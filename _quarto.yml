@@ -1,0 +1,43 @@
+project:
+  type: book
+  output-dir: _book
+
+author-title: "Autores"
+book:
+  title: "Modelos Lineares I - Seminário"
+  author: 
+    - name: "Gustavo Jun Yakushiji"
+    - name: "Luis Bernardo Patrício"
+
+  site-url: https://github.com/gustavojy/mod-lin
+  repo-url: https://github.com/gustavojy/mod-lin
+  repo-branch: main
+
+  chapters:
+    - index.qmd
+    
+    - part: "Covariância, Correlação e Distância de Mahalanobis"
+      chapters: 
+        - exemplo1.qmd
+    
+    - part: "Distribuição Normal Multivariada"
+      chapters:
+        - exemplo2.1.qmd
+        - exemplo2.2.qmd
+        - exemplo2.3.qmd
+
+    - part: "Regressão Linear Simples"
+      # chapters:
+      #   - exemplo3.1.qmd
+
+    - part: "Regressão Linear Múltipla"
+      # chapters:
+      #   - exemplo4.1.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-link: true
+
+lang: pt-BR

@@ -1,0 +1,99 @@
+# Gráfico da Normal Bivariada
+
+Construiremos o gráfico da normal bivariada utilizando o pacote `plotly`. Este pacote permite confeccionar gráficos dinâmicos tridimensionais.
+
+```{r}
+#| eval: false
+
+install.packages("plotly")
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+library(plotly)
+```
+
+::: {.panel-tabset}
+
+### R
+
+Para construir o gráfico da normal bivariada, primeiramente, definimos os valores dos vetores das variáveis `y1` e `y2`.
+
+```{r}
+y1 <- seq(from = -4, to = 4, by = 0.1)
+y1
+
+y2 <- seq(from = -4, to = 4, by = 0.1)
+y2
+```
+
+A função `seq()` cria uma sequência de valores e possui três argumentos:
+
+- `from =`: valor em que a sequência começa;
+
+- `to =`: valor em que a sequência termina;
+
+- `by =`: de quanto em quanto a sequência é construída.
+
+Em seguida, calculamos a densidade bivariada, dada pela seguinte equação:
+
+$$
+\phi = \frac{1}{2\pi \sqrt{1-r^2}} exp\left\{-\frac{y_1^2 - 2r y_1 y_2 + y_2^2}{2(1-r^2)}\right\}
+$$
+
+em que $r$ é o **coeficiente de correlação** entre `y1` e `y2`, variando de -1 a 1.
+
+O valor do coeficiente de correlação será salvo no objeto `r`. Já o objeto `pi` armazena o valor de $\pi$ com seis casas decimais.
+
+```{r}
+r <- -0.75  # Modificar este valor para verificar as alterações gráficas
+pi
+```
+
+Para realizar o cálculo da densidade bivariada no R, criamos uma função (`function()`) que executa a equação definida anteriormente para cada um dos valores de `y1` e `y2`, gerando a matriz final, salva no objeto `z`.
+
+```{r}
+z <- outer(y1, y2, function(y1,y2) { 
+  phi <- 1/(2 * pi * sqrt(1 - r^2)) * exp(-(y1^2 - 2 * r * y1 * y2 + y2^2) / (2 * (1 - r^2)))
+  return(phi)
+})
+```
+
+Com isso, podemos criar o gráfico de densidade bivariada.
+
+```{r}
+plot_ly(x = y1, y = y2, z = z, type = "surface") |> 
+  layout(title = paste("Densidade Normal Bivariada (r =", r, ")"))
+```
+
+Com a função `plot_ly()`, definimos os objetos que compõem os eixos x, y e z, além do estilo do gráfico (`type = "surface"`). Em seguida, utilizando a função `layout()`, inserimos o título do gráfico.
+
+Link para aplicativo: <>
+
+### SAS
+
+```{r}
+#| eval: false
+
+%let r=-0.75; * Fixa o coeficiente de correlação entre y1 e y2;
+data Normal;
+ pi=3.1416;
+ do y1=-4 to 4 by 0.1;
+  do y2=-4 to 4 by 0.1; 
+  phi=exp(-(y1*y1-2*&r*y1*y2+y2*y2)/2/(1-&r*&r))/2/pi/sqrt(1-&r*&r);
+  output;
+  end;
+ end;
+run;
+
+goptions reset=all border;
+proc g3d data=Normal;
+ title 'Densidade Normal Bivariada (r =' &r ')';
+ plot y1*y2=phi / rotate=-20;
+run;
+```
+
+:::
+

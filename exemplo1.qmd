@@ -1,0 +1,316 @@
+# Exemplo
+
+Exemplo de cálculo de matriz de Covariâncias e de Correlações amostrais, além da distância de Mahalanobis.
+
+Fonte dos dados: *Weights of Cork Boring (in Centigrams) in Four Directions for 28 trees. Applied Multivariate Statistics with SAS Software. Khattree & Naik(2003) - p. 11.*
+
+## Vetores e Matriz
+
+::: {.panel-tabset}
+
+### R
+
+Para criar vetores no R, definimos um nome para cada vetor (`y1`, `y2`, `y3` e `y4`), em seguida, utilizamos o operador `<-` e a função `c()` para atribuir valores a cada um dos objetos (vetores). Dentro de `c()`, declaramos seus valores, separados por vírgula.
+
+```{r}
+y1 <- c(72,60,56,41,32,30,39,42,37,33,32,63,54,47,91,56,79,81,78,46,39,32,60,35,39,50,43,48)
+
+y2 <- c(66,53,57,29,32,35,39,43,40,29,30,45,46,51,79,68,65,80,55,38,35,30,50,37,36,34,37,54)
+
+y3 <- c(76,66,64,36,35,34,31,31,31,27,34,74,60,52,100,47,70,68,67,37,34,30,67,48,39,37,39,57)
+
+y4 <- c(77,63,58,38,36,26,27,25,25,36,28,63,52,43,75,50,61,58,60,38,37,32,54,39,31,40,50,43)
+```
+
+Com a função `cbind()` juntamos os vetores `y1`, `y2`, `y3` e `y4`, salvando-os em um objeto chamado `Y`. Utilizando a função `colnames()`, alteramos os nomes dos vetores (`"North"`, `"East"`, `"South"`, `"West"`).
+
+```{r}
+Y <- cbind(y1, y2, y3, y4)
+colnames(Y) <- c("North", "East", "South", "West")
+Y
+```
+
+Com a função `class()`, constatamos que o objeto `Y` é uma matriz (`matrix`).
+
+```{r}
+class(Y)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc iml;
+
+y1 = {72,60,56,41,32,30,39,42,37,33,32,63,54,47, 91,56,79,81,78,46, 39,32,60,35,39,50,43,48};
+
+y2 = {66,53,57,29,32,35,39,43,40,29,30,45,46,51, 79,68,65,80,55,38, 35,30,50,37,36,34,37,54};
+
+y3 = {76,66,64,36,35,34,31,31,31,27,34,74,60,52,100,47,70,68,67,37, 34,30,67,48,39,37,39,57};
+
+y4 = {77,63,58,38,36,26,27,25,25,36,28,63,52,43, 75,50,61,58,60,38, 37,32,54,39,31,40,50,43};
+```
+
+```{r}
+#| eval: false
+
+Y = y1||y2||y3||y4;
+create Cork var {North East South West};
+append from Y;
+Close Cork;
+```
+
+:::
+
+## Matriz de Covariâncias e Correlações 
+
+::: {.panel-tabset}
+
+### R
+
+As funções `nrow()` e `ncol()` nos retornam o número de linhas e colunas de um objeto, respectivamente.
+
+```{r}
+n <- nrow(Y)
+p <- ncol(Y)
+
+n; p
+```
+
+No caso da matriz `Y`, ela apresenta dimensão $28 \times 4$.
+
+A função `diag()` cria uma matriz identidade. Basta inserirmos dentro da função a dimensão da matriz.
+
+```{r}
+In <- diag(n)
+In
+```
+
+$$
+\mathbf{I}_{(n)} = 
+  \begin{bmatrix}
+   1 & 0 & 0 & \dots & 0 \\
+   0 & 1 & 0 & \dots & 0 \\
+   0 & 0 & 1 &\dots & 0 \\
+   \vdots & \vdots & \vdots & \ddots & \vdots \\
+   0 & 0 & 0 & \dots & 1
+   \end{bmatrix}
+$$
+
+Com a função `matrix()`, podemos criar qualquer tipo de matriz, vetor ou escalar. Para isso, utilizamos três argumentos dentro da função: 
+
+- `data =`: os elementos que compõem a matriz;
+
+- `nrow =`: número de linhas da matriz;
+
+- `ncol =`: número de colunas da matriz.
+
+```{r}
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+jn
+
+Jnn <- matrix(data = 1, nrow = n, ncol = n)
+Jnn
+```
+
+Nos casos anteriores, criamos o vetor coluna de 1's `jn` de dimensão $28 \times 1$ e a matriz de 1's `Jnn` de dimensão $28 \times 28$.
+
+$$
+j_n = \mathbf{j}_{(28 \times 1)} = [1,1,...,1]'
+$$
+
+$$
+Jnn = \mathbf{J}_{(28 \times 28)} = 
+  \begin{bmatrix}
+   1 & 1 & 1 & \dots & 1 \\
+   1 & 1 & 1 & \dots & 1 \\
+   1 & 1 & 1 &\dots & 1 \\
+   \vdots & \vdots & \vdots & \ddots & \vdots \\
+   1 & 1 & 1 & \dots & 1
+   \end{bmatrix}
+$$
+
+A seguir, calcularemos a matriz de variâncias e covariâncias amostrais, dada pela equação:
+
+$$\mathbf{\Sigma} = \frac{1}{n-1} \mathbf{Y}'(\mathbf{I} - \frac{1}{n}J) \mathbf{Y}$$
+
+```{r}
+Sigma <- (1 / (n - 1)) * t(Y) %*% (In - (1/n) * Jnn) %*% Y
+Sigma
+```
+
+A função `t()` realiza a transposição de uma matriz ou vetor. Já o operador `%*%` realiza a multiplicação entre duas matrizes ou vetores conformes.
+
+No R, temos a função `cov()` que realiza o cálculo da matriz de variâncias e covariâncias.
+
+```{r}
+cov(Y)
+```
+
+$$
+\mathbf{\Sigma} = 
+  \begin{bmatrix}
+   \sigma^2_1 & \sigma_{12} & \sigma_{13} & \dots & \sigma_{1p} \\
+   \sigma_{21} & \sigma^2_2 & \sigma_{23} & \dots & \sigma_{2p} \\
+   \sigma_{31} & \sigma_{32} & \sigma^2_3 &\dots & \sigma_{p3} \\
+   \vdots & \vdots & \vdots & \ddots & \vdots \\
+   \sigma_{p1} & \sigma_{p2} & \sigma_{p3} & \dots & \sigma^2_p
+   \end{bmatrix}
+$$
+
+Para calcular a matriz de correlação ($\mathbf{\rho}_{ij}$), utilizamos a seguinte expressão:
+
+$$\mathbf{\rho}_{ij} = \mathbf{D}_{\sigma}^{-1} \mathbf{\Sigma}  \mathbf{D}_{\sigma}^{-1}$$
+
+em que $\mathbf{D}_{\sigma}$ é a raiz quadrada das variâncias, ou seja, a raiz quadrada da diagonal da matriz de variâncias e covariâncias ($\mathbf{\Sigma}$).
+
+```{r}
+D <- sqrt(diag(Sigma))
+D
+
+corr <- solve(diag(D)) %*% Sigma %*% solve(diag(D))
+corr
+```
+
+A função `sqrt()` realiza a operação raiz quadrada. Já a `solve()`, calcula a inversa de uma matriz.
+
+No R, temos a função `cor()` que realiza o cálculo da matriz de correlação.
+
+```{r}
+cor(Y)
+```
+
+$$
+\mathbf{\rho} = 
+  \begin{bmatrix}
+   1 & \rho_{12} & \rho_{13} & \dots & \rho_{1p} \\
+   \rho_{21} & 1 & \rho_{23} & \dots & \rho_{2p} \\
+   \rho_{31} & \rho_{32} & 1 &\dots & \rho_{p3} \\
+   \vdots & \vdots & \vdots & \ddots & \vdots \\
+   \rho_{p1} & \rho_{p2} & \rho_{p3} & \dots & 1
+   \end{bmatrix}
+$$
+
+Por fim, a partir da matriz de correlação ($\mathbf{\rho}_{ij}$), podemos retornar para a matriz de variâncias e covariâncias ($\mathbf{\Sigma}$) a partir da seguinte equação:
+
+$$
+\mathbf{\Sigma} = \mathbf{D}_{\sigma} \mathbf{\rho}_{ij} \mathbf{D}_{\sigma}
+$$
+
+```{r}
+Verifica <- diag(D) %*% corr %*% diag(D)
+Verifica
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+p = ncol(Y);
+n = nrow(Y);
+In = I(n);
+jn = j(n,1,1);
+Jnn = J(n,n,1);
+Sigma = (1/(n-1))*t(Y)*(In-(1/n)*Jnn)*Y;
+D = sqrt(diag(Sigma));
+corr = inv(D)*Sigma*inv(D);
+Verifica = D*corr*D;
+title 'Matriz de variâncias e covariâncias amostrais utilizando proc iml';
+print ,,Sigma[format=8.4],, 'Matriz de correlações:' ,, corr[format=8.5],, Verifica[format=8.4];
+```
+
+:::
+
+## Distância de Mahalanobis (Distância padronizada)
+
+::: {.panel-tabset}
+
+### R
+
+Primeiramente, calcularemos o vetor de médias ($\mathbf{\mu}$) da matriz $\mathbf{Y}$.
+
+$$\mathbf{\mu} = \frac{1}n \mathbf{j}' \mathbf{Y}$$
+
+```{r}
+mi <- (1/n) * t(jn) %*% Y
+mi
+```
+
+Com o vetor de médias ($\mathbf{\mu}$), calcularemos a distância de Mahalanobis ($DM$), dada pela seguinte expressão:
+
+$$
+DM = (y - \mathbf{\mu})' \mathbf{\Sigma} (y - \mathbf{\mu})
+$$
+
+```{r}
+DM2 <- rep(0, n)
+for (i in 1:n) {
+  yi <- Y[i,]
+  DM <- as.numeric((yi - mi) %*% solve(Sigma) %*% t(yi - mi))
+  DM2[i] <- DM
+}
+DM2
+```
+
+No R, podemos utilizar a função `mahalanobis()` para calcular a distância de Mahalanobis. Como argumentos, temos:
+
+- `x =`: matriz utilizada para o cálculo;
+
+- `center =`: o vetor de médias ($\mu$);
+
+- `cov =`: a matriz de variâncias e covariâncias ($\Sigma$).
+
+```{r}
+mahalanobis(x = Y, center = mi, cov = Sigma)
+```
+
+Ordenando os valores do vetor da distância de Mahalanobis, temos:
+
+```{r}
+rank <- rank(DM2)
+data.frame(Y, DM2, rank)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+mi = (1/n)*t(jn)*y;
+print 'Vetor de médias:' mi[format=5.2],,;
+```
+
+```{r}
+#| eval: false
+
+DM2 = j(n,1,0);
+i=1;
+do while (i<=n);
+yi= Y[i,];
+DM = (yi-mi)*inv(Sigma)*t(yi-mi);
+DM2[i] = DM;
+i=i+1;
+end;
+
+rank = rank(DM2);
+print
+```
+
+```{r}
+#| eval: false
+
+'-----------------------------------------------------------------',
+'Distância de Mahalanobis de cada ponto (y) ao vetor de médias(mi)',
+'-----------------------------------------------------------------';
+print ,,Y ' ' DM2[format=8.4] ' ' rank;
+quit;
+
+proc corr cov data=cork;
+title 'Matriz de variâncias e covariâncias utilizando proc corr';
+var north east south west;
+run;
+```
+
+:::

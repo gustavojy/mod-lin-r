@@ -1,0 +1,3 @@
+# Introdução {.unnumbered}
+
+Este material faz parte da disciplina LCE5861 - Modelos Lineares, ministrada pelo prof. dr. César Gonçalves de Lima na ESALQ/USP para o programa de Pós Graduação em Estatística e Experimentação Agronômica, curso de mestrado no ano de 2024.

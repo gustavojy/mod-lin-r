@@ -1,0 +1,671 @@
+# Propriedades
+
+## Exemplo 1 (4.4(a))
+
+Para os exemplos dos Teoremas 1, 2 e 3 considere um vetor aleatório $\mathbf{y} \sim N_3(\mathbf{\mu}, \mathbf{\Sigma})$, em que:
+
+$$
+\mathbf{\mu} = 
+  \begin{bmatrix}
+  3 \\ 1 \\ 2
+  \end{bmatrix}
+\space e \space
+\mathbf{\Sigma} = 
+  \begin{bmatrix}
+   4 & 0 & 2 \\
+   0 & 1 & -1 \\
+   2 & -1 & 3 \\
+   \end{bmatrix}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+mi <- c(3, 1, 2)
+mi
+
+Sigma <- matrix(c(4, 0, 2, 0, 1, -1, 2, -1, 3), nrow = 3, ncol = 3)
+Sigma
+```
+
+#### SAS
+
+```{r}
+#| eval: false
+
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+
+y = {'y1','y2','y3'};
+mi = {3,1,2};
+Sigma = {4 0 2, 0 1 -1, 2 -1 3};
+```
+
+:::
+
+### Teorema 1.1 (4.4A. i)
+
+Sejam $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{a}$ um vetor $p \times 1$ de constantes. Então, a **variável aleatória**:
+
+$$z = \mathbf{a'}\mathbf{y} \sim N(\mathbf{a' \mu}, \mathbf{a'\Sigma a})$$
+
+Como exemplo, considere: 
+
+$$
+z = y_1 - 2y_2 + y_3 
+\text{ ,   em que } 
+\mathbf{a} = 
+  \begin{bmatrix}
+    1 \\ -2 \\ 1
+  \end{bmatrix}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+a <- c(1, -2, 1)
+a
+
+E_z <- t(a) %*% mi
+E_z
+
+var_z <- t(a) %*% Sigma %*% a
+var_z
+```
+
+Com isso, a variável aleatória $z$ fica:
+
+$$z = \mathbf{a'y} \sim N(\mathbf{a' \mu} = 3, \mathbf{a'\Sigma a} = 19)$$
+
+#### SAS
+
+```{r}
+#| eval: false
+
+a = {1, -2, 1};
+mi_z = t(a) * mi;
+var_z = t(a)*Sigma*a;
+print y mi Sigma,,,,, 'item (i)   ',,'z = y1-2y2+y3   ' mi_z var_z;
+```
+
+:::
+
+### Teorema 1.2 (4.4A. ii)
+
+Sejam $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{A}$ uma matriz $k \times p$ de constantes e posto $k \le p$. Então, o **vetor aleatório**:
+
+$$\mathbf{z} = \mathbf{A} \mathbf{y} \sim N_k(\mathbf{A \mu}, \mathbf{A\Sigma A'})$$
+
+Agora, considere as seguintes combinações lineares $z_1$ e $z_2$:
+
+$$
+\begin{aligned}
+z_1 = y_1 - y_2 + y_3 \space \text{ e } \space z_2 = 3y_1 + y_2 - 2y_3 \\
+\mathbf{z} = 
+\begin{bmatrix}
+\mathbf{z_1} \\ \mathbf{z_2}
+\end{bmatrix}
+\text{ = }
+\begin{bmatrix}
+1 & -1 & 1 \\
+3 & 1 & -2
+\end{bmatrix}
+\begin{bmatrix}
+y_1 \\ y_2 \\ y_3
+\end{bmatrix}
+\text{ = }
+\mathbf{Ay}
+\end{aligned}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+A <- matrix(c(1, -1, 1, 3, 1, -2), nrow = 2, ncol = 3, byrow = TRUE)
+A
+
+E_z1z2 <- A %*% mi
+E_z1z2
+
+cov_z1z2 <- A %*% Sigma %*% t(A)
+cov_z1z2
+```
+
+Pelo teorema, o vetor aleatório fica:
+
+$$
+\mathbf{z} = \mathbf{Ay} \sim N_2
+\left(
+  \mathbf{A \mu} = 
+    \begin{bmatrix}
+      4 \\ 6
+    \end{bmatrix},
+  \mathbf{A\Sigma A'} = 
+    \begin{bmatrix}
+      14 & 4 \\ 
+      4 & 29
+    \end{bmatrix}
+\right)
+$$
+
+#### SAS
+
+```{r}
+#| eval: false
+
+ZZ = {'z1 = y1-y2+y3','z2 = 3y1+y2-2y3'}; 
+A = {1 -1  1, 3  1 -2};
+mi_ZZ = A*mi;
+Sigma_ZZ = A*Sigma*t(A);
+print 'item (ii)',,  ZZ '     ' mi_ZZ '     ' Sigma_ZZ;
+```
+
+:::
+
+### Teorema 2 (4.4B.) {#sec-T2}
+
+Se $\mathbf{y} \sim N_p(\mathbf{\mu, \Sigma})$, então **qualquer subvetor** $r \times 1$ de $\mathbf{y}$ tem uma distribuição normal $r$-variada com médias, variâncias e covariâncias iguais às da distribuição normal $p$-variada original.
+
+Como exmeplo, considere: $y_1 \sim N(3,4)$, $y_2 \sim N(1,1)$ e $y_3 \sim N(2, 3)$.
+
+::: {.panel-tabset}
+
+#### R
+
+Dessa forma, o vetor $\begin{bmatrix} y_1 \\ y_2\end{bmatrix}$:
+
+```{r}
+A12 <- matrix(c(1, 0, 0, 0, 1, 0), nrow = 2, ncol = 3, byrow = TRUE)
+A12
+
+mi_12 <- A12 %*% mi
+mi_12
+
+Sigma_12 <- A12 %*% Sigma %*% t(A12)
+Sigma_12
+```
+
+$$
+\begin{bmatrix}
+  y_1 \\ y_2
+\end{bmatrix}
+  \sim N_2\left(
+    \begin{bmatrix}
+      3 \\ 1
+    \end{bmatrix}, 
+    \begin{bmatrix}
+      4 & 0 \\ 
+      0 & 1
+    \end{bmatrix}
+  \right) \\
+$$
+
+Enquanto isso, o vetor $\begin{bmatrix} y_1 \\ y_3\end{bmatrix}$:
+
+```{r}
+A13 <- matrix(c(1, 0, 0, 0, 0, 1), nrow = 2, ncol = 3, byrow = TRUE)
+A13
+
+mi_13 <- A13 %*% mi
+mi_13
+
+Sigma_13 <- A13 %*% Sigma %*% t(A13)
+Sigma_13
+```
+
+$$
+\begin{bmatrix}
+  y_1 \\ y_3
+\end{bmatrix}
+  \sim N_2\left(
+    \begin{bmatrix}
+      3 \\ 2
+    \end{bmatrix}, 
+    \begin{bmatrix}
+      4 & 2 \\ 
+      2 & 3
+    \end{bmatrix}
+  \right)
+$$
+
+#### SAS
+
+```{r}
+#| eval: false
+
+A12 = {1 0 0, 0 1 0};
+mi_12 = A12*mi;
+Sigma_12 = A12*Sigma*t(A12);
+print mi_12 Sigma_12;
+
+A13 = {1 0 0, 0 0 1};
+mi_13 = A13*mi;
+Sigma_13 = A13*Sigma*t(A13);
+print mi_13 Sigma_13;
+```
+
+:::
+
+### Teorema 3 (4.4C.)
+
+Se o vetor particionado $\mathbf{v} = \begin{bmatrix} \mathbf{y} \\ \mathbf{x} \end{bmatrix} \sim N_{p+q}(\mathbf{\mu, \Sigma})$ então os subvetores aleatórios $\mathbf{y}$ e $\mathbf{x}$ são **independentes** se $\mathbf{\Sigma}_{xy} = 0$.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+a1 <- c(1, 0, 0)
+a1
+
+b2 <- c(0, 1, 0)
+b2
+
+cov_12 <- t(a1) %*% Sigma %*% b2
+cov_12
+```
+
+#### SAS
+
+```{r}
+#| eval: false
+
+a1 = {1 0 0};
+b2 = {0 1 0};
+cov_12 = a1*Sigma*t(b2);
+print cov_12;
+```
+
+:::
+
+## Exemplo 2 (4.4(b))
+
+### Teorema 4 (4.4D.) {#sec-T4}
+
+Se $\mathbf{y}$ e $\mathbf{x}$ têm distribuição conjunta normal multivariada com $\mathbf{\Sigma}_{yx} \ne 0$ então a **distribuição condicional** de $\mathbf{y}$ dado $\mathbf{x}$, $f(\mathbf{y} \mid \mathbf{x})$, é **normal multivariada** com vetor de médias e matriz de covariâncias dados por:
+
+$$
+\begin{aligned}
+E(\mathbf{y} \mid \mathbf{x}) = \mathbf{\mu}_y + \mathbf{\Sigma}_{yx} \mathbf{\Sigma}_{xx}^{-1}(\mathbf{x} - \mathbf{\mu}_x) \\
+cov(\mathbf{y} \mid \mathbf{x}) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \mathbf{\Sigma}_{xx}^{-1} \mathbf{\Sigma}_{xy}
+\end{aligned}
+$$
+
+Para ilustrar o Teorema 4 (4.4D.), considere o vetor aleatório $\mathbf{v} \sim N_4(\mathbf{\mu, \Sigma})$ em que:
+
+$$
+\begin{aligned}
+\mathbf{\mu} = 
+\begin{bmatrix}
+2 \\ 5 \\ -2 \\ 1
+\end{bmatrix}
+\text{ e }
+\mathbf{\Sigma} = 
+\begin{bmatrix}
+9 & 0 & 3 & 3 \\
+0 & 1 & -1 & 2 \\
+3 & -1 & 6 & -3 \\
+3 & 2 & -3 & 7 \\
+\end{bmatrix}
+\end{aligned}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+mi <- c(2, 5, -2, 1)
+mi
+
+Sigma <- matrix(
+  c(9, 0, 3, 3, 0, 1, -1, 2, 3, -1, 6, -3, 3, 2, -3, 7), 
+  nrow = 4, byrow = TRUE
+  )
+Sigma
+```
+
+
+#### SAS
+
+```{r}
+#| eval: false
+
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+
+mi = {2,5,-2,1};
+Sigma = {9 0 3 3, 0 1 -1 2, 3 -1 6 -3, 3 2 -3 7};
+print v mi Sigma;
+```
+
+:::
+
+Se $\mathbf{v} = \begin{bmatrix} y_1, y_2, x_1, x_2 \end{bmatrix} '$ é um vetor particionado dessa forma, então:
+
+$$
+\mathbf{\mu_y} = 
+\begin{bmatrix} 
+2 \\ 5
+\end{bmatrix}
+, 
+\mathbf{\mu_x} =
+\begin{bmatrix} 
+-2 \\ 1
+\end{bmatrix} \\
+$$
+
+$$
+\mathbf{\Sigma_{yy}} = 
+\begin{bmatrix} 
+9 & 0 \\ 0 & 1
+\end{bmatrix}
+,
+\mathbf{\Sigma_{xx}}
+\begin{bmatrix} 
+6 & -3 \\ -3 & 7
+\end{bmatrix}
+,
+\mathbf{\Sigma_{yx}}
+\begin{bmatrix} 
+3 & 3 \\ -1 & 2
+\end{bmatrix}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+Ay <- matrix(c(1, 0, 0, 0, 0, 1, 0, 0), nrow = 2, byrow = TRUE)
+Ay
+
+mi_y <- Ay %*% mi
+mi_y
+
+Sigma_yy <- Ay %*% Sigma %*% t(Ay)
+Sigma_yy
+
+Ax <- matrix(c(0, 0, 1, 0, 0, 0, 0, 1), nrow = 2, byrow = TRUE)
+Ax
+
+mi_x <- Ax %*% mi
+mi_x
+
+Sigma_xx <- Ax %*%Sigma %*% t(Ax)
+Sigma_xx
+
+Sigma_yx <- Ay %*% Sigma %*% t(Ax)
+Sigma_yx
+```
+
+#### SAS
+
+```{r}
+#| eval: false
+
+Ay = {1 0 0 0, 0 1 0 0};
+mi_y = Ay*mi;
+Sigma_yy = Ay*Sigma*t(Ay);
+
+Ax = {0 0 1 0, 0 0 0 1};
+mi_x = Ax*mi;
+Sigma_xx = Ax*Sigma*t(Ax);
+
+Sigma_yx = Ay*Sigma*t(Ax);
+print mi_y Sigma_yy,, mi_x Sigma_xx,, Sigma_yx;
+```
+
+:::
+
+Para calcular $cov(\mathbf{y} \mid \mathbf{x}) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \mathbf{\Sigma}_{xx}^{-1} \mathbf{\Sigma}_{xy}$ procedemos da seguinte maneira:
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+cov_ydx <- Sigma_yy - Sigma_yx %*% solve(Sigma_xx) %*% t(Sigma_yx)
+cov_ydx
+```
+
+$$ cov(\mathbf{y} \mid \mathbf{x}) = `r round(cov_ydx, 2)` $$
+
+#### SAS
+
+```{r}
+#| eval: false
+
+cov_ydx = Sigma_yy-Sigma_yx*inv(Sigma_xx)*t(Sigma_yx);
+
+print Sigma_yy[format=6.0],, cov_ydx[format=6.2];
+```
+
+:::
+
+Note que a variância de $y_1$ e de $y_2$ são maiores do que as variâncias condicionais:
+
+```{r}
+Sigma_yy
+
+cov_ydx
+```
+
+$$
+\begin{aligned}
+var(y_1) = 9 \text{ e } var(y_1 \mid x_1, x_2) = 3,82 \\
+var(y_2) = 1 \text{ e } var(y_2 \mid x_1, x_2) = 0,42
+\end{aligned}
+$$
+
+## Exemplo 3 (4.4(c))
+
+### Teorema 4 (4.4D.) - Corolário 1
+
+Considere: 
+
+$$
+\mathbf{v} = 
+\begin{bmatrix} 
+y, & x_1, & \dots, & x_q
+\end{bmatrix}
+' = 
+\begin{bmatrix} 
+y \\ \mathbf{x'}
+\end{bmatrix} 
+\text{ com } 
+\mathbf{\mu} = 
+\begin{bmatrix} 
+\mu_y \\ \mathbf{\mu_x}
+\end{bmatrix} 
+\text{ e } 
+\mathbf{\Sigma} = 
+\begin{bmatrix}
+\sigma_y^2 & \mathbf{\sigma}_{yx}' \\
+\mathbf{\sigma}_{yx} & \mathbf{\Sigma}_{xx}
+\end{bmatrix}
+\text{, }
+$$
+
+então $y \mid \mathbf{x}$ tem distribuição normal univariada com:
+
+$$
+\begin{aligned}
+E(y \mid \mathbf{x}) = \mu_y + \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{xx}^{-1} (\mathbf{x} - \mathbf{\mu}_x) \\
+var(y \mid \mathbf{x}) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{xx}^{-1} \mathbf{\sigma}_{yx}
+\end{aligned}
+$$
+
+Como exemplo, seguimos com o vetor utilizado no [Teorema 4 (4.4D) @sec-T4].
+
+$$
+\mathbf{v} \sim N_4(\mathbf{\mu}, \mathbf{\Sigma})
+\text{ , }
+\mathbf{\mu} = 
+\begin{bmatrix}
+2 \\ 5 \\ -2 \\ 1
+\end{bmatrix}
+\text{ e }
+\mathbf{\Sigma} = 
+\begin{bmatrix}
+9 & 0 & 3 & 3 \\
+0 & 1 & -1 & 2 \\
+3 & -1 & 6 & -3 \\
+3 & 2 & -3 & 7 \\
+\end{bmatrix}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+mi <- c(2, 5, -2, 1)
+mi
+
+Sigma <- matrix(
+  c(9, 0, 3, 3, 0, 1, -1, 2, 3, -1, 6, -3, 3, 2, -3, 7), 
+  nrow = 4, byrow = TRUE
+  )
+Sigma
+```
+
+#### SAS
+
+```{r}
+#| eval: false
+
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+
+mi = {2,5,-2,1};
+Sigma = {9 0 3 3, 0 1 -1 2, 3 -1 6 -3, 3 2 -3 7};
+print v mi Sigma;
+```
+
+:::
+
+Se $\mathbf{v} = \begin{bmatrix} y, & x_1, & x_2, & x_3 \end{bmatrix}'$ então:
+
+$$\mu_y = 2 \text{ e } var(y) = 9 \\$$
+
+$$
+\mathbf{\mu}_x = 
+\begin{bmatrix}
+5 \\ -2 \\ 1
+\end{bmatrix}
+\text{ , }
+\mathbf{\Sigma}_{xx} = 
+\begin{bmatrix}
+1 & -1 & 2 \\
+-1 & 6 & -3 \\
+2 & -3 & 7
+\end{bmatrix}
+\text{ e }
+\mathbf{\sigma}_{yx} = 
+\begin{bmatrix}
+0 \\ 3 \\ 3
+\end{bmatrix}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+Ay <- matrix(c(1, 0, 0, 0), nrow = 1)
+Ay
+
+mi_y <- Ay %*% mi
+mi_y
+
+Sigma_yy <- Ay %*% Sigma %*% t(Ay)
+Sigma_yy
+
+Ax <- matrix(
+  c(0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1), 
+  nrow = 3, ncol = 4, byrow = TRUE
+)
+Ax
+
+mi_x <- Ax %*% mi
+mi_x
+
+Sigma_xx <- Ax %*% Sigma %*% t(Ax)
+Sigma_xx
+
+sigma_yx <- Ay %*% Sigma %*% t(Ax)
+sigma_yx
+```
+
+#### SAS
+
+```{r}
+#| eval: false
+
+Ay = {1 0 0 0};
+mi_y = Ay*mi;
+Sigma_yy = Ay*Sigma*t(Ay);
+
+Ax = {0 1 0 0, 0 0 1 0, 0 0 0 1};
+mi_x = Ax*mi;
+Sigma_xx = Ax*Sigma*t(Ax);
+
+Sigma_yx = Ay*Sigma*t(Ax);
+print mi_y Sigma_yy,, mi_x Sigma_xx,, Sigma_yx;
+```
+
+:::
+
+Pelo Corolário, temos:
+
+$$
+var(y \mid x_1, x_2, x_3) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{xx}^{-1} \mathbf{\sigma}_{yx}
+$$
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+cov_ydx <- Sigma_yy - sigma_yx %*% solve(Sigma_xx) %*% t(sigma_yx)
+cov_ydx
+```
+
+Portanto, $var(y \mid x_1, x_2, x_3) = `r round(cov_ydx, 3)`$.
+
+Note que a variância de $y$ é maior do que a variância condicional:
+
+```{r}
+Sigma_yy
+
+cov_ydx
+```
+
+$$
+\begin{aligned}
+var(y) = `r round(cov_ydx, 3)` \\
+var(y \mid x_1, x_2, x_3) = `r round(cov_ydx, 3)`
+\end{aligned}
+$$
+
+#### SAS
+
+```{r}
+#| eval: false
+
+cov_ydx = Sigma_yy-Sigma_yx*inv(Sigma_xx)*t(Sigma_yx);
+
+print Sigma_yy[format=6.0],, cov_ydx[format=6.2];
+```
+
+:::
