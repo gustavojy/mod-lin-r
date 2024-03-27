@@ -1,0 +1,90 @@
+options nodate nocenter ps=1000;
+proc iml;
+reset fuzz;
+*pág.159;
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+n = nrow(y);
+In = I(n);
+Jnn = J(n,n,1);
+x0 = j(n,1,1); *cria um vetor nx1 de uns;
+x1 = {0,2,2,2,4,4,4,6,6,6,8,8};
+x2 = {2,6,7,5,9,8,7,10,11,9,15,13};	
+k = 2;
+x01 = x0||x1;
+x02 = x0||x2;
+x012 = x0||x1||x2;
+
+* Estima vetor Beta nos três modelos;
+Beta01 = inv(t(X01)*X01)*t(X01)*y;
+Beta02 = inv(t(X02)*X02)*t(X02)*y;
+Beta012 = inv(t(X012)*X012)*t(X012)*y;
+print '  Modelo: y = b0 + b1*x1 + e          =>     Beta = ' Beta01[format=10.4],,,
+      '  Modelo: y = b0 + b2*x2 + e          =>     Beta = ' Beta02[format=10.4],,,
+	  '  Modelo: y = b0 + b1*x1 + b2*x2 + e  =>     Beta = ' Beta012[format=10.4],,,,;
+print Beta01[format=10.4] Beta02[format=10.4] Beta012[format=10.4];
+
+*pág.168;
+* Ajusta modelo com x1 e x2 + vetor de estimativas da resposta + resíduos do modelo;
+X = x0||x1||x2;
+Beta = inv(t(X)*X)*t(X)*y;
+y_hat = X*Beta;
+Nome = {'Beta0','Beta1','Beta2'};
+print Nome Beta[format=10.4] '   ' X '   ' y[format=10.] '   ' y_hat[format=10.4],,;
+
+* Calcula estimativa de sigma2 no modelo inicial;
+res = y-y_hat;
+SQRes = t(res)*res;
+s2 = SQRes/(n-k-1);
+cov_Beta = s2*inv(t(X)*X);
+
+print s2[format=10.3] cov_Beta[format=10.5];;
+
+* Estima Beta do modelo com variáveis x's centradas;
+* Confere que y-chapéu é o mesmo nos modelos inicial e centrado;
+* Calcula estimativa de sigma2 no modelo centrado e cov(Beta);
+x1x2 = x1||x2;
+x1x2c = (In - (1/n)*Jnn)*x1x2;
+Xc = x0||x1x2c; 
+BetaC = inv(t(Xc)*Xc)*t(Xc)*y;
+y_hatc = Xc*Betac;
+XcLXc = t(Xc)*Xc;
+*pág. 175;
+res = y - y_hat;
+SQRes = t(res)*res;
+s2c = (1/(n-k-1))*SQRes;
+cov_Betac = s2*inv(t(X)*X);
+Nome = {'Beta0c','Beta1c','Beta2c'};
+print 'Estimativas dos parâmetros com colunas x1 e x2 centradas nas médias';
+print Nome Betac[format=10.4] '   ' Xc[format=10.4] '   ' y '   ' y_hatC[format=10.4],;
+print s2c[format=10.5] cov_Betac[format=10.5];
+
+*pág.195;
+* Calcula coeficiente de determinação;
+SQreg = t(y)*(X*inv(t(X)*X)*t(X)-(1/n)*Jnn)*y;
+SQTot = t(y)*(In-(1/n)*Jnn)*y;
+R2 = SQReg/SQTot;
+R2aj = ((n-1)*R2-k)/(n-k-1);
+print R2[format=10.4] R2aj[format=10.4];
+
+x1=x1-3*j(n,1,1); * subtrai 3 de todos os valores em x1;
+x2=x2+2*j(n,1,1); * soma 2 a todos os valores em x2;
+X = x0||x1||x2;
+BetaD = inv(t(X)*X)*t(X)*y;
+y_hatD = X*BetaD;
+Nome = {'Beta0d','Beta1d','Beta2d'};
+print 'Estimativas dos parâmetros usando (x1-3) e (x2+2)';
+print Nome BetaD[format=10.4] '   ' X '   ' y[format=10.] '   ' y_hatD[format=10.4],,;
+
+print 'Resumo dos resultados:';
+print Beta[format=10.4] Betac[format=10.4] Betad[format=10.4];
+print y_hat[format=10.4] y_hatc[format=10.4] y_hatd[format=10.4];
+quit;
+
+
+
+
+
+
+
+
+

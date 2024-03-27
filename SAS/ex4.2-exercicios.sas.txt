@@ -1,0 +1,145 @@
+title;
+* Exemplo 4.4(a);
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+print '----------------',
+      ' Exemplo 4.4(a) ',
+      '----------------',;
+
+y = {'y1','y2','y3'};
+mi = {3,1,2};
+Sigma = {4 0 2, 0 1 -1, 2 -1 3};
+
+a = {1,-2, 1};
+mi_z = t(a)*mi;
+var_z = t(a)*Sigma*a;
+print y mi Sigma,,,,, 'item (i)   ',,'z = y1-2y2+y3   ' mi_z var_z;
+
+ZZ = {'z1 = y1-y2+y3','z2 = 3y1+y2-2y3'}; 
+A = {1 -1  1, 3  1 -2};
+mi_ZZ = A*mi;
+Sigma_ZZ = A*Sigma*t(A);
+print 'item (ii)',,  ZZ '     ' mi_ZZ '     ' Sigma_ZZ;
+
+A12 = {1 0 0, 0 1 0};
+mi_12 = A12*mi;
+Sigma_12 = A12*Sigma*t(A12);
+print mi_12 Sigma_12;
+
+A13 = {1 0 0, 0 0 1};
+mi_13 = A13*mi;
+Sigma_13 = A13*Sigma*t(A13);
+print mi_13 Sigma_13;
+
+a1 = {1 0 0};
+b2 = {0 1 0};
+cov_12 = a1*Sigma*t(b2);
+print cov_12;
+
+print ,,'-----------------------------------------------------------';
+
+quit;
+
+
+* Exemplo 4.4(b);
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+print '----------------',
+      ' Exemplo 4.4(b) ',
+      '----------------',;
+
+mi = {2,5,-2,1};
+Sigma = {9 0 3 3, 0 1 -1 2, 3 -1 6 -3, 3 2 -3 7};
+print v mi Sigma;
+
+Ay = {1 0 0 0, 0 1 0 0};
+mi_y = Ay*mi;
+Sigma_yy = Ay*Sigma*t(Ay);
+
+Ax = {0 0 1 0, 0 0 0 1};
+mi_x = Ax*mi;
+Sigma_xx = Ax*Sigma*t(Ax);
+
+Sigma_yx = Ay*Sigma*t(Ax);
+print mi_y Sigma_yy,, mi_x Sigma_xx,, Sigma_yx;
+
+cov_ydx = Sigma_yy-Sigma_yx*inv(Sigma_xx)*t(Sigma_yx);
+
+print Sigma_yy[format=6.0],, cov_ydx[format=6.2];
+
+print ,,'-----------------------------------------------------------';
+
+quit;
+
+
+* Exemplo 4.4(c);
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+
+print '----------------',
+      ' Exemplo 4.4(c) ',
+      '----------------',;
+
+mi = {2,5,-2,1};
+Sigma = {9 0 3 3, 0 1 -1 2, 3 -1 6 -3, 3 2 -3 7};
+print v mi Sigma;
+
+Ay = {1 0 0 0};
+mi_y = Ay*mi;
+Sigma_yy = Ay*Sigma*t(Ay);
+
+Ax = {0 1 0 0, 0 0 1 0, 0 0 0 1};
+mi_x = Ax*mi;
+Sigma_xx = Ax*Sigma*t(Ax);
+
+Sigma_yx = Ay*Sigma*t(Ax);
+print mi_y Sigma_yy,, mi_x Sigma_xx,, Sigma_yx;
+
+cov_ydx = Sigma_yy-Sigma_yx*inv(Sigma_xx)*t(Sigma_yx);
+
+print Sigma_yy[format=6.0],, cov_ydx[format=6.2];
+
+print ,,'-----------------------------------------------------------';
+
+quit;
+
+* Exemplo 4.5;
+options nocenter ps=1000;
+proc iml;
+reset fuzz;
+
+print '--------------',
+      ' Exemplo 4.5) ',
+      '--------------',;
+
+Sigma = {9  0  3  3, 
+         0  1 -1  2, 
+         3 -1  6 -3, 
+         3  2 -3  7};
+D = sqrt(diag(Sigma));
+Ro = inv(D)*Sigma*inv(D);
+print Sigma '     ' Ro[format=6.2];
+
+Ay = {1 0 0 0, 0 1 0 0};
+Sigma_yy = Ay*Sigma*t(Ay);
+Dyy = sqrt(diag(Sigma_yy));
+Ro_yy = inv(Dyy)*Sigma_yy*inv(Dyy);
+
+Ax = {0 0 1 0, 0 0 0 1};
+Sigma_xx = Ax*Sigma*t(Ax);
+
+Sigma_yx = Ay*Sigma*t(Ax);
+
+cov_ydx = Sigma_yy-Sigma_yx*inv(Sigma_xx)*t(Sigma_yx);
+D = sqrt(diag(cov_ydx));
+Ro_ydx = inv(D)*cov_ydx*inv(D);
+
+print Ro_yy[format=8.2] '    ' Ro_ydx[format=8.3];
+
+print ,,'-----------------------------------------------------------';
+
+
+quit;

@@ -1,0 +1,110 @@
+options nocenter ls=90 ps=1000;
+
+title 'Exemplo 6.2. Relation between exam score (y) and homework score (x)';
+proc iml;
+y  = {95,80,0,0,79,77,72,66,98,90, 0,95,35,50,72,55,75,66};
+x1 = {96,77,0,0,78,64,89,47,90,93,18,86, 0,30,59,77,74,67};
+n = nrow(y);
+k = 1;
+jn = j(n,1,1);
+Jnn = j(n,n,1);
+In = I(n);
+X = jn||x1;
+y_barra = (1/n)*Jnn*y;
+Tot = y-y_barra;
+SQTotal = t(Tot)*(Tot);
+* pág.135;
+Beta1 = t(x1)*(In-(1/n)*Jnn)*y/(t(x1)*(In-(1/n)*Jnn)*x1);
+Beta0 = (1/n)*t(jn)*(y - Beta1*x1);
+print 'Estimativas dos parâmetros da reta:' Beta0[format=8.4] Beta1[format=8.4],,,;
+
+y_hat = Beta0 + Beta1*x1;
+Reg = y_hat-y_barra;
+SQReg = t(Reg)*Reg;
+
+Res = y-y_hat;
+SQRes = t(Res)*Res;
+s2 = SQRes/(n-k-1);
+* s2 = (t(y)*y - t(Beta)*t(X)*y)/(n-k-1);
+res_pad = res/sqrt(s2);
+
+*pág. 141;
+print 'Valores observados(y) e estimados(y_hat), residuo(res) e residuo padronizado(res_pad):',
+      '--------------------------------------------------------------------------------------'; 
+print y '   ' y_hat [format=8.4] '   ' res [format=8.4]  '   ' res_pad [format=8.4],,,;
+
+var_y = (t(y)*(In - (1/n)*Jnn)*y)/(n-1); * Calcula a variância amostral de y;
+s = sqrt(s2);
+
+print 'Variância dos dados originais:' var_y [format=10.4],,
+      'Variância de y|x:             ' s2[format=10.4],,
+      'Desvio padrão de y|x :        ' s[format=10.4] ,,,;
+
+x_barra = t(jn)*x1/n;
+var_Beta0 = s2*(1/n + x_barra**2/(t(x1)*(In-(1/n)*Jnn)*x1));
+stderr_Beta0 = sqrt(var_Beta0);
+
+var_Beta1 = s2/(t(x1)*(In-(1/n)*Jnn)*x1);
+stderr_Beta1 = sqrt(var_Beta1);
+
+ttab = tinv(0.975,n-2);
+liminf0 = Beta0-ttab*stderr_Beta0; limsup0 = Beta0+ttab*stderr_Beta0;
+liminf1 = Beta1-ttab*stderr_Beta1; limsup1 = Beta1+ttab*stderr_Beta1;
+*pág.146;
+print Beta0[format=10.4] var_Beta0[format=10.4] stderr_Beta0[format=10.4]
+      '     I.C.(Beta0,95%) = ' liminf0[format=10.4] limsup0[format=10.4] ,,, 
+      Beta1[format=10.4] var_Beta1[format=10.4] stderr_Beta1[format=10.4] 
+      '     I.C.(Beta1,95%) = ' liminf1[format=10.4] limsup1[format=10.4] ,,,;
+
+R2 = SQReg/SQTotal;  * Coeficiente de determinação - R2';
+
+corr = sqrt(R2);
+
+print '     SQTotal  =     SQReg   +    SQRes',,
+       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,
+      'Coeficiente de determinação (R2): ' R2[format=10.4],,,
+      'Coeficiente de correlação (r):    ' corr[format=10.4],,,;
+
+tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;
+tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));
+p_valor = 2*(1-cdf('t',abs(tcalc1),n-2));
+
+print 'H0: Beta1 = 0   ' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];
+
+quit;
+
+data Exemplo_6_2;
+input Ind y_exam x_homework;
+cards;
+  1  95  96
+  2  80  77
+  3   0   0
+  4   0   0
+  5  79  78
+  6  77  64
+  7  72  89
+  8  66  47
+  9  98  90
+ 10  90  93
+ 11   0  18
+ 12  95  86
+ 13  35   0
+ 14  50  30
+ 15  72  59
+ 16  55  77
+ 17  75  74
+ 18  66  67
+ ;
+
+proc reg data=Work.Exemplo_6_2;                                                        
+ model y_exam = x_homework / covb;                                                             
+ output out=work.Saida p=y_hat r=Res;
+run;
+
+proc print data=saida; run;
+
+proc sgplot data=Work.Saida noautolegend;
+ scatter x=x_homework y=y_exam;
+ reg x=x_homework y=y_exam / degree=1;
+run;
+
