@@ -1,16 +1,19 @@
 project:
   type: book
-  output-dir: _book
+  output-dir: docs
 
 author-title: "Autores"
+published-title: "Data"
 book:
   title: "Modelos Lineares I - Seminário"
   author: 
     - name: "Gustavo Jun Yakushiji"
     - name: "Luis Bernardo Patrício"
-
-  site-url: https://github.com/gustavojy/mod-lin
-  repo-url: https://github.com/gustavojy/mod-lin
+  date: 04/01/2024
+  date-format: "DD/MMMM/YYYY"
+  
+  site-url: https://github.com/gustavojy/mod-lin-r
+  repo-url: https://github.com/gustavojy/mod-lin-r
   repo-branch: main
 
   chapters:

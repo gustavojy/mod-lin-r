@@ -79,12 +79,3 @@ print 'Resumo dos resultados:';
 print Beta[format=10.4] Betac[format=10.4] Betad[format=10.4];
 print y_hat[format=10.4] y_hatc[format=10.4] y_hatd[format=10.4];
 quit;
-
-
-
-
-
-
-
-
-

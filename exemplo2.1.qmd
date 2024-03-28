@@ -70,7 +70,7 @@ plot_ly(x = y1, y = y2, z = z, type = "surface") |>
 
 Com a função `plot_ly()`, definimos os objetos que compõem os eixos x, y e z, além do estilo do gráfico (`type = "surface"`). Em seguida, utilizando a função `layout()`, inserimos o título do gráfico.
 
-Link para aplicativo: <>
+**Link para aplicativo dinâmico:** <https://gustavojy.github.io/n-multi-graph-app/>.
 
 ### SAS
 
@@ -96,4 +96,3 @@ run;
 ```
 
 :::
-

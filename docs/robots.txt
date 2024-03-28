@@ -1,1 +1,1 @@
-Sitemap: https://github.com/gustavojy/mod-lin/sitemap.xml
+Sitemap: https://github.com/gustavojy/mod-lin-r/sitemap.xml

@@ -1,5 +1,5 @@
 # Modelos Lineares - Exemplos R
-# Link material: 
+# Material complementar: <https://gustavojy.github.io/mod-lin-r/>
 
 
 # 1. Covariância, Correlação e Distância de Mahalanobis -------------------

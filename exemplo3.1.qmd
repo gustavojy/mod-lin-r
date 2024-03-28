@@ -1,2 +1,508 @@
 # Regressão Linear Simples
 
+O modelo de regressão linear simples para $n$ observações pode ser escrito como:
+
+$$
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i \space , \quad \text{para } i = 1, \dots,n 
+$$
+
+em que:
+
+-   $y$ é a variável resposta;
+
+-   $x_i$ é a variável regressora (única variável preditora de $y$);
+
+-   $\beta_0 \text{ e } \beta_1$ são os parâmetros do modelo;
+
+-   $\epsilon_i$ o termo de erro do modelo.
+
+Como suposições do modelo, temos:
+
+-   $E(\epsilon_i) = 0, \forall \space i = 1,\dots,n$ e $E(y_i) = \beta_0 + \beta_1 x_i$, ou seja, $y_i$ só depende de $x_i$ e que outras variações são aleatórias;
+
+-   $var(\epsilon_i) = \sigma^2, \forall \space i = 1,\dots,n$ e $var(y_i) = \sigma^2$, ou seja, a variância não depende dos valores de $x_i$ (homocedasticidade);
+
+-   $cov(\epsilon_i, \epsilon_j) = 0, \forall \space i \ne j$ e $cov(y_i, y_j) = 0$, portanto, não correlacionados entre si.
+
+O exemplo a seguir trata da seguinte situação: *Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame (*$y$) e das tarefas ($x$) para os 18 alunos da classe foram:
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(95,80,0,0,79,77,72,66,98,90,0,95,35,50,72,55,75,66)
+
+x1 <- c(96,77,0,0,78,64,89,47,90,93,18,86,0,30,59,77,74,67)
+```
+
+O objeto `y`, variável resposta, corresponde aos escores na prova e o `x1`, variável regressora, aos escores nas tarefas.
+
+### SAS
+
+```{r}
+#| eval: false
+
+options nocenter ls=90 ps=1000;
+
+title 'Exemplo 6.2. Relation between exam score (y) and homework score (x)';
+proc iml;
+y  = {95,80,0,0,79,77,72,66,98,90, 0,95,35,50,72,55,75,66};
+x1 = {96,77,0,0,78,64,89,47,90,93,18,86, 0,30,59,77,74,67};
+```
+
+:::
+
+## Análise exploratória
+
+Para visualizar a dispersão dos dados, construiremos um gráfico de pontos (gráfico de dispersão) entre as notas dos alunos na prova (`y`) e nas tarefas de casa (`x1`). Para isso, utilizaremos os recursos do pacote `ggplot2`.
+
+```{r}
+#| warning: false
+
+library(ggplot2)
+```
+
+```{r}
+notas <- data.frame(y, x1)
+notas
+
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point()
+```
+
+Primeiramente, criamos um *data frame* com as notas dos alunos. Em seguida, com a função `ggplot()`, atribuímos a variável nota nas tarefas (`x1`) ao eixo das abscissas e a nota na prova (`y`) ao eixo das ordenadas. Com a `geom_point()`, adicionamos a camada gráfica referente à geometria de pontos, ou seja, a geometria do gráfico de dispersão. Note que as funções `ggplot()` e `geom_point()` são ligadas pelo operador `+`.
+
+## Estimação dos parâmetros $\beta_0$ e $\beta_1$
+
+Para estimar os parâmetros $\beta_0$ e $\beta_1$, utilizaremos o **Método dos Mínimos Quadrados Ordinários (MQO)**. O método consiste em achar os estimadores $\hat\beta_0$ e $\hat\beta_1$ que minimizem a soma de quadrados dos desvios $y_i - \hat{y}_i$.
+
+Primeiramente, criaremos os seguintes objetos:
+
+-   `n`: número de observações $n$;
+
+-   `jn`: vetor coluna de 1's $\mathbf{j}$;
+
+-   `Jnn`: matriz de 1's $\mathbf{J}$;
+
+-   `In`: matriz identidade $\mathbf{I}$.
+
+::: panel-tabset
+
+### R
+
+```{r}
+n <- length(y)
+n
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+jn
+
+Jnn <- jn %*% t(jn)
+Jnn
+
+In <- diag(n)
+In
+```
+
+A operação matricial para obter $\hat\beta_1$ e $\hat\beta_0$ é:
+
+$$
+\hat\beta_1 = \frac{\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{y}\right]} {\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{x}\right]} \\
+\hat\beta_0 = \frac{1}n \mathbf{j}' (\mathbf{y} - \beta_1 \mathbf{x})
+$$
+
+```{r}
+Beta1 <- as.numeric(t(x1) %*% (In - (1 / n) * Jnn) %*% y / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1))
+Beta1
+
+Beta0 <- as.numeric((1 / n) * t(jn) %*% (y - Beta1 * x1))
+Beta0
+```
+
+O R possui a função `lm()`, que nos retorna as estimativas dos parâmetros de um modelo linear. Para isso, dentro da função, colocamos os valores de `y` e `x1` ligados pelo operador `~`, que representa uma fórmula.
+
+```{r}
+lm(y ~ x1)
+```
+
+Com isso, a equação predita fica:
+
+$$\hat{y}_i = 10.7269 + 0.8726 x_i$$
+
+Graficamente, temos:
+
+```{r}
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point() + 
+  geom_abline(intercept = 10.7269, slope = 0.8726, color = "red")
+```
+
+Com a função `geom_abline()`, declaramos o $\hat\beta_0 = 10.7269$ no argumento `intercept =` e $\hat\beta_1 = 0.8726$ no argumento `slope =`.
+
+Também podemos utilizar a função `geom_smooth()` para construir a reta de regressão. Essa função calcula, automaticamente, os valores do $\hat\beta_0$ e $\hat\beta_1$ para construir a reta.
+
+```{r}
+#| message: false
+
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color = "red", se = FALSE)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+n = nrow(y);
+jn = j(n,1,1);
+Jnn = j(n,n,1);
+In = I(n);
+X = jn||x1;
+y_barra = (1/n)*Jnn*y;
+Tot = y-y_barra;
+SQTotal = t(Tot)*(Tot);
+* pág.135;
+Beta1 = t(x1)*(In-(1/n)*Jnn)*y/(t(x1)*(In-(1/n)*Jnn)*x1);
+Beta0 = (1/n)*t(jn)*(y - Beta1*x1);
+print 'Estimativas dos parâmetros da reta:' Beta0[format=8.4] Beta1[format=8.4],,,;
+```
+
+:::
+
+## Estimação da variância ($\sigma^2$)
+
+Para estimar a variância $\sigma^2$, utilizamos a seguinte expressão:
+
+$$
+s^2 = 
+\frac{(\mathbf{y} - \mathbf{\hat{y}})' \space \mathbf{\hat{y}}}{n-2} =  \frac{SQRes}{n-2}
+$$
+
+Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$. *(ver pg 89-90 Rencher)*
+
+::: panel-tabset
+
+### R
+
+```{r}
+y_hat <- Beta0 + Beta1 * x1
+y_hat
+
+Res <- y - y_hat
+Res
+
+SQRes <- t(Res) %*% Res
+SQRes
+
+s2 <- as.numeric(SQRes / (n - 2))
+s2
+```
+
+```{r}
+y_barra <- (1 / n) * Jnn %*% y
+y_barra
+
+Reg <- y_hat - y_barra
+Reg
+
+SQReg <- t(Reg) %*% Reg
+SQReg
+```
+
+```{r}
+res_pad <- Res / sqrt(s2)
+res_pad
+```
+
+```{r}
+#| echo: false
+
+tab1 <- data.frame(y, y_hat, Res, res_pad)
+
+kableExtra::kbl(
+  x = tab1, digits = 4, align = "c",
+  col.names = c("Valores observados(`y`)", "Valores estimados(`y_hat`)",
+                "Residuo(`Res`)", "Residuo Padronizado(`res_pad`)")
+) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+
+*Tipos de variância*
+
+```{r}
+var_y <- (t(y) %*% (In - (1/n) * Jnn) %*% y) / (n - 1)
+var_y
+
+s <- sqrt(s2)
+s
+```
+
+```{r}
+#| echo: false
+
+tab2 <- data.frame(var_y, s2, s)
+
+kableExtra::kbl(
+  x = tab2, digits = 4, align = "c",
+  col.names = c("Variância dos dados originais (`var_y`)", 
+                "Variância de y|x (`s2`)",
+                "Desvio padrão de y|x")
+) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+k = 1;
+
+y_hat = Beta0 + Beta1*x1;
+Reg = y_hat-y_barra;
+SQReg = t(Reg)*Reg;
+
+Res = y-y_hat;
+SQRes = t(Res)*Res;
+s2 = SQRes/(n-k-1);
+* s2 = (t(y)*y - t(Beta)*t(X)*y)/(n-k-1);
+res_pad = res/sqrt(s2);
+
+*pág. 141;
+print 'Valores observados(y) e estimados(y_hat), residuo(res) e residuo padronizado(res_pad):',
+      '--------------------------------------------------------------------------------------'; 
+print y '   ' y_hat [format=8.4] '   ' res [format=8.4]  '   ' res_pad [format=8.4],,,;
+```
+
+```{r}
+#| eval: false
+
+var_y = (t(y)*(In - (1/n)*Jnn)*y)/(n-1); * Calcula a variância amostral de y;
+s = sqrt(s2);
+
+print 'Variância dos dados originais:' var_y [format=10.4],,
+      'Variância de y|x:             ' s2[format=10.4],,
+      'Desvio padrão de y|x :        ' s[format=10.4] ,,,;
+```
+
+:::
+
+## Teste de Hipóteses e Intervalo de Confiança para $\beta_1$
+
+Realizaremos um teste de hipótese para $H_0: \beta_1 = 0$, com a suposição que $y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)$ ou $\epsilon_i \sim N(0, \sigma^2)$.
+
+Das propriedades de $\hat\beta_1$ e $s^2$, temos:
+
+$$
+t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+x_barra <- t(jn) %*% (x1 / n)
+x_barra
+
+var_Beta0 <- s2 * ((1 / n) + (x_barra^2 / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1)))
+var_Beta0
+
+stderr_Beta0 <- sqrt(var_Beta0)
+stderr_Beta0
+
+var_Beta1 <- s2 / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1)
+var_Beta1
+
+stderr_Beta1 <- sqrt(var_Beta1)
+stderr_Beta1
+```
+
+```{r}
+t0 <- Beta0 / stderr_Beta0
+t0
+
+t1 <- Beta1 / stderr_Beta1
+t1
+```
+
+Para construir os limites de intervalo de confiança:
+
+$$
+\hat\beta \pm t_{\alpha/2, n-2} \sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}
+$$
+
+```{r}
+ttab <- qt(0.975, n - 2) # quantil t com probabilidade 0.975 e gl = n-2
+
+liminf0 <- Beta0 - ttab * stderr_Beta0
+liminf0
+
+limsup0 <- Beta0 + ttab * stderr_Beta0
+limsup0
+
+liminf1 <- Beta1 - ttab * stderr_Beta1
+liminf1
+
+limsup1 <- Beta1 + ttab * stderr_Beta1
+limsup1
+```
+
+```{r}
+#| echo: false
+
+tab3 <- data.frame(
+  param = c("Bo", "B1"),
+  var = c(var_Beta0, var_Beta1),
+  stderr = c(stderr_Beta0, stderr_Beta1),
+  t = c(t0, t1),
+  ic = c("[-3.301 , 24.755]", "[0.662 , 1.083]")
+)
+
+kableExtra::kbl(
+  x = tab3, digits = 4, align = "c",
+  col.names = c("Parâmetro", "Variância", "Erro Padrão", "t", "IC 95%")
+) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+x_barra = t(jn)*x1/n;
+var_Beta0 = s2*(1/n + x_barra**2/(t(x1)*(In-(1/n)*Jnn)*x1));
+stderr_Beta0 = sqrt(var_Beta0);
+
+var_Beta1 = s2/(t(x1)*(In-(1/n)*Jnn)*x1);
+stderr_Beta1 = sqrt(var_Beta1);
+```
+
+```{r}
+#| eval: false
+
+ttab = tinv(0.975,n-2);
+liminf0 = Beta0-ttab*stderr_Beta0; limsup0 = Beta0+ttab*stderr_Beta0;
+liminf1 = Beta1-ttab*stderr_Beta1; limsup1 = Beta1+ttab*stderr_Beta1;
+*pág.146;
+print Beta0[format=10.4] var_Beta0[format=10.4] stderr_Beta0[format=10.4]
+      '     I.C.(Beta0,95%) = ' liminf0[format=10.4] limsup0[format=10.4] ,,, 
+      Beta1[format=10.4] var_Beta1[format=10.4] stderr_Beta1[format=10.4] 
+      '     I.C.(Beta1,95%) = ' liminf1[format=10.4] limsup1[format=10.4] ,,,;
+```
+
+:::
+
+## Coeficiente de Determinação ($r^2$)
+
+O coeficiente de determinação ($r^2$) indica a proporção da variação em $y$ que é explicada pelo modelo ou que é devida à regressão em $x$. É definido como:
+
+$$r^2 = \frac{SQReg}{SQTotal} = 1 - \frac{SQRes}{SQTotal}$$
+
+em que: 
+
+- $SQReg$ é a soma de quadrados da regressão;
+
+- $SQRes$ é a soma de quadrados dos resíduos;
+
+- $SQTotal$ é a soma de quadrados total ($SQTotal = SQReg + SQRes$).
+
+::: panel-tabset
+
+### R
+
+```{r}
+Tot <- y - y_barra
+Tot
+
+SQTotal <- t(Tot) %*% Tot
+SQTotal
+
+SQTotal <- SQReg + SQRes
+SQTotal
+```
+
+```{r}
+R2 <- SQReg / SQTotal
+R2
+```
+
+O coeficiente de correlação ($r$) é dado pela raiz quadrada do coeficiente de determinação ($r^2$).
+
+```{r}
+r <- sqrt(R2)
+r
+```
+
+```{r}
+#| echo: false
+
+tab4 <- data.frame(R2, r)
+
+kableExtra::kbl(
+  x = tab4, digits = 4, align = "c",
+  col.names = c("Coeficiente de determinação (R2)", 
+                "Coeficiente de correlação (r)")
+) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+A estatística t para testar $H_0: \beta_1 = 0$ também pode ser expressa em termos de $r$:
+
+$$
+t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
+$$
+
+```{r}
+tcalc1 <- corr * sqrt(n - 2) / (sqrt(1 - corr^2))
+tcalc1
+
+tcalc2 <- Beta1 / stderr_Beta1
+tcalc2
+```
+
+Com a estatística t, calculamos o p-valor da seguinte maneira:
+
+```{r}
+p_valor <- 2 * (1 - pt(abs(tcalc1), n - 2))
+p_valor
+```
+
+Onde a função `pt()` retorna a função de distribuição da estatística t.
+
+Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função `lm()`.
+
+```{r}
+modelo <- lm(y ~ x1)
+
+summary(modelo)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+R2 = SQReg/SQTotal;  * Coeficiente de determinação - R2';
+
+corr = sqrt(R2);
+
+print '     SQTotal  =     SQReg   +    SQRes',,
+       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,
+      'Coeficiente de determinação (R2): ' R2[format=10.4],,,
+      'Coeficiente de correlação (r):    ' corr[format=10.4],,,;
+
+tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;
+tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));
+p_valor = 2*(1-cdf('t',abs(tcalc1),n-2));
+
+print 'H0: Beta1 = 0   ' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];
+
+quit;
+```
+
+:::

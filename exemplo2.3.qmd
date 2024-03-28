@@ -112,7 +112,7 @@ $$
 
 ### R
 
-Para particionar $\mathbf{\Sigma}$, utilizaremos o [Teorema 2 (4.4B.) @sec-T2].
+Para particionar $\mathbf{\Sigma}$, utilizaremos o [Teorema 2 (4.4B.) -@sec-T2].
 
 A primeira partição ($\mathbf{\Sigma}_{yy}$) fica:
 
@@ -151,7 +151,7 @@ Sigma_yx <- Ay %*% Sigma %*% t(Ax)
 Sigma_yx
 ```
 
-Usando o [Teorema 4 (4.4D) @sec-T4], obtemos a matriz de covariâncias condicionais de $y_1$ e $y_2$ dado $y_3$ e $y_4$:
+Usando o [Teorema 4 (4.4D) -@sec-T4], obtemos a matriz de covariâncias condicionais de $y_1$ e $y_2$ dado $y_3$ e $y_4$:
 
 $$cov(y \mid x) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \mathbf{\Sigma}_{xx}^{-1} \mathbf{\Sigma}_{xy}$$
 

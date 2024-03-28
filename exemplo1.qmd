@@ -131,6 +131,25 @@ Jnn = \mathbf{J}_{(28 \times 28)} =
    \end{bmatrix}
 $$
 
+Além disso, note que a matriz $\mathbf{J}$ (`Jnn`) pode ser obtida por $\mathbf{J} = \mathbf{j}\mathbf{j}'$, ou seja, a multiplicação do vetor coluna $\mathbf{j}$ pela sua transposta.
+
+```{r}
+Jnn <- jn %*% t(jn)
+Jnn
+```
+
+No R, utilizamos a função `t()` para realizar a transposição de uma matriz ou vetor.
+
+$$
+\mathbf{J} = \mathbf{j}\mathbf{j}' = 
+\begin{bmatrix} 
+1 \\ 1 \\ \vdots \\1 
+\end{bmatrix}
+\begin{bmatrix} 
+1 & 1 & \dots & 1 
+\end{bmatrix}
+$$
+
 A seguir, calcularemos a matriz de variâncias e covariâncias amostrais, dada pela equação:
 
 $$\mathbf{\Sigma} = \frac{1}{n-1} \mathbf{Y}'(\mathbf{I} - \frac{1}{n}J) \mathbf{Y}$$

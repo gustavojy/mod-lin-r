@@ -504,7 +504,7 @@ var(y \mid \mathbf{x}) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{x
 \end{aligned}
 $$
 
-Como exemplo, seguimos com o vetor utilizado no [Teorema 4 (4.4D) @sec-T4].
+Como exemplo, seguimos com o vetor utilizado no [Teorema 4 (4.4D) -@sec-T4].
 
 $$
 \mathbf{v} \sim N_4(\mathbf{\mu}, \mathbf{\Sigma})
