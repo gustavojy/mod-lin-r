@@ -128,7 +128,7 @@ $$
 #### R
 
 ```{r}
-A <- matrix(c(1, -1, 1, 3, 1, -2), nrow = 2, ncol = 3, byrow = TRUE)
+A <- matrix(c(1, -1, 1, 3, 1, -2), nrow = 2, ncol = 3)
 A
 
 E_z1z2 <- A %*% mi
@@ -173,7 +173,7 @@ print 'item (ii)',,  ZZ '     ' mi_ZZ '     ' Sigma_ZZ;
 
 Se $\mathbf{y} \sim N_p(\mathbf{\mu, \Sigma})$, então **qualquer subvetor** $r \times 1$ de $\mathbf{y}$ tem uma distribuição normal $r$-variada com médias, variâncias e covariâncias iguais às da distribuição normal $p$-variada original.
 
-Como exmeplo, considere: $y_1 \sim N(3,4)$, $y_2 \sim N(1,1)$ e $y_3 \sim N(2, 3)$.
+Como exemplo, considere: $y_1 \sim N(3,4)$, $y_2 \sim N(1,1)$ e $y_3 \sim N(2, 3)$.
 
 ::: {.panel-tabset}
 
@@ -182,7 +182,7 @@ Como exmeplo, considere: $y_1 \sim N(3,4)$, $y_2 \sim N(1,1)$ e $y_3 \sim N(2, 3
 Dessa forma, o vetor $\begin{bmatrix} y_1 \\ y_2\end{bmatrix}$:
 
 ```{r}
-A12 <- matrix(c(1, 0, 0, 0, 1, 0), nrow = 2, ncol = 3, byrow = TRUE)
+A12 <- matrix(c(1, 0, 0, 0, 1, 0), nrow = 2, ncol = 3)
 A12
 
 mi_12 <- A12 %*% mi
@@ -437,7 +437,12 @@ cov_ydx <- Sigma_yy - Sigma_yx %*% solve(Sigma_xx) %*% t(Sigma_yx)
 cov_ydx
 ```
 
-$$ cov(\mathbf{y} \mid \mathbf{x}) = `r round(cov_ydx, 2)` $$
+$$
+cov(\mathbf{y} \mid \mathbf{x}) = 
+\begin{bmatrix} 
+3,82 & -0,73 \\ -0,73 & 0,42
+\end{bmatrix}
+$$
 
 #### SAS
 
@@ -504,7 +509,7 @@ var(y \mid \mathbf{x}) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{x
 \end{aligned}
 $$
 
-Como exemplo, seguimos com o vetor utilizado no [Teorema 4 (4.4D) -@sec-T4].
+Como exemplo, seguimos com o vetor $\mathbf{v}$ utilizado no [Teorema 4 (4.4D) -@sec-T4].
 
 $$
 \mathbf{v} \sim N_4(\mathbf{\mu}, \mathbf{\Sigma})
@@ -653,7 +658,7 @@ cov_ydx
 
 $$
 \begin{aligned}
-var(y) = `r round(cov_ydx, 3)` \\
+var(y) = `r round(Sigma_yy, 3)` \\
 var(y \mid x_1, x_2, x_3) = `r round(cov_ydx, 3)`
 \end{aligned}
 $$

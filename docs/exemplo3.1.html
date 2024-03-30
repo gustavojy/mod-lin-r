@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Modelos Lineares I - Seminário - 5&nbsp; Regressão Linear Simples</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./exemplo2.3.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Nenhum resultado",
+    "search-matching-documents-text": "documentos correspondentes",
+    "search-copy-link-title": "Copiar link para a busca",
+    "search-hide-matches-text": "Esconder correspondências adicionais",
+    "search-more-match-text": "mais correspondência neste documento",
+    "search-more-matches-text": "mais correspondências neste documento",
+    "search-clear-button-title": "Limpar",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Procurar"
+  }
+}</script><script src="site_libs/kePrint-0.0.1/kePrint.js"></script><link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./exemplo3.1.html">Regressão Linear Simples</a></li><li class="breadcrumb-item"><a href="./exemplo3.1.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Regressão Linear Simples</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Modelos Lineares I - Seminário</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/gustavojy/mod-lin-r" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Procurar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introdução</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Covariância, Correlação e Distância de Mahalanobis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Exemplo</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Distribuição Normal Multivariada</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo2.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Gráfico da Normal Bivariada</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo2.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Propriedades</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo2.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Correlação Parcial</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Regressão Linear Simples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo3.1.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Regressão Linear Simples</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Índice</h2>
+   
+  <ul>
+<li><a href="#an%C3%A1lise-explorat%C3%B3ria" id="toc-análise-exploratória" class="nav-link active" data-scroll-target="#an%C3%A1lise-explorat%C3%B3ria"><span class="header-section-number">5.1</span> Análise exploratória</a></li>
+  <li><a href="#estima%C3%A7%C3%A3o-dos-par%C3%A2metros-beta_0-e-beta_1" id="toc-estimação-dos-parâmetros-beta_0-e-beta_1" class="nav-link" data-scroll-target="#estima%C3%A7%C3%A3o-dos-par%C3%A2metros-beta_0-e-beta_1"><span class="header-section-number">5.2</span> Estimação dos parâmetros <span class="math inline">\(\beta_0\)</span> e <span class="math inline">\(\beta_1\)</span></a></li>
+  <li><a href="#estima%C3%A7%C3%A3o-da-vari%C3%A2ncia-sigma2" id="toc-estimação-da-variância-sigma2" class="nav-link" data-scroll-target="#estima%C3%A7%C3%A3o-da-vari%C3%A2ncia-sigma2"><span class="header-section-number">5.3</span> Estimação da variância (<span class="math inline">\(\sigma^2\)</span>)</a></li>
+  <li><a href="#teste-de-hip%C3%B3teses-e-intervalo-de-confian%C3%A7a-para-beta_1" id="toc-teste-de-hipóteses-e-intervalo-de-confiança-para-beta_1" class="nav-link" data-scroll-target="#teste-de-hip%C3%B3teses-e-intervalo-de-confian%C3%A7a-para-beta_1"><span class="header-section-number">5.4</span> Teste de Hipóteses e Intervalo de Confiança para <span class="math inline">\(\beta_1\)</span></a></li>
+  <li><a href="#coeficiente-de-determina%C3%A7%C3%A3o-r2" id="toc-coeficiente-de-determinação-r2" class="nav-link" data-scroll-target="#coeficiente-de-determina%C3%A7%C3%A3o-r2"><span class="header-section-number">5.5</span> Coeficiente de Determinação (<span class="math inline">\(r^2\)</span>)</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">
+<span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Regressão Linear Simples</span>
+</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header><p>O modelo de regressão linear simples para <span class="math inline">\(n\)</span> observações pode ser escrito como:</p>
+<p><span class="math display">\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i \space , \quad \text{para } i = 1, \dots,n
+\]</span></p>
+<p>em que:</p>
+<ul>
+<li><p><span class="math inline">\(y\)</span> é a variável resposta;</p></li>
+<li><p><span class="math inline">\(x_i\)</span> é a variável regressora (única variável preditora de <span class="math inline">\(y\)</span>);</p></li>
+<li><p><span class="math inline">\(\beta_0 \text{ e } \beta_1\)</span> são os parâmetros do modelo;</p></li>
+<li><p><span class="math inline">\(\epsilon_i\)</span> o termo de erro do modelo.</p></li>
+</ul>
+<p>Como suposições do modelo, temos:</p>
+<ul>
+<li><p><span class="math inline">\(E(\epsilon_i) = 0, \forall \space i = 1,\dots,n\)</span> e <span class="math inline">\(E(y_i) = \beta_0 + \beta_1 x_i\)</span>, ou seja, <span class="math inline">\(y_i\)</span> só depende de <span class="math inline">\(x_i\)</span> e que outras variações são aleatórias;</p></li>
+<li><p><span class="math inline">\(var(\epsilon_i) = \sigma^2, \forall \space i = 1,\dots,n\)</span> e <span class="math inline">\(var(y_i) = \sigma^2\)</span>, ou seja, a variância não depende dos valores de <span class="math inline">\(x_i\)</span> (homocedasticidade);</p></li>
+<li><p><span class="math inline">\(cov(\epsilon_i, \epsilon_j) = 0, \forall \space i \ne j\)</span> e <span class="math inline">\(cov(y_i, y_j) = 0\)</span>, portanto, não correlacionados entre si.</p></li>
+</ul>
+<p>O exemplo a seguir trata da seguinte situação: <em>Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame (</em><span class="math inline">\(y\)</span>) e das tarefas (<span class="math inline">\(x\)</span>) para os 18 alunos da classe foram:</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">SAS</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">95</span>,<span class="fl">80</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">79</span>,<span class="fl">77</span>,<span class="fl">72</span>,<span class="fl">66</span>,<span class="fl">98</span>,<span class="fl">90</span>,<span class="fl">0</span>,<span class="fl">95</span>,<span class="fl">35</span>,<span class="fl">50</span>,<span class="fl">72</span>,<span class="fl">55</span>,<span class="fl">75</span>,<span class="fl">66</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">96</span>,<span class="fl">77</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">78</span>,<span class="fl">64</span>,<span class="fl">89</span>,<span class="fl">47</span>,<span class="fl">90</span>,<span class="fl">93</span>,<span class="fl">18</span>,<span class="fl">86</span>,<span class="fl">0</span>,<span class="fl">30</span>,<span class="fl">59</span>,<span class="fl">77</span>,<span class="fl">74</span>,<span class="fl">67</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>O objeto <code>y</code>, variável resposta, corresponde aos escores na prova e o <code>x1</code>, variável regressora, aos escores nas tarefas.</p>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>options nocenter ls<span class="ot">=</span><span class="dv">90</span> ps<span class="ot">=</span><span class="dv">1000</span>;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>title <span class="st">'Exemplo 6.2. Relation between exam score (y) and homework score (x)'</span>;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>proc iml;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y  <span class="ot">=</span> {<span class="dv">95</span>,<span class="dv">80</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">79</span>,<span class="dv">77</span>,<span class="dv">72</span>,<span class="dv">66</span>,<span class="dv">98</span>,<span class="dv">90</span>, <span class="dv">0</span>,<span class="dv">95</span>,<span class="dv">35</span>,<span class="dv">50</span>,<span class="dv">72</span>,<span class="dv">55</span>,<span class="dv">75</span>,<span class="dv">66</span>};</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> {<span class="dv">96</span>,<span class="dv">77</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">78</span>,<span class="dv">64</span>,<span class="dv">89</span>,<span class="dv">47</span>,<span class="dv">90</span>,<span class="dv">93</span>,<span class="dv">18</span>,<span class="dv">86</span>, <span class="dv">0</span>,<span class="dv">30</span>,<span class="dv">59</span>,<span class="dv">77</span>,<span class="dv">74</span>,<span class="dv">67</span>};</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<section id="análise-exploratória" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="análise-exploratória">
+<span class="header-section-number">5.1</span> Análise exploratória</h2>
+<p>Para visualizar a dispersão dos dados, construiremos um gráfico de pontos (gráfico de dispersão) entre as notas dos alunos na prova (<code>y</code>) e nas tarefas de casa (<code>x1</code>). Para isso, utilizaremos os recursos do pacote <code>ggplot2</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">notas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">x1</span><span class="op">)</span></span>
+<span><span class="va">notas</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    y x1
+1  95 96
+2  80 77
+3   0  0
+4   0  0
+5  79 78
+6  77 64
+7  72 89
+8  66 47
+9  98 90
+10 90 93
+11  0 18
+12 95 86
+13 35  0
+14 50 30
+15 72 59
+16 55 77
+17 75 74
+18 66 67</code></pre>
+</div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">notas</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x1</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Primeiramente, criamos um <em>data frame</em> com as notas dos alunos. Em seguida, com a função <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot()</a></code>, atribuímos a variável nota nas tarefas (<code>x1</code>) ao eixo das abscissas e a nota na prova (<code>y</code>) ao eixo das ordenadas. Com a <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point()</a></code>, adicionamos a camada gráfica referente à geometria de pontos, ou seja, a geometria do gráfico de dispersão. Note que as funções <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot()</a></code> e <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point()</a></code> são ligadas pelo operador <code>+</code>.</p>
+</section><section id="estimação-dos-parâmetros-beta_0-e-beta_1" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="estimação-dos-parâmetros-beta_0-e-beta_1">
+<span class="header-section-number">5.2</span> Estimação dos parâmetros <span class="math inline">\(\beta_0\)</span> e <span class="math inline">\(\beta_1\)</span>
+</h2>
+<p>Para estimar os parâmetros <span class="math inline">\(\beta_0\)</span> e <span class="math inline">\(\beta_1\)</span>, utilizaremos o <strong>Método dos Mínimos Quadrados Ordinários (MQO)</strong>. O método consiste em achar os estimadores <span class="math inline">\(\hat\beta_0\)</span> e <span class="math inline">\(\hat\beta_1\)</span> que minimizem a soma de quadrados dos desvios <span class="math inline">\(y_i - \hat{y}_i\)</span>.</p>
+<p>Primeiramente, criaremos os seguintes objetos:</p>
+<ul>
+<li><p><code>n</code>: número de observações <span class="math inline">\(n\)</span>;</p></li>
+<li><p><code>jn</code>: vetor coluna de 1’s <span class="math inline">\(\mathbf{j}\)</span>;</p></li>
+<li><p><code>Jnn</code>: matriz de 1’s <span class="math inline">\(\mathbf{J}\)</span>;</p></li>
+<li><p><code>In</code>: matriz identidade <span class="math inline">\(\mathbf{I}\)</span>.</p></li>
+</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">SAS</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="va">n</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 18</code></pre>
+</div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">jn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="va">n</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">jn</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1]
+ [1,]    1
+ [2,]    1
+ [3,]    1
+ [4,]    1
+ [5,]    1
+ [6,]    1
+ [7,]    1
+ [8,]    1
+ [9,]    1
+[10,]    1
+[11,]    1
+[12,]    1
+[13,]    1
+[14,]    1
+[15,]    1
+[16,]    1
+[17,]    1
+[18,]    1</code></pre>
+</div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Jnn</span> <span class="op">&lt;-</span> <span class="va">jn</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span></span>
+<span><span class="va">Jnn</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
+ [1,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [2,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [3,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [4,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [5,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [6,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [7,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [8,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+ [9,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[10,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[11,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[12,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[13,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[14,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[15,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[16,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[17,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+[18,]    1    1    1    1    1    1    1    1    1     1     1     1     1
+      [,14] [,15] [,16] [,17] [,18]
+ [1,]     1     1     1     1     1
+ [2,]     1     1     1     1     1
+ [3,]     1     1     1     1     1
+ [4,]     1     1     1     1     1
+ [5,]     1     1     1     1     1
+ [6,]     1     1     1     1     1
+ [7,]     1     1     1     1     1
+ [8,]     1     1     1     1     1
+ [9,]     1     1     1     1     1
+[10,]     1     1     1     1     1
+[11,]     1     1     1     1     1
+[12,]     1     1     1     1     1
+[13,]     1     1     1     1     1
+[14,]     1     1     1     1     1
+[15,]     1     1     1     1     1
+[16,]     1     1     1     1     1
+[17,]     1     1     1     1     1
+[18,]     1     1     1     1     1</code></pre>
+</div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">In</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
+<span><span class="va">In</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
+ [1,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+ [2,]    0    1    0    0    0    0    0    0    0     0     0     0     0
+ [3,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+ [4,]    0    0    0    1    0    0    0    0    0     0     0     0     0
+ [5,]    0    0    0    0    1    0    0    0    0     0     0     0     0
+ [6,]    0    0    0    0    0    1    0    0    0     0     0     0     0
+ [7,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+ [8,]    0    0    0    0    0    0    0    1    0     0     0     0     0
+ [9,]    0    0    0    0    0    0    0    0    1     0     0     0     0
+[10,]    0    0    0    0    0    0    0    0    0     1     0     0     0
+[11,]    0    0    0    0    0    0    0    0    0     0     1     0     0
+[12,]    0    0    0    0    0    0    0    0    0     0     0     1     0
+[13,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+[14,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+[15,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+[16,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+[17,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+[18,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [,14] [,15] [,16] [,17] [,18]
+ [1,]     0     0     0     0     0
+ [2,]     0     0     0     0     0
+ [3,]     0     0     0     0     0
+ [4,]     0     0     0     0     0
+ [5,]     0     0     0     0     0
+ [6,]     0     0     0     0     0
+ [7,]     0     0     0     0     0
+ [8,]     0     0     0     0     0
+ [9,]     0     0     0     0     0
+[10,]     0     0     0     0     0
+[11,]     0     0     0     0     0
+[12,]     0     0     0     0     0
+[13,]     0     0     0     0     0
+[14,]     1     0     0     0     0
+[15,]     0     1     0     0     0
+[16,]     0     0     1     0     0
+[17,]     0     0     0     1     0
+[18,]     0     0     0     0     1</code></pre>
+</div>
+</div>
+<p>A operação matricial para obter <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(\hat\beta_0\)</span> é:</p>
+<p><span class="math display">\[
+\begin{align}
+\hat\beta_1 &amp;= \frac{\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{y}\right]} {\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{x}\right]} \\
+\hat\beta_0 &amp;= \frac{1}n \mathbf{j}' (\mathbf{y} - \beta_1 \mathbf{x})
+\end{align}
+\]</span></p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">x1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">Beta1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8726465</code></pre>
+</div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">y</span> <span class="op">-</span> <span class="va">Beta1</span> <span class="op">*</span> <span class="va">x1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">Beta0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 10.72691</code></pre>
+</div>
+</div>
+<p>O R possui a função <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>, que nos retorna as estimativas dos parâmetros de um modelo linear. Para isso, dentro da função, colocamos os valores de <code>y</code> e <code>x1</code> ligados pelo operador <code>~</code>, que representa uma fórmula.</p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x1)
+
+Coefficients:
+(Intercept)           x1  
+    10.7269       0.8726  </code></pre>
+</div>
+</div>
+<p>Com isso, a equação predita fica:</p>
+<p><span class="math display">\[\hat{y}_i = 10.7269 + 0.8726 x_i\]</span></p>
+<p>Graficamente, temos:</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">notas</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x1</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">10.7269</span>, slope <span class="op">=</span> <span class="fl">0.8726</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Com a função <code><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline()</a></code>, declaramos o <span class="math inline">\(\hat\beta_0 = 10.7269\)</span> no argumento <code>intercept =</code> e <span class="math inline">\(\hat\beta_1 = 0.8726\)</span> no argumento <code>slope =</code>.</p>
+<p>Também podemos utilizar a função <code><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth()</a></code> para construir a reta de regressão. Essa função calcula, automaticamente, os valores do <span class="math inline">\(\hat\beta_0\)</span> e <span class="math inline">\(\hat\beta_1\)</span> para construir a reta.</p>
+<div class="cell">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">notas</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x1</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, color <span class="op">=</span> <span class="st">"red"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="fu">nrow</span>(y);</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>jn <span class="ot">=</span> <span class="fu">j</span>(n,<span class="dv">1</span>,<span class="dv">1</span>);</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Jnn <span class="ot">=</span> <span class="fu">j</span>(n,n,<span class="dv">1</span>);</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>In <span class="ot">=</span> <span class="fu">I</span>(n);</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> jn<span class="sc">||</span>x1;</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>y_barra <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>n)<span class="sc">*</span>Jnn<span class="sc">*</span>y;</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>Tot <span class="ot">=</span> y<span class="sc">-</span>y_barra;</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>SQTotal <span class="ot">=</span> <span class="fu">t</span>(Tot)<span class="sc">*</span>(Tot);</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span> pág<span class="fl">.135</span>;</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>Beta1 <span class="ot">=</span> <span class="fu">t</span>(x1)<span class="sc">*</span>(In<span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>n)<span class="sc">*</span>Jnn)<span class="sc">*</span>y<span class="sc">/</span>(<span class="fu">t</span>(x1)<span class="sc">*</span>(In<span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>n)<span class="sc">*</span>Jnn)<span class="sc">*</span>x1);</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>Beta0 <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>n)<span class="sc">*</span><span class="fu">t</span>(jn)<span class="sc">*</span>(y <span class="sc">-</span> Beta1<span class="sc">*</span>x1);</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Estimativas dos parâmetros da reta:'</span> Beta0[format<span class="ot">=</span><span class="fl">8.4</span>] Beta1[format<span class="ot">=</span><span class="fl">8.4</span>],,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="estimação-da-variância-sigma2" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="estimação-da-variância-sigma2">
+<span class="header-section-number">5.3</span> Estimação da variância (<span class="math inline">\(\sigma^2\)</span>)</h2>
+<p>Para estimar a variância <span class="math inline">\(\sigma^2\)</span>, utilizamos a seguinte expressão:</p>
+<p><span class="math display">\[
+s^2 =
+\frac{(\mathbf{y} - \mathbf{\hat{y}})' \space (\mathbf{y} - \mathbf{\hat{y}})}{n-2} =  \frac{SQRes}{n-2}
+\]</span></p>
+<p>Em que <span class="math inline">\(SQRes\)</span> é a soma de quadrados dos resíduos e <span class="math inline">\(\hat{y}\)</span>. <em>(ver pg 89-90 Rencher)</em></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">SAS</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_hat</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">+</span> <span class="va">Beta1</span> <span class="op">*</span> <span class="va">x1</span></span>
+<span><span class="va">y_hat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 94.50098 77.92069 10.72691 10.72691 78.79334 66.57629 88.39245 51.74130
+ [9] 89.26510 91.88304 26.43455 85.77451 10.72691 36.90631 62.21306 77.92069
+[17] 75.30275 69.19423</code></pre>
+</div>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Res</span> <span class="op">&lt;-</span> <span class="va">y</span> <span class="op">-</span> <span class="va">y_hat</span></span>
+<span><span class="va">Res</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]   0.4990229   2.0793072 -10.7269091 -10.7269091   0.2066607  10.4237122
+ [7] -16.3924513  14.2587034   8.7349022  -1.8830375 -26.4345469   9.2254883
+[13]  24.2730909  13.0936946   9.7869449 -22.9206928  -0.3027532  -3.1942274</code></pre>
+</div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Res</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Res</span></span>
+<span><span class="va">SQRes</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 3071.229</code></pre>
+</div>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">SQRes</span> <span class="op">/</span> <span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">s2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 191.9518</code></pre>
+</div>
+</div>
+<p>Para calcular o resíduo padronizado, dividimos o resíduo pelo desvio padrão da variância estimada (<span class="math inline">\(\sqrt{s^2}\)</span>).</p>
+<div class="cell">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res_pad</span> <span class="op">&lt;-</span> <span class="va">Res</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">s2</span><span class="op">)</span></span>
+<span><span class="va">res_pad</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  0.03601839  0.15007989 -0.77424509 -0.77424509  0.01491632  0.75236099
+ [7] -1.18317166  1.02916236  0.63046633 -0.13591357 -1.90798839  0.66587578
+[13]  1.75197917  0.94507454  0.70640050 -1.65436600 -0.02185207 -0.23055242</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead><tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Valores observados(`y`)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Valores estimados(`y_hat`)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Resíduo(`Res`)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Resíduo Padronizado(`res_pad`)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">95</td>
+<td style="text-align: center;">94.5010</td>
+<td style="text-align: center;">0.4990</td>
+<td style="text-align: center;">0.0360</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">80</td>
+<td style="text-align: center;">77.9207</td>
+<td style="text-align: center;">2.0793</td>
+<td style="text-align: center;">0.1501</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">10.7269</td>
+<td style="text-align: center;">-10.7269</td>
+<td style="text-align: center;">-0.7742</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">10.7269</td>
+<td style="text-align: center;">-10.7269</td>
+<td style="text-align: center;">-0.7742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">79</td>
+<td style="text-align: center;">78.7933</td>
+<td style="text-align: center;">0.2067</td>
+<td style="text-align: center;">0.0149</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">77</td>
+<td style="text-align: center;">66.5763</td>
+<td style="text-align: center;">10.4237</td>
+<td style="text-align: center;">0.7524</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">72</td>
+<td style="text-align: center;">88.3925</td>
+<td style="text-align: center;">-16.3925</td>
+<td style="text-align: center;">-1.1832</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">66</td>
+<td style="text-align: center;">51.7413</td>
+<td style="text-align: center;">14.2587</td>
+<td style="text-align: center;">1.0292</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">98</td>
+<td style="text-align: center;">89.2651</td>
+<td style="text-align: center;">8.7349</td>
+<td style="text-align: center;">0.6305</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">90</td>
+<td style="text-align: center;">91.8830</td>
+<td style="text-align: center;">-1.8830</td>
+<td style="text-align: center;">-0.1359</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">26.4345</td>
+<td style="text-align: center;">-26.4345</td>
+<td style="text-align: center;">-1.9080</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">95</td>
+<td style="text-align: center;">85.7745</td>
+<td style="text-align: center;">9.2255</td>
+<td style="text-align: center;">0.6659</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">35</td>
+<td style="text-align: center;">10.7269</td>
+<td style="text-align: center;">24.2731</td>
+<td style="text-align: center;">1.7520</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">50</td>
+<td style="text-align: center;">36.9063</td>
+<td style="text-align: center;">13.0937</td>
+<td style="text-align: center;">0.9451</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">72</td>
+<td style="text-align: center;">62.2131</td>
+<td style="text-align: center;">9.7869</td>
+<td style="text-align: center;">0.7064</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">55</td>
+<td style="text-align: center;">77.9207</td>
+<td style="text-align: center;">-22.9207</td>
+<td style="text-align: center;">-1.6544</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">75</td>
+<td style="text-align: center;">75.3028</td>
+<td style="text-align: center;">-0.3028</td>
+<td style="text-align: center;">-0.0219</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">66</td>
+<td style="text-align: center;">69.1942</td>
+<td style="text-align: center;">-3.1942</td>
+<td style="text-align: center;">-0.2306</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Variância dos dados originais e desvio padrão estimado:</p>
+<div class="cell">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">var_y</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">var_y</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 1055.546</code></pre>
+</div>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">s2</span><span class="op">)</span></span>
+<span><span class="va">s</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 13.85467</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead><tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Variância dos dados originais (`var_y`)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Variância de y|x (`s2`)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Desvio padrão de y|x (`s`)</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td style="text-align: center;">1055.546</td>
+<td style="text-align: center;">191.9518</td>
+<td style="text-align: center;">13.8547</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">1</span>;</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>y_hat <span class="ot">=</span> Beta0 <span class="sc">+</span> Beta1<span class="sc">*</span>x1;</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>Reg <span class="ot">=</span> y_hat<span class="sc">-</span>y_barra;</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>SQReg <span class="ot">=</span> <span class="fu">t</span>(Reg)<span class="sc">*</span>Reg;</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>Res <span class="ot">=</span> y<span class="sc">-</span>y_hat;</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>SQRes <span class="ot">=</span> <span class="fu">t</span>(Res)<span class="sc">*</span>Res;</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">=</span> SQRes<span class="sc">/</span>(n<span class="sc">-</span>k<span class="dv">-1</span>);</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span> s2 <span class="ot">=</span> (<span class="fu">t</span>(y)<span class="sc">*</span>y <span class="sc">-</span> <span class="fu">t</span>(Beta)<span class="sc">*</span><span class="fu">t</span>(X)<span class="sc">*</span>y)<span class="sc">/</span>(n<span class="sc">-</span>k<span class="dv">-1</span>);</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>res_pad <span class="ot">=</span> res<span class="sc">/</span><span class="fu">sqrt</span>(s2);</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>pág. <span class="dv">141</span>;</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Valores observados(y) e estimados(y_hat), residuo(res) e residuo padronizado(res_pad):'</span>,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">'--------------------------------------------------------------------------------------'</span>; </span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>print y <span class="st">'   '</span> y_hat [format<span class="ot">=</span><span class="fl">8.4</span>] <span class="st">'   '</span> res [format<span class="ot">=</span><span class="fl">8.4</span>]  <span class="st">'   '</span> res_pad [format<span class="ot">=</span><span class="fl">8.4</span>],,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>var_y <span class="ot">=</span> (<span class="fu">t</span>(y)<span class="sc">*</span>(In <span class="sc">-</span> (<span class="dv">1</span><span class="sc">/</span>n)<span class="sc">*</span>Jnn)<span class="sc">*</span>y)<span class="sc">/</span>(n<span class="dv">-1</span>); <span class="sc">*</span> Calcula a variância amostral de y;</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="fu">sqrt</span>(s2);</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Variância dos dados originais:'</span> var_y [format<span class="ot">=</span><span class="fl">10.4</span>],,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Variância de y|x:             '</span> s2[format<span class="ot">=</span><span class="fl">10.4</span>],,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Desvio padrão de y|x :        '</span> s[format<span class="ot">=</span><span class="fl">10.4</span>] ,,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="teste-de-hipóteses-e-intervalo-de-confiança-para-beta_1" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="teste-de-hipóteses-e-intervalo-de-confiança-para-beta_1">
+<span class="header-section-number">5.4</span> Teste de Hipóteses e Intervalo de Confiança para <span class="math inline">\(\beta_1\)</span>
+</h2>
+<p>Realizaremos um teste de hipótese para <span class="math inline">\(H_0: \beta_1 = 0\)</span>, com a suposição que <span class="math inline">\(y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)\)</span> ou <span class="math inline">\(\epsilon_i \sim N(0, \sigma^2)\)</span>.</p>
+<p>Das propriedades de <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(s^2\)</span>, temos:</p>
+<p><span class="math display">\[
+t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{\hat\beta_1}{\text{Erro padrão}}
+\]</span></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">SAS</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_barra</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">x1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span></span>
+<span><span class="va">x_barra</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 58.05556</code></pre>
+</div>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">var_Beta0</span> <span class="op">&lt;-</span> <span class="va">s2</span> <span class="op">*</span> <span class="op">(</span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">x_barra</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">x1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">var_Beta0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 43.78905</code></pre>
+</div>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">stderr_Beta0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta0</span><span class="op">)</span></span>
+<span><span class="va">stderr_Beta0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 6.617329</code></pre>
+</div>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">var_Beta1</span> <span class="op">&lt;-</span> <span class="va">s2</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">x1</span><span class="op">)</span></span>
+<span><span class="va">var_Beta1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            [,1]
+[1,] 0.009828088</code></pre>
+</div>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">stderr_Beta1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta1</span><span class="op">)</span></span>
+<span><span class="va">stderr_Beta1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]
+[1,] 0.09913671</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">/</span> <span class="va">stderr_Beta0</span></span>
+<span><span class="va">t0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 1.621033</code></pre>
+</div>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">/</span> <span class="va">stderr_Beta1</span></span>
+<span><span class="va">t1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 8.802456</code></pre>
+</div>
+</div>
+<p>Para construir os limites de intervalo de confiança:</p>
+<p><span class="math display">\[
+\hat\beta \pm t_{\alpha/2, n-2} \sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}
+\]</span></p>
+<div class="cell">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ttab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">qt</a></span><span class="op">(</span><span class="fl">0.975</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># quantil t com probabilidade 0.975 e gl = n-2</span></span>
+<span></span>
+<span><span class="va">liminf0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
+<span><span class="va">liminf0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]
+[1,] -3.301202</code></pre>
+</div>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
+<span><span class="va">limsup0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 24.75502</code></pre>
+</div>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">liminf1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
+<span><span class="va">liminf1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]
+[1,] 0.6624861</code></pre>
+</div>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
+<span><span class="va">limsup1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 1.082807</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead><tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Parâmetro</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Variância</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Erro Padrão</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">t</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">IC 95%</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Bo</td>
+<td style="text-align: center;">43.7890</td>
+<td style="text-align: center;">6.6173</td>
+<td style="text-align: center;">1.6210</td>
+<td style="text-align: center;">[-3.301 , 24.755]</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B1</td>
+<td style="text-align: center;">0.0098</td>
+<td style="text-align: center;">0.0991</td>
+<td style="text-align: center;">8.8025</td>
+<td style="text-align: center;">[0.662 , 1.083]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_barra</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">/</span><span class="va">n</span>;</span>
+<span><span class="va">var_Beta0</span> <span class="op">=</span> <span class="va">s2</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span> <span class="op">+</span> <span class="va">x_barra</span><span class="op">**</span><span class="fl">2</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="va">In</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span><span class="op">)</span><span class="op">*</span><span class="va">Jnn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">)</span><span class="op">)</span>;</span>
+<span><span class="va">stderr_Beta0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta0</span><span class="op">)</span>;</span>
+<span></span>
+<span><span class="va">var_Beta1</span> <span class="op">=</span> <span class="va">s2</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="va">In</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span><span class="op">)</span><span class="op">*</span><span class="va">Jnn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">)</span>;</span>
+<span><span class="va">stderr_Beta1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta1</span><span class="op">)</span>;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>ttab <span class="ot">=</span> <span class="fu">tinv</span>(<span class="fl">0.975</span>,n<span class="dv">-2</span>);</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>liminf0 <span class="ot">=</span> Beta0<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta0; limsup0 <span class="ot">=</span> Beta0<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta0;</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>liminf1 <span class="ot">=</span> Beta1<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta1; limsup1 <span class="ot">=</span> Beta1<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta1;</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>pág<span class="fl">.146</span>;</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>print Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>]</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta0,95%) = '</span> liminf0[format<span class="ot">=</span><span class="fl">10.4</span>] limsup0[format<span class="ot">=</span><span class="fl">10.4</span>] ,,, </span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>      Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] </span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta1,95%) = '</span> liminf1[format<span class="ot">=</span><span class="fl">10.4</span>] limsup1[format<span class="ot">=</span><span class="fl">10.4</span>] ,,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="coeficiente-de-determinação-r2" class="level2" data-number="5.5"><h2 data-number="5.5" class="anchored" data-anchor-id="coeficiente-de-determinação-r2">
+<span class="header-section-number">5.5</span> Coeficiente de Determinação (<span class="math inline">\(r^2\)</span>)</h2>
+<p>O coeficiente de determinação (<span class="math inline">\(r^2\)</span>) indica a proporção da variação em <span class="math inline">\(y\)</span> que é explicada pelo modelo ou que é devida à regressão em <span class="math inline">\(x\)</span>. É definido como:</p>
+<p><span class="math display">\[r^2 = \frac{SQReg}{SQTotal} = 1 - \frac{SQRes}{SQTotal}\]</span></p>
+<p>em que:</p>
+<ul>
+<li><p><span class="math inline">\(SQReg\)</span> é a soma de quadrados da regressão;</p></li>
+<li><p><span class="math inline">\(SQRes\)</span> é a soma de quadrados dos resíduos;</p></li>
+<li><p><span class="math inline">\(SQTotal\)</span> é a soma de quadrados total (<span class="math inline">\(SQTotal = SQReg + SQRes\)</span>).</p></li>
+</ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">SAS</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<p>Para calcular <span class="math inline">\(SQReg\)</span>:</p>
+<div class="cell">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_barra</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
+<span><span class="va">y_barra</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]
+ [1,] 61.38889
+ [2,] 61.38889
+ [3,] 61.38889
+ [4,] 61.38889
+ [5,] 61.38889
+ [6,] 61.38889
+ [7,] 61.38889
+ [8,] 61.38889
+ [9,] 61.38889
+[10,] 61.38889
+[11,] 61.38889
+[12,] 61.38889
+[13,] 61.38889
+[14,] 61.38889
+[15,] 61.38889
+[16,] 61.38889
+[17,] 61.38889
+[18,] 61.38889</code></pre>
+</div>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Reg</span> <span class="op">&lt;-</span> <span class="va">y_hat</span> <span class="op">-</span> <span class="va">y_barra</span></span>
+<span><span class="va">Reg</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             [,1]
+ [1,]  33.1120882
+ [2,]  16.5318039
+ [3,] -50.6619797
+ [4,] -50.6619797
+ [5,]  17.4044505
+ [6,]   5.1873989
+ [7,]  27.0035624
+ [8,]  -9.6475923
+ [9,]  27.8762089
+[10,]  30.4941486
+[11,] -34.9543420
+[12,]  24.3856228
+[13,] -50.6619797
+[14,] -24.4825835
+[15,]   0.8241662
+[16,]  16.5318039
+[17,]  13.9138643
+[18,]   7.8053385</code></pre>
+</div>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQReg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Reg</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Reg</span></span>
+<span><span class="va">SQReg</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 14873.05</code></pre>
+</div>
+</div>
+<p>Já <span class="math inline">\(SQTotal\)</span>:</p>
+<div class="cell">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Tot</span> <span class="op">&lt;-</span> <span class="va">y</span> <span class="op">-</span> <span class="va">y_barra</span></span>
+<span><span class="va">Tot</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            [,1]
+ [1,]  33.611111
+ [2,]  18.611111
+ [3,] -61.388889
+ [4,] -61.388889
+ [5,]  17.611111
+ [6,]  15.611111
+ [7,]  10.611111
+ [8,]   4.611111
+ [9,]  36.611111
+[10,]  28.611111
+[11,] -61.388889
+[12,]  33.611111
+[13,] -26.388889
+[14,] -11.388889
+[15,]  10.611111
+[16,]  -6.388889
+[17,]  13.611111
+[18,]   4.611111</code></pre>
+</div>
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Tot</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Tot</span></span>
+<span><span class="va">SQTotal</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 17944.28</code></pre>
+</div>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">+</span> <span class="va">SQRes</span></span>
+<span><span class="va">SQTotal</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 17944.28</code></pre>
+</div>
+</div>
+<p>Assim, o <strong>coeficiente de determinação</strong> é dado por:</p>
+<div class="cell">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">R2</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">/</span> <span class="va">SQTotal</span></span>
+<span><span class="va">R2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]
+[1,] 0.8288463</code></pre>
+</div>
+</div>
+<p>O <strong>coeficiente de correlação</strong> (<span class="math inline">\(r\)</span>) é dado pela raiz quadrada do coeficiente de determinação (<span class="math inline">\(r^2\)</span>).</p>
+<div class="cell">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">R2</span><span class="op">)</span></span>
+<span><span class="va">r</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        [,1]
+[1,] 0.91041</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead><tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Coeficiente de determinação (R2)</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Coeficiente de correlação (r)</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td style="text-align: center;">0.8288</td>
+<td style="text-align: center;">0.9104</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+<p>A estatística t para testar <span class="math inline">\(H_0: \beta_1 = 0\)</span> também pode ser expressa em termos de <span class="math inline">\(r\)</span>:</p>
+<p><span class="math display">\[
+t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
+\]</span></p>
+<div class="cell">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc1</span> <span class="op">&lt;-</span> <span class="va">r</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">r</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">tcalc1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 8.802456</code></pre>
+</div>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc2</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">/</span> <span class="va">stderr_Beta1</span></span>
+<span><span class="va">tcalc2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]
+[1,] 8.802456</code></pre>
+</div>
+</div>
+<p>Com a estatística t, calculamos o p-valor da seguinte maneira:</p>
+<div class="cell">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valor</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">pt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">tcalc1</span><span class="op">)</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_valor</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             [,1]
+[1,] 1.570688e-07</code></pre>
+</div>
+</div>
+<p>Onde a função <code><a href="https://rdrr.io/r/stats/TDist.html">pt()</a></code> retorna a função de distribuição da estatística t.</p>
+<p>Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">modelo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">modelo</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-26.4345  -8.8437   0.3528   9.6466  24.2731 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 10.72691    6.61733   1.621    0.125    
+x1           0.87265    0.09914   8.802 1.57e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 13.85 on 16 degrees of freedom
+Multiple R-squared:  0.8288,    Adjusted R-squared:  0.8181 
+F-statistic: 77.48 on 1 and 16 DF,  p-value: 1.571e-07</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> SQReg<span class="sc">/</span>SQTotal;  <span class="sc">*</span> Coeficiente de determinação <span class="sc">-</span> R2<span class="st">';</span></span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a><span class="st">corr = sqrt(R2);</span></span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>     SQTotal  <span class="ot">=</span>     SQReg   <span class="sc">+</span>    SQRes<span class="st">',,</span></span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a><span class="st">       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,</span></span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de determinação (R2)<span class="sc">:</span> <span class="st">' R2[format=10.4],,,</span></span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de correlação (r)<span class="sc">:</span>    <span class="st">' corr[format=10.4],,,;</span></span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;</span></span>
+<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));</span></span>
+<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a><span class="st">p_valor = 2*(1-cdf('</span>t<span class="st">',abs(tcalc1),n-2));</span></span>
+<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>H0<span class="sc">:</span> Beta1 <span class="ot">=</span> <span class="dv">0</span>   <span class="st">' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];</span></span>
+<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a><span class="st">quit;</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copiada");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copiada");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./exemplo2.3.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Correlação Parcial</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

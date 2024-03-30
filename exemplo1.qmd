@@ -10,7 +10,7 @@ Fonte dos dados: *Weights of Cork Boring (in Centigrams) in Four Directions for 
 
 ### R
 
-Para criar vetores no R, definimos um nome para cada vetor (`y1`, `y2`, `y3` e `y4`), em seguida, utilizamos o operador `<-` e a função `c()` para atribuir valores a cada um dos objetos (vetores). Dentro de `c()`, declaramos seus valores, separados por vírgula.
+Para criar **vetores** no R, definimos um nome para cada vetor (`y1`, `y2`, `y3` e `y4`), em seguida, utilizamos o operador `<-` e a função `c()` para atribuir valores a cada um dos objetos (vetores). Dentro de `c()`, declaramos seus valores, separados por vírgula.
 
 ```{r}
 y1 <- c(72,60,56,41,32,30,39,42,37,33,32,63,54,47,91,56,79,81,78,46,39,32,60,35,39,50,43,48)
@@ -30,7 +30,7 @@ colnames(Y) <- c("North", "East", "South", "West")
 Y
 ```
 
-Com a função `class()`, constatamos que o objeto `Y` é uma matriz (`matrix`).
+Com a função `class()`, constatamos que o objeto `Y` é uma **matriz** (`matrix`).
 
 ```{r}
 class(Y)
@@ -63,13 +63,23 @@ Close Cork;
 
 :::
 
-## Matriz de Covariâncias e Correlações 
+## Matriz de Variâncias e Covariâncias 
+
+Para obtermos a matriz de variâncias e covariâncias, precisamos dos seguintes escalares, vetores e matrizes:
+
+-   `n`: número de observações $n$;
+
+-   `In`: matriz identidade $\mathbf{I}$;
+
+-   `jn`: vetor coluna de 1's $\mathbf{j}$;
+
+-   `Jnn`: matriz de 1's $\mathbf{J}$.
 
 ::: {.panel-tabset}
 
 ### R
 
-As funções `nrow()` e `ncol()` nos retornam o número de linhas e colunas de um objeto, respectivamente.
+As funções `nrow()` e `ncol()` nos retornam o número de **linhas** e **colunas** de um objeto, respectivamente.
 
 ```{r}
 n <- nrow(Y)
@@ -80,7 +90,7 @@ n; p
 
 No caso da matriz `Y`, ela apresenta dimensão $28 \times 4$.
 
-A função `diag()` cria uma matriz identidade. Basta inserirmos dentro da função a dimensão da matriz.
+A função `diag()` cria uma **matriz identidade**. Basta inserirmos dentro da função a dimensão da matriz.
 
 ```{r}
 In <- diag(n)
@@ -131,7 +141,7 @@ Jnn = \mathbf{J}_{(28 \times 28)} =
    \end{bmatrix}
 $$
 
-Além disso, note que a matriz $\mathbf{J}$ (`Jnn`) pode ser obtida por $\mathbf{J} = \mathbf{j}\mathbf{j}'$, ou seja, a multiplicação do vetor coluna $\mathbf{j}$ pela sua transposta.
+Além disso, note que a matriz $\mathbf{J}$ (`Jnn`) pode ser obtida por $\mathbf{J} = \mathbf{j} \space \mathbf{j}'$, ou seja, a multiplicação do vetor coluna $\mathbf{j}$ (`jn`) pela sua transposta.
 
 ```{r}
 Jnn <- jn %*% t(jn)
@@ -141,13 +151,20 @@ Jnn
 No R, utilizamos a função `t()` para realizar a transposição de uma matriz ou vetor.
 
 $$
-\mathbf{J} = \mathbf{j}\mathbf{j}' = 
+\mathbf{J} = \mathbf{j} \space \mathbf{j}' = 
 \begin{bmatrix} 
 1 \\ 1 \\ \vdots \\1 
 \end{bmatrix}
 \begin{bmatrix} 
 1 & 1 & \dots & 1 
 \end{bmatrix}
+= 
+  \begin{bmatrix}
+   1 & 1 & \dots & 1 \\
+   1 & 1 & \dots & 1 \\
+   \vdots & \vdots & \ddots & \vdots \\
+   1 & 1 & \dots & 1
+   \end{bmatrix}
 $$
 
 A seguir, calcularemos a matriz de variâncias e covariâncias amostrais, dada pela equação:
@@ -161,7 +178,7 @@ Sigma
 
 A função `t()` realiza a transposição de uma matriz ou vetor. Já o operador `%*%` realiza a multiplicação entre duas matrizes ou vetores conformes.
 
-No R, temos a função `cov()` que realiza o cálculo da matriz de variâncias e covariâncias.
+No R, temos a função `cov()` que realiza o cálculo da matriz de variâncias e covariâncias. Para isso, basta declarar dentro da função a matriz desejada.
 
 ```{r}
 cov(Y)
@@ -178,11 +195,13 @@ $$
    \end{bmatrix}
 $$
 
+## Matriz de Correlações
+
 Para calcular a matriz de correlação ($\mathbf{\rho}_{ij}$), utilizamos a seguinte expressão:
 
 $$\mathbf{\rho}_{ij} = \mathbf{D}_{\sigma}^{-1} \mathbf{\Sigma}  \mathbf{D}_{\sigma}^{-1}$$
 
-em que $\mathbf{D}_{\sigma}$ é a raiz quadrada das variâncias, ou seja, a raiz quadrada da diagonal da matriz de variâncias e covariâncias ($\mathbf{\Sigma}$).
+em que $\mathbf{D}_{\sigma}$ é uma matriz diagonal com a raiz quadrada das variâncias, ou seja, a raiz quadrada da diagonal da matriz de variâncias e covariâncias ($\mathbf{\Sigma}$).
 
 ```{r}
 D <- sqrt(diag(Sigma))
@@ -194,7 +213,7 @@ corr
 
 A função `sqrt()` realiza a operação raiz quadrada. Já a `solve()`, calcula a inversa de uma matriz.
 
-No R, temos a função `cor()` que realiza o cálculo da matriz de correlação.
+No R, temos a função `cor()` que realiza o cálculo da matriz de correlação. Novamente, basta declarar a matriz dentro da função.
 
 ```{r}
 cor(Y)
@@ -260,7 +279,7 @@ mi
 Com o vetor de médias ($\mathbf{\mu}$), calcularemos a distância de Mahalanobis ($DM$), dada pela seguinte expressão:
 
 $$
-DM = (y - \mathbf{\mu})' \mathbf{\Sigma} (y - \mathbf{\mu})
+DM = (\mathbf{y} - \mathbf{\mu})' \mathbf{\Sigma} (\mathbf{y} - \mathbf{\mu})
 $$
 
 ```{r}

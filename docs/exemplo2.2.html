@@ -175,13 +175,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </ul>
 </li>
         <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">Regressão Linear Simples</span></span>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">Regressão Linear Múltipla</span></span>
-  </li>
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Regressão Linear Simples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo3.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Regressão Linear Simples</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
     </ul>
 </div>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
@@ -366,26 +375,26 @@ y_1 \\ y_2 \\ y_3
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell">
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">A</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3]
-[1,]    1   -1    1
-[2,]    3    1   -2</code></pre>
+[1,]    1    1    1
+[2,]   -1    3   -2</code></pre>
 </div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">E_z1z2</span> <span class="op">&lt;-</span> <span class="va">A</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">mi</span></span>
 <span><span class="va">E_z1z2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1]
-[1,]    4
-[2,]    6</code></pre>
+[1,]    6
+[2,]   -4</code></pre>
 </div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cov_z1z2</span> <span class="op">&lt;-</span> <span class="va">A</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Sigma</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span></span>
 <span><span class="va">cov_z1z2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2]
-[1,]   14    4
-[2,]    4   29</code></pre>
+[1,]   10  -14
+[2,]  -14   45</code></pre>
 </div>
 </div>
 <p>Pelo teorema, o vetor aleatório fica:</p>
@@ -418,7 +427,7 @@ y_1 \\ y_2 \\ y_3
 </section><section id="sec-T2" class="level3" data-number="3.1.3"><h3 data-number="3.1.3" class="anchored" data-anchor-id="sec-T2">
 <span class="header-section-number">3.1.3</span> Teorema 2 (4.4B.)</h3>
 <p>Se <span class="math inline">\(\mathbf{y} \sim N_p(\mathbf{\mu, \Sigma})\)</span>, então <strong>qualquer subvetor</strong> <span class="math inline">\(r \times 1\)</span> de <span class="math inline">\(\mathbf{y}\)</span> tem uma distribuição normal <span class="math inline">\(r\)</span>-variada com médias, variâncias e covariâncias iguais às da distribuição normal <span class="math inline">\(p\)</span>-variada original.</p>
-<p>Como exmeplo, considere: <span class="math inline">\(y_1 \sim N(3,4)\)</span>, <span class="math inline">\(y_2 \sim N(1,1)\)</span> e <span class="math inline">\(y_3 \sim N(2, 3)\)</span>.</p>
+<p>Como exemplo, considere: <span class="math inline">\(y_1 \sim N(3,4)\)</span>, <span class="math inline">\(y_2 \sim N(1,1)\)</span> e <span class="math inline">\(y_3 \sim N(2, 3)\)</span>.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist">
 <li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">R</a></li>
@@ -428,26 +437,26 @@ y_1 \\ y_2 \\ y_3
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <p>Dessa forma, o vetor <span class="math inline">\(\begin{bmatrix} y_1 \\ y_2\end{bmatrix}\)</span>:</p>
 <div class="cell">
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">A12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">A12</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3]
-[1,]    1    0    0
-[2,]    0    1    0</code></pre>
+[1,]    1    0    1
+[2,]    0    0    0</code></pre>
 </div>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mi_12</span> <span class="op">&lt;-</span> <span class="va">A12</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">mi</span></span>
 <span><span class="va">mi_12</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1]
-[1,]    3
-[2,]    1</code></pre>
+[1,]    5
+[2,]    0</code></pre>
 </div>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Sigma_12</span> <span class="op">&lt;-</span> <span class="va">A12</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Sigma</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">A12</span><span class="op">)</span></span>
 <span><span class="va">Sigma_12</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2]
-[1,]    4    0
-[2,]    0    1</code></pre>
+[1,]   11    0
+[2,]    0    0</code></pre>
 </div>
 </div>
 <p><span class="math display">\[
@@ -745,7 +754,12 @@ cov(\mathbf{y} \mid \mathbf{x}) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \m
 [2,] -0.7272727  0.4242424</code></pre>
 </div>
 </div>
-<p><span class="math display">\[ cov(\mathbf{y} \mid \mathbf{x}) = 3.82, -0.73, -0.73, 0.42 \]</span></p>
+<p><span class="math display">\[
+cov(\mathbf{y} \mid \mathbf{x}) =
+\begin{bmatrix}
+3,82 &amp; -0,73 \\ -0,73 &amp; 0,42
+\end{bmatrix}
+\]</span></p>
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
 <div class="cell">
@@ -811,7 +825,7 @@ E(y \mid \mathbf{x}) = \mu_y + \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{xx}^{-1} (
 var(y \mid \mathbf{x}) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{xx}^{-1} \mathbf{\sigma}_{yx}
 \end{aligned}
 \]</span></p>
-<p>Como exemplo, seguimos com o vetor utilizado no <a href="#sec-T4">Teorema 4 (4.4D)&nbsp;<span>3.2.1</span></a>.</p>
+<p>Como exemplo, seguimos com o vetor <span class="math inline">\(\mathbf{v}\)</span> utilizado no <a href="#sec-T4">Teorema 4 (4.4D)&nbsp;<span>3.2.1</span></a>.</p>
 <p><span class="math display">\[
 \mathbf{v} \sim N_4(\mathbf{\mu}, \mathbf{\Sigma})
 \text{ , }
@@ -1000,7 +1014,7 @@ var(y \mid x_1, x_2, x_3) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}
 </div>
 <p><span class="math display">\[
 \begin{aligned}
-var(y) = 2.571 \\
+var(y) = 9 \\
 var(y \mid x_1, x_2, x_3) = 2.571
 \end{aligned}
 \]</span></p>

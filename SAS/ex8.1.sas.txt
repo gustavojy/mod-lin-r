@@ -1,0 +1,81 @@
+options nodate nocenter ps=1000;
+
+proc iml;
+reset fuzz;
+
+* Exemplo 8.1 - usando dados do Exemplo 7.2  (Tabela 7.1);
+* (Freund & Minton, 1979, pág.36-39);
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+X = {1 0 2,1 2 6,1 2 7,1 2 5,1 4 9,1 4 8,1 4 7,1 6 10,1 6 11,1 6 9,1 8 15,1 8 13};
+print y '   '  X;
+
+n = nrow(y);
+k = 2; 	* número de variáveis regressoras x's;
+X1 = X[,2:3];
+In = I(n);
+Jnn = J(n,n,1);
+Xc = (In - (1/n)*Jnn)*X1;	* Matriz X1 centrada;
+
+* Cálculo das SQ´s para testar hipótese H0: Beta1 = 0;
+SQTotal = t(y)*(In - (1/n)*Jnn)*y;	* Calcula SQTotal;
+gl_total = n-1;
+
+Beta1 = inv(t(Xc)*Xc)*t(Xc)*y;		* Calcula Beta1;
+SQReg = t(Beta1)*t(Xc)*y;
+gl_reg = k;
+QMReg = SQReg/gl_reg;
+
+SQRes = SQTotal - SQReg;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+
+Fcalc1 = QMReg/QMRes;
+p_valor1 = 1-cdf('F',Fcalc1,k,n-k-1);
+
+print 'Seção 8.1: TESTE DE REGRESSÃO GLOBAL - H0: Beta1 = 0',;
+print 'Regressão' gl_reg   SQReg[format=10.4] QMReg[format=10.4] Fcalc1[format=10.3] p_valor1[format=10.6],,
+      'Resíduo  ' gl_res   SQRes[format=10.4] QMRes[format=10.4],,
+      'Total    ' gl_total SQTotal[format=10.4],,,,;
+
+* SQ´s para testar hipótese H0: Beta2 = 0 (>>> NÃO APARECE NO LIVRO <<<);
+X1 = X[,1:2]; 	* Variáveis importantes em X1Beta1;
+X2 = X[,3];   	* Variáveis desprezíveis em X2Beta2; 
+A1 = X*inv(t(X)*X)*t(X);
+A2 = X1*inv(t(X1)*X1)*t(X1);
+h = ncol(X2);
+SQB2_B1 = t(y)*(A1-A2)*y;
+QMB2_B1 = SQB2_B1/h;
+
+Fcalc2 = QMB2_B1/QMRes;
+p_valor2 = 1-cdf('F',Fcalc2,h,n-k-1);
+
+print 'Seção 8.2: TESTE PARA SUBCONJUNTO DOS BETA´S - H0: Beta2 = 0',
+      '                (MODELO COMPLETO versus MODELO REDUZIDO)',;
+print 'Beta2 | Beta1' h SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc2[format=10.4] p_valor2[format=10.4],
+      'Resíduo      ' gl_res SQRes[format=10.4] QMRes[format=10.4],,,,;
+
+*Hipótese Linear Geral H0: C*Beta = 0 ou H0: beta1=beta2=0;
+C = {0 1 0, 0 0 1};
+gl_hip = nrow(C);
+Beta = inv(t(X)*X)*t(X)*y;
+SQHip = t(C*Beta)*inv(C*inv(t(X)*X)*t(C))*C*Beta;
+QMHip = SQHip/gl_hip;
+Fcalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,gl_hip,n-k-1);
+
+print 'Seção 8.3: H0: B1 = B2 = 0 usando HIPÓTESE LINEAR GERAL',;
+print 'H0: B1 = B2 = 0   ' gl_hip SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.3] p_valor3[format=10.6],,
+      'Resíduo           ' gl_res SQRes[format=10.4] QMRes[format=10.4],,,,;
+
+* Exemplo 8.5.2. Testando H01: B1 = 0 e H02: B2 = 0 usando Hipótese Linear Geral;
+C1 = {0 1 0};
+t1 = C1*Beta/sqrt(QMRes*(C1*inv(t(X)*X)*t(C1)));
+p_valor4 = 2*(1-cdf('t',abs(t1),n-k-1));
+C2 = {0 0 1};
+gl_hip2 = nrow(C2);
+t2 = C2*Beta/sqrt(QMRes*(C2*inv(t(X)*X)*t(C2)));
+p_valor5 = 2*(1-cdf('t',abs(t2),n-k-1));
+print 'Exemplo 8.5.2: TESTE t PARA DIVERSOS BETAS (alfa conjunto = 5%)',
+      'H01: B1 = 0   ' t1[format=10.4] '   ' p_valor4[format=10.4], 
+      'H02: B2 = 0   ' t2[format=10.4] '   ' p_valor5[format=10.4];
+quit;

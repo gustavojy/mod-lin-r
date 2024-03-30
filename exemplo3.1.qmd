@@ -108,8 +108,10 @@ In
 A operação matricial para obter $\hat\beta_1$ e $\hat\beta_0$ é:
 
 $$
-\hat\beta_1 = \frac{\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{y}\right]} {\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{x}\right]} \\
-\hat\beta_0 = \frac{1}n \mathbf{j}' (\mathbf{y} - \beta_1 \mathbf{x})
+\begin{align}
+\hat\beta_1 &= \frac{\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{y}\right]} {\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{x}\right]} \\
+\hat\beta_0 &= \frac{1}n \mathbf{j}' (\mathbf{y} - \beta_1 \mathbf{x})
+\end{align}
 $$
 
 ```{r}
@@ -177,7 +179,7 @@ Para estimar a variância $\sigma^2$, utilizamos a seguinte expressão:
 
 $$
 s^2 = 
-\frac{(\mathbf{y} - \mathbf{\hat{y}})' \space \mathbf{\hat{y}}}{n-2} =  \frac{SQRes}{n-2}
+\frac{(\mathbf{y} - \mathbf{\hat{y}})' \space (\mathbf{y} - \mathbf{\hat{y}})}{n-2} =  \frac{SQRes}{n-2}
 $$
 
 Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$. *(ver pg 89-90 Rencher)*
@@ -200,16 +202,7 @@ s2 <- as.numeric(SQRes / (n - 2))
 s2
 ```
 
-```{r}
-y_barra <- (1 / n) * Jnn %*% y
-y_barra
-
-Reg <- y_hat - y_barra
-Reg
-
-SQReg <- t(Reg) %*% Reg
-SQReg
-```
+Para calcular o resíduo padronizado, dividimos o resíduo pelo desvio padrão da variância estimada ($\sqrt{s^2}$).
 
 ```{r}
 res_pad <- Res / sqrt(s2)
@@ -224,13 +217,12 @@ tab1 <- data.frame(y, y_hat, Res, res_pad)
 kableExtra::kbl(
   x = tab1, digits = 4, align = "c",
   col.names = c("Valores observados(`y`)", "Valores estimados(`y_hat`)",
-                "Residuo(`Res`)", "Residuo Padronizado(`res_pad`)")
+                "Resíduo(`Res`)", "Resíduo Padronizado(`res_pad`)")
 ) |> 
   kableExtra::kable_styling(position = "center")
 ```
 
-
-*Tipos de variância*
+Variância dos dados originais e desvio padrão estimado:
 
 ```{r}
 var_y <- (t(y) %*% (In - (1/n) * Jnn) %*% y) / (n - 1)
@@ -249,7 +241,7 @@ kableExtra::kbl(
   x = tab2, digits = 4, align = "c",
   col.names = c("Variância dos dados originais (`var_y`)", 
                 "Variância de y|x (`s2`)",
-                "Desvio padrão de y|x")
+                "Desvio padrão de y|x (`s`)")
 ) |> 
   kableExtra::kable_styling(position = "center")
 ```
@@ -297,7 +289,7 @@ Realizaremos um teste de hipótese para $H_0: \beta_1 = 0$, com a suposição qu
 Das propriedades de $\hat\beta_1$ e $s^2$, temos:
 
 $$
-t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}}
+t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{\hat\beta_1}{\text{Erro padrão}}
 $$
 
 ::: panel-tabset
@@ -415,6 +407,21 @@ em que:
 
 ### R
 
+Para calcular $SQReg$:
+
+```{r}
+y_barra <- (1 / n) * Jnn %*% y
+y_barra
+
+Reg <- y_hat - y_barra
+Reg
+
+SQReg <- t(Reg) %*% Reg
+SQReg
+```
+
+Já $SQTotal$:
+
 ```{r}
 Tot <- y - y_barra
 Tot
@@ -426,12 +433,14 @@ SQTotal <- SQReg + SQRes
 SQTotal
 ```
 
+Assim, o **coeficiente de determinação** é dado por:
+
 ```{r}
 R2 <- SQReg / SQTotal
 R2
 ```
 
-O coeficiente de correlação ($r$) é dado pela raiz quadrada do coeficiente de determinação ($r^2$).
+O **coeficiente de correlação** ($r$) é dado pela raiz quadrada do coeficiente de determinação ($r^2$).
 
 ```{r}
 r <- sqrt(R2)
@@ -458,7 +467,7 @@ t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
 $$
 
 ```{r}
-tcalc1 <- corr * sqrt(n - 2) / (sqrt(1 - corr^2))
+tcalc1 <- r * sqrt(n - 2) / (sqrt(1 - r^2))
 tcalc1
 
 tcalc2 <- Beta1 / stderr_Beta1

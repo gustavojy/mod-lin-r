@@ -112,7 +112,7 @@ z
 plot_ly(x = y1, y = y2, z = z, type = "surface") |> 
   layout(title = paste("Densidade Normal Bivariada (r =", r, ")"))
 
-## Link para aplicativo: 
+## Link para aplicativo: <https://gustavojy.github.io/n-multi-graph-app/>.
 
 
 # 3. Normal Multivariada - Propriedades --------------------------------------
@@ -308,3 +308,169 @@ Ro_ydx
 Ro_yy
 Ro_ydx
 
+
+
+# 5. Regressão Linear Simples -----------------------------------------------
+
+## Vetores
+y <- c(95,80,0,0,79,77,72,66,98,90,0,95,35,50,72,55,75,66)
+
+x1 <- c(96,77,0,0,78,64,89,47,90,93,18,86,0,30,59,77,74,67)
+
+## Análise exploratória
+notas <- data.frame(y, x1)
+notas
+
+library(ggplot2)
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point()
+
+## Estimação dos parâmetros beta
+### Opção 1
+n <- length(y)
+n
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+jn
+
+Jnn <- jn %*% t(jn)
+Jnn
+
+In <- diag(n)
+In
+
+Beta1 <- as.numeric(t(x1) %*% (In - (1 / n) * Jnn) %*% y / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1))
+Beta1
+
+Beta0 <- as.numeric((1 / n) * t(jn) %*% (y - Beta1 * x1))
+Beta0
+
+### Opção 2
+lm(y ~ x1)
+
+### Gráfico
+#### Opção 1
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point() + 
+  geom_abline(intercept = 10.7269, slope = 0.8726, color = "red")
+
+#### Opção 2
+
+ggplot(data = notas, aes(x = x1, y = y)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color = "red", se = FALSE)
+
+## Estimação da variância
+
+### SQRes
+y_hat <- Beta0 + Beta1 * x1
+y_hat
+
+Res <- y - y_hat
+Res
+
+SQRes <- t(Res) %*% Res
+SQRes
+
+### Variância s2
+
+s2 <- as.numeric(SQRes / (n - 2))
+s2
+
+### Resíduo padronizado
+res_pad <- Res / sqrt(s2)
+res_pad
+
+### Variância dos dados originais
+
+var_y <- (t(y) %*% (In - (1/n) * Jnn) %*% y) / (n - 1)
+var_y
+
+### Desvio padrão
+s <- sqrt(s2)
+s
+
+## Teste de Hipóteses e Intervalo de Confiança para Beta1
+
+### Variância e Erro Padrão
+x_barra <- t(jn) %*% (x1 / n)
+x_barra
+
+var_Beta0 <- s2 * ((1 / n) + (x_barra^2 / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1)))
+var_Beta0
+
+stderr_Beta0 <- sqrt(var_Beta0)
+stderr_Beta0
+
+var_Beta1 <- s2 / (t(x1) %*% (In - (1 / n) * Jnn) %*% x1)
+var_Beta1
+
+stderr_Beta1 <- sqrt(var_Beta1)
+stderr_Beta1
+
+### Valor da estatística t
+t0 <- Beta0 / stderr_Beta0
+t0
+
+t1 <- Beta1 / stderr_Beta1
+t1
+
+### Intervalo de confiança
+ttab <- qt(0.975, n - 2) # quantil t com probabilidade 0.975 e gl = n-2
+
+liminf0 <- Beta0 - ttab * stderr_Beta0
+liminf0
+
+limsup0 <- Beta0 + ttab * stderr_Beta0
+limsup0
+
+liminf1 <- Beta1 - ttab * stderr_Beta1
+liminf1
+
+limsup1 <- Beta1 + ttab * stderr_Beta1
+limsup1
+
+### Coeficiente de Determinação
+
+#### SQReg 
+y_barra <- (1 / n) * Jnn %*% y
+y_barra
+
+Reg <- y_hat - y_barra
+Reg
+
+SQReg <- t(Reg) %*% Reg
+SQReg
+
+#### SQTotal
+Tot <- y - y_barra
+Tot
+
+SQTotal <- t(Tot) %*% Tot
+SQTotal
+
+SQTotal <- SQReg + SQRes
+SQTotal
+
+#### Coef. determinação (r2)
+R2 <- SQReg / SQTotal
+R2
+
+#### Coef de correlação (r)
+r <- sqrt(R2)
+r
+
+#### Estatística t usando valor de r
+tcalc1 <- r * sqrt(n - 2) / (sqrt(1 - r^2))
+tcalc1
+
+tcalc2 <- Beta1 / stderr_Beta1
+tcalc2
+
+### p-valor
+p_valor <- 2 * (1 - pt(abs(tcalc1), n - 2))
+p_valor
+
+## Visão geral
+modelo <- lm(y ~ x1)
+summary(modelo)

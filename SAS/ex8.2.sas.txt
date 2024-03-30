@@ -1,0 +1,196 @@
+* ---------------------------------------------------------------- ;
+* Exercício 8.2a = Exercício 7.54 da 2a edição do livro do Rencher ;
+* ---------------------------------------------------------------- ;
+
+options nodate nocenter ps=1000 ls=120;
+
+proc iml;
+reset noprint;
+*pág.245;
+y1 = {41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6};
+* y1 = % de material que não reagiu;
+y2 = {45.9,53.3,57.5,58.8,60.6,58.0,58.6,52.4,56.9,55.4,46.9,57.3,55.0,58.9,50.3,61.1,62.9,60.0,60.6};
+* y2 = % convertida ao material desejado;
+n = nrow(y1);
+print n;
+In = I(n);
+Jnn = J(n,n,1);
+* c1 = temperatura; * c2 = concentração de reagente; * c3 = tempo de reação;
+c0 = j(n,1,1);
+c1 = {162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160};  
+c2 = {23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34};	    
+c3 = {3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5};					
+c11 = c1#c1; * eleva C1 ao quadrado;
+c22 = c2#c2; 
+c33 = c3#c3; 
+c12 = c1#c2; 
+c13 = c1#c3;
+c23 = c2#c3;
+X = c0||c1||c2||c3||c11||c22||c33||c12||c13||c23;
+k = ncol(X)-1;
+gl_reg = k;
+Beta = inv(t(X)*X)*t(X)*y2;
+print Beta[format=12.4];
+
+* Modelo completo;
+SQTotal = t(y2)*(In-(1/n)*Jnn)*y2;
+gltotal = n-1;
+SQReg = t(y2)*(X*inv(t(X)*X)*t(X)-(1/n)*Jnn)*y2;
+SQRes = SQTotal-SQReg;
+glres = n-k-1;
+QMRes = SQRes/glres;
+
+print 'Modelo completo:',,, gl_reg SQReg[format=10.4] SQRes[format=10.4] SQTotal[format=10.4],,,;
+
+* -----------------------------------------------------------------------------------;
+*  Modelo completo vs reduzido para testar H0: B11 = B22 = B33 = B12 = B13 = B23 = 0 ;
+* -----------------------------------------------------------------------------------;
+X1 = c0||c1||c2||c3;
+gl_regB1 = ncol(X1)-1;
+* Modelo reduzido (1);
+SQReg1 = t(y2)*(X1*inv(t(X1)*X1)*t(X1)-(1/n)*Jnn)*y2;
+SQB2_B1 = SQReg - SQReg1;
+gl_regB2 = gl_reg - gl_regB1;
+h = gl_regB2;
+QMB2_B1 = SQB2_B1/h;
+Fcalc1 = QMB2_B1/QMRes;
+p_valor1 = 1-cdf('F',Fcalc1,h,glres);
+
+print '------------------------------------------------------------',
+      'Teste da hipótese H01: B11 = B22 = B33 = B12 = B13 = B23 = 0',
+      'usando abordagem Modelo completo x Modelo reduzido',
+	  '------------------------------------------------------------';
+print 'g.l. do modelo completo .............................................' gl_reg,
+      'g.l. do modelo reduzido por H0: B11 = B22 = B33 = B12 = B13 = B23 = 0' gl_regB1,
+      'g.l. da diferença (Modelo completo - Modelo reduzido)................' h,,;
+print 'Quadro de ANOVA para testar H01: B11 = B22 = B33 = B12 = B13 = B23 = 0',,
+'H01      ' h       SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc1[format=10.4] p_valor1[format=10.4],,
+'Resíduo  ' glres   SQRes[format=10.4]   QMRes[format=10.4],,
+'Total    ' gltotal SQTotal[format=10.4],,,,;
+
+* ---------------------------------------------------------------;
+*  Modelo completo vs reduzido para testar H02: B1 = B2 = B3 = 0 ;
+* ---------------------------------------------------------------;
+* Modelo reduzido (2);
+X1 = c0||c11||c22||c33||c12||c13||c23;
+gl_regB1 = ncol(X1)-1;
+SQReg1 = t(y2)*(X1*inv(t(X1)*X1)*t(X1)-(1/n)*Jnn)*y2;
+SQB2_B1 = SQReg - SQReg1;
+gl_regB2 = gl_reg - gl_regB1;
+h = gl_regB2;
+QMB2_B1 = SQB2_B1/h;
+Fcalc2 = QMB2_B1/QMRes;
+p_valor2 = 1-cdf('F',Fcalc2,h,glres);
+
+print '--------------------------------------------------',
+      'Teste da Hipótese H02: B1 = B2 = B3 = 0           ',
+      'usando abordagem Modelo completo x Modelo reduzido',
+      '--------------------------------------------------',;
+
+print 'g.l. do modelo completo ................................' gl_reg,
+      'g.l. do modelo reduzido por H0: B1 = B2 = B3 = 0 .......' gl_regB1,
+      'g.l. da diferença (Modelo completo - Modelo reduzido)...' h,,;
+print 'Quadro de ANOVA para testar H02: B1 = B2 = B3 = 0',,
+'H02      ' h       SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc2[format=10.4] p_valor2[format=10.4],,
+'Resíduo  ' glres   SQRes[format=10.4]   QMRes[format=10.4],,
+'Total    ' gltotal SQTotal[format=10.4],,,,;
+
+* ----------------------------------------------------------------;
+* Hipótese linear geral (C*Beta=0) para testar H0:B1 = B2 = B3 = 0;
+* ----------------------------------------------------------------;
+C = {0 1 0 0 0 0 0 0 0 0,
+     0 0 1 0 0 0 0 0 0 0,
+	 0 0 0 1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'Hipótese H0: B1 = B2 = B3 = 0 usando abordagem C*Beta = 0',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+
+* ------------------------------------------------------------------------- ;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 1) ;
+*                           (Matriz C não é única!)                         ;
+* ------------------------------------------------------------------------- ;
+C = {0 1 -1  0 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 1)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+
+* ------------------------------------------------------------------------- ;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 2) ;
+* ------------------------------------------------------------------------- ;
+C = {0 2 -1 -1 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 2)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+
+* -------------------------------------------------------------------------;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 3);
+* -------------------------------------------------------------------------;
+C = {0 1  0 -1 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 3)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+quit;
+
+data Ex82a;
+input y1 y2 x1 x2 x3;
+x11=x1*x1; x22=x2*x2; x33=x3*x3; x12=x1*x2; x13=x1*x3; x23=x2*x3;
+cards;
+41.5  45.9  162  23.0  3.0
+33.8  53.3  162  23.0  8.0
+27.7  57.5  162  30.0  5.0
+21.7  58.8  162  30.0  8.0
+19.9  60.6  172  25.0  5.0
+15.0  58.0  172  25.0  8.0
+12.2  58.6  172  30.0  5.0
+ 4.3  52.4  172  30.0  8.0
+19.3  56.9  167  27.5  6.5
+ 6.4  55.4  177  27.5  6.5
+37.6  46.9  157  27.5  6.5
+18.0  57.3  167  32.5  6.5
+26.3  55.0  167  22.5  6.5
+ 9.9  58.9  167  27.5  9.5
+25.0  50.3  167  27.5  3.5
+14.1  61.1  177  20.0  6.5
+15.2  62.9  177  20.0  6.5
+15.9  60.0  160  34.0  7.5
+19.6  60.6  160  34.0  7.5
+;
+
+proc reg data=Ex82a;
+ model y2 = x1 x2 x3 x11 x22 x33 x12 x13 x23;
+ Hip_GERAL: test x1=0,x2=0,x3=0,x11=0,x22=0,x33=0,x12=0,x13=0,x23=0;
+ Coef_QUADRATICO: test x11=0,x22=0,x33=0,x12=0,x13=0,x23=0;
+ Coef_LINEAR: test x1=0,x2=0,x3=0;
+ B1_B2_B3_iguais: test x1-x2=0, x2-x3=0;
+run;

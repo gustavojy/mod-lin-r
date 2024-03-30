@@ -1,0 +1,45 @@
+options nodate nocenter ps=1000;
+proc iml;
+ y = {2,5,5,8,6,9,7,11,7,15,10,17};
+ x1 = {2,5,6,7,7,8,9,9,10,11,13,15};
+ n = nrow(y);
+ x0 = j(n,1,1);
+
+* Estimação de Beta usando MQO;
+ X = x0||x1;
+ k = ncol(X)-1;
+ Beta = inv(t(X)*X)*t(X)*y;
+*pág. 214;
+ y_hat = X*Beta;
+ res = y - y_hat;
+ s2 = (1/(n-k-1))*t(res)*res;
+ cov_Beta = s2*inv(t(X)*X);
+ print 'Modelo com estrutura cov(y) = I*sigma2',,,
+       Beta[format=10.4] s2[format=10.4] cov_Beta[format=10.4];
+
+* Estimação de Beta usando MQG;
+ V = diag(x1);
+ Betaz = inv(t(X)*inv(V)*X)*t(X)*inv(V)*y;	
+ y_hatz = X*Betaz;
+ resz = y - y_hatz;
+ s2z = (1/(n-k-1))*t(resz)*inv(V)*resz;
+ cov_Betaz = s2z*inv(t(X)*inv(V)*X);
+ print 'Modelo com estrutura cov(y) = V*sigma2',,,
+        Betaz[format=10.4] s2z[format=10.4] cov_Betaz[format=10.4];
+
+ K = x1||y||y_hat||y_hatz;
+ name = {'x','y','y_hat','y_hatz'};
+ create graf from K[colname=name];
+ append from K;
+ close graf;
+quit;
+
+proc print data=graf;
+run;
+
+proc sgplot data=graf;
+title 'Ajustes MQ Ordinario (y_hat) e Ponderado (y_hatz)';
+ scatter x=x y=y;
+ series x=x y=y_hat / LINEATTRS=(color=blue);
+ series x=x y=y_hatz / LINEATTRS=(color=red);
+run;

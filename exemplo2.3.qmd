@@ -117,7 +117,7 @@ Para particionar $\mathbf{\Sigma}$, utilizaremos o [Teorema 2 (4.4B.) -@sec-T2].
 A primeira partição ($\mathbf{\Sigma}_{yy}$) fica:
 
 ```{r}
-Ay <- matrix(c(1, 0, 0, 0, 0, 1, 0, 0), nrow = 2, byrow = T)
+Ay <- matrix(c(1, 0, 0, 0, 0, 1, 0, 0), nrow = 2, byrow = TRUE)
 Ay
 
 Sigma_yy <- Ay %*% Sigma %*% t(Ay)
@@ -137,7 +137,7 @@ Ro_yy
 Para a partição $\mathbf{\Sigma}_{xx}$ temos:
 
 ```{r}
-Ax <- matrix(c(0, 0, 1, 0, 0, 0, 0, 1), nrow = 2, byrow = T)
+Ax <- matrix(c(0, 0, 1, 0, 0, 0, 0, 1), nrow = 2, byrow = TRUE)
 Ax
 
 Sigma_xx <- Ax %*% Sigma %*% t(Ax)
