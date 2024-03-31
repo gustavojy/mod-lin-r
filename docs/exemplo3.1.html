@@ -515,7 +515,7 @@ Coefficients:
 s^2 =
 \frac{(\mathbf{y} - \mathbf{\hat{y}})' \space (\mathbf{y} - \mathbf{\hat{y}})}{n-2} =  \frac{SQRes}{n-2}
 \]</span></p>
-<p>Em que <span class="math inline">\(SQRes\)</span> é a soma de quadrados dos resíduos e <span class="math inline">\(\hat{y}\)</span>. <em>(ver pg 89-90 Rencher)</em></p>
+<p>Em que <span class="math inline">\(SQRes\)</span> é a soma de quadrados dos resíduos e <span class="math inline">\(\hat{y}\)</span>.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist">
 <li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">R</a></li>
@@ -790,6 +790,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 [1,] 0.09913671</code></pre>
 </div>
 </div>
+<p>Como valores da estatística t, temos:</p>
 <div class="cell">
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">/</span> <span class="va">stderr_Beta0</span></span>
 <span><span class="va">t0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -808,39 +809,45 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 <p><span class="math display">\[
 \hat\beta \pm t_{\alpha/2, n-2} \sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}
 \]</span></p>
+<p>onde <span class="math inline">\(t_{(\alpha/2, n-2)}\)</span> é o percentil de ordem <span class="math inline">\(100(1-\alpha)\%\)</span> da distribuição <span class="math inline">\(t\)</span> com <span class="math inline">\(n-2\)</span> graus de liberdade e <span class="math inline">\(\alpha\)</span> é o nível de significância do teste.</p>
 <div class="cell">
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ttab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">qt</a></span><span class="op">(</span><span class="fl">0.975</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="co"># quantil t com probabilidade 0.975 e gl = n-2</span></span>
-<span></span>
-<span><span class="va">liminf0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
+<span><span class="va">ttab</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.119905</code></pre>
+</div>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">liminf0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
 <span><span class="va">liminf0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] -3.301202</code></pre>
 </div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup0</span> <span class="op">&lt;-</span> <span class="va">Beta0</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta0</span></span>
 <span><span class="va">limsup0</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 24.75502</code></pre>
 </div>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">liminf1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">liminf1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">-</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
 <span><span class="va">liminf1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] 0.6624861</code></pre>
 </div>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">limsup1</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">+</span> <span class="va">ttab</span> <span class="op">*</span> <span class="va">stderr_Beta1</span></span>
 <span><span class="va">limsup1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 1.082807</code></pre>
 </div>
 </div>
+<p>Dado que o <span class="math inline">\(t\)</span> calculado para <span class="math inline">\(\beta_1\)</span> é maior que o limite superior, temos evidências para rejeitar <span class="math inline">\(H_0: \beta_1 = 0\)</span>, com nível de significância de 5%.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
 <thead><tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">Parâmetro</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Estimado</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">Variância</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">Erro Padrão</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">t</th>
@@ -849,6 +856,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Bo</td>
+<td style="text-align: center;">10.7269</td>
 <td style="text-align: center;">43.7890</td>
 <td style="text-align: center;">6.6173</td>
 <td style="text-align: center;">1.6210</td>
@@ -856,6 +864,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 </tr>
 <tr class="even">
 <td style="text-align: center;">B1</td>
+<td style="text-align: center;">0.8726</td>
 <td style="text-align: center;">0.0098</td>
 <td style="text-align: center;">0.0991</td>
 <td style="text-align: center;">8.8025</td>
@@ -868,7 +877,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <div class="cell">
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_barra</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">/</span><span class="va">n</span>;</span>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_barra</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">/</span><span class="va">n</span>;</span>
 <span><span class="va">var_Beta0</span> <span class="op">=</span> <span class="va">s2</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span> <span class="op">+</span> <span class="va">x_barra</span><span class="op">**</span><span class="fl">2</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="va">In</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">n</span><span class="op">)</span><span class="op">*</span><span class="va">Jnn</span><span class="op">)</span><span class="op">*</span><span class="va">x1</span><span class="op">)</span><span class="op">)</span>;</span>
 <span><span class="va">stderr_Beta0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta0</span><span class="op">)</span>;</span>
 <span></span>
@@ -876,14 +885,14 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 <span><span class="va">stderr_Beta1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">var_Beta1</span><span class="op">)</span>;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>ttab <span class="ot">=</span> <span class="fu">tinv</span>(<span class="fl">0.975</span>,n<span class="dv">-2</span>);</span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>liminf0 <span class="ot">=</span> Beta0<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta0; limsup0 <span class="ot">=</span> Beta0<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta0;</span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>liminf1 <span class="ot">=</span> Beta1<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta1; limsup1 <span class="ot">=</span> Beta1<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta1;</span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>pág<span class="fl">.146</span>;</span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>print Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>]</span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta0,95%) = '</span> liminf0[format<span class="ot">=</span><span class="fl">10.4</span>] limsup0[format<span class="ot">=</span><span class="fl">10.4</span>] ,,, </span>
-<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>      Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] </span>
-<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta1,95%) = '</span> liminf1[format<span class="ot">=</span><span class="fl">10.4</span>] limsup1[format<span class="ot">=</span><span class="fl">10.4</span>] ,,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>ttab <span class="ot">=</span> <span class="fu">tinv</span>(<span class="fl">0.975</span>,n<span class="dv">-2</span>);</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>liminf0 <span class="ot">=</span> Beta0<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta0; limsup0 <span class="ot">=</span> Beta0<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta0;</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>liminf1 <span class="ot">=</span> Beta1<span class="sc">-</span>ttab<span class="sc">*</span>stderr_Beta1; limsup1 <span class="ot">=</span> Beta1<span class="sc">+</span>ttab<span class="sc">*</span>stderr_Beta1;</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>pág<span class="fl">.146</span>;</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>print Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta0[format<span class="ot">=</span><span class="fl">10.4</span>]</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta0,95%) = '</span> liminf0[format<span class="ot">=</span><span class="fl">10.4</span>] limsup0[format<span class="ot">=</span><span class="fl">10.4</span>] ,,, </span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>      Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] var_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] stderr_Beta1[format<span class="ot">=</span><span class="fl">10.4</span>] </span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">'     I.C.(Beta1,95%) = '</span> liminf1[format<span class="ot">=</span><span class="fl">10.4</span>] limsup1[format<span class="ot">=</span><span class="fl">10.4</span>] ,,,;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -907,7 +916,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <p>Para calcular <span class="math inline">\(SQReg\)</span>:</p>
 <div class="cell">
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_barra</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_barra</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jnn</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
 <span><span class="va">y_barra</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
@@ -930,7 +939,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 [17,] 61.38889
 [18,] 61.38889</code></pre>
 </div>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Reg</span> <span class="op">&lt;-</span> <span class="va">y_hat</span> <span class="op">-</span> <span class="va">y_barra</span></span>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Reg</span> <span class="op">&lt;-</span> <span class="va">y_hat</span> <span class="op">-</span> <span class="va">y_barra</span></span>
 <span><span class="va">Reg</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             [,1]
@@ -953,7 +962,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 [17,]  13.9138643
 [18,]   7.8053385</code></pre>
 </div>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQReg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Reg</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Reg</span></span>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQReg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Reg</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Reg</span></span>
 <span><span class="va">SQReg</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -962,7 +971,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 </div>
 <p>Já <span class="math inline">\(SQTotal\)</span>:</p>
 <div class="cell">
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Tot</span> <span class="op">&lt;-</span> <span class="va">y</span> <span class="op">-</span> <span class="va">y_barra</span></span>
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Tot</span> <span class="op">&lt;-</span> <span class="va">y</span> <span class="op">-</span> <span class="va">y_barra</span></span>
 <span><span class="va">Tot</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            [,1]
@@ -985,13 +994,13 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 [17,]  13.611111
 [18,]   4.611111</code></pre>
 </div>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Tot</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Tot</span></span>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">Tot</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Tot</span></span>
 <span><span class="va">SQTotal</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 17944.28</code></pre>
 </div>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">+</span> <span class="va">SQRes</span></span>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">+</span> <span class="va">SQRes</span></span>
 <span><span class="va">SQTotal</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -1000,7 +1009,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 </div>
 <p>Assim, o <strong>coeficiente de determinação</strong> é dado por:</p>
 <div class="cell">
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">R2</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">/</span> <span class="va">SQTotal</span></span>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">R2</span> <span class="op">&lt;-</span> <span class="va">SQReg</span> <span class="op">/</span> <span class="va">SQTotal</span></span>
 <span><span class="va">R2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
@@ -1009,7 +1018,7 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 </div>
 <p>O <strong>coeficiente de correlação</strong> (<span class="math inline">\(r\)</span>) é dado pela raiz quadrada do coeficiente de determinação (<span class="math inline">\(r^2\)</span>).</p>
 <div class="cell">
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">R2</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">R2</span><span class="op">)</span></span>
 <span><span class="va">r</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        [,1]
@@ -1035,13 +1044,13 @@ t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{
 t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
 \]</span></p>
 <div class="cell">
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc1</span> <span class="op">&lt;-</span> <span class="va">r</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">r</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc1</span> <span class="op">&lt;-</span> <span class="va">r</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">r</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tcalc1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 8.802456</code></pre>
 </div>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc2</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">/</span> <span class="va">stderr_Beta1</span></span>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tcalc2</span> <span class="op">&lt;-</span> <span class="va">Beta1</span> <span class="op">/</span> <span class="va">stderr_Beta1</span></span>
 <span><span class="va">tcalc2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -1050,7 +1059,7 @@ t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
 </div>
 <p>Com a estatística t, calculamos o p-valor da seguinte maneira:</p>
 <div class="cell">
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valor</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">pt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">tcalc1</span><span class="op">)</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valor</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/TDist.html">pt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">tcalc1</span><span class="op">)</span>, <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_valor</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>             [,1]
@@ -1058,9 +1067,10 @@ t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
 </div>
 </div>
 <p>Onde a função <code><a href="https://rdrr.io/r/stats/TDist.html">pt()</a></code> retorna a função de distribuição da estatística t.</p>
+<p>Dado que o p-valor é menor que <span class="math inline">\(\alpha = 0,05\)</span>, rejeitamos <span class="math inline">\(H_0: \beta_1 = 0\)</span>.</p>
 <p>Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">modelo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">modelo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">modelo</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1087,22 +1097,22 @@ F-statistic: 77.48 on 1 and 16 DF,  p-value: 1.571e-07</code></pre>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> SQReg<span class="sc">/</span>SQTotal;  <span class="sc">*</span> Coeficiente de determinação <span class="sc">-</span> R2<span class="st">';</span></span>
-<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a><span class="st">corr = sqrt(R2);</span></span>
-<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>     SQTotal  <span class="ot">=</span>     SQReg   <span class="sc">+</span>    SQRes<span class="st">',,</span></span>
-<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a><span class="st">       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,</span></span>
-<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de determinação (R2)<span class="sc">:</span> <span class="st">' R2[format=10.4],,,</span></span>
-<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de correlação (r)<span class="sc">:</span>    <span class="st">' corr[format=10.4],,,;</span></span>
-<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;</span></span>
-<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));</span></span>
-<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a><span class="st">p_valor = 2*(1-cdf('</span>t<span class="st">',abs(tcalc1),n-2));</span></span>
-<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>H0<span class="sc">:</span> Beta1 <span class="ot">=</span> <span class="dv">0</span>   <span class="st">' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];</span></span>
-<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a><span class="st">quit;</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> SQReg<span class="sc">/</span>SQTotal;  <span class="sc">*</span> Coeficiente de determinação <span class="sc">-</span> R2<span class="st">';</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="st">corr = sqrt(R2);</span></span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>     SQTotal  <span class="ot">=</span>     SQReg   <span class="sc">+</span>    SQRes<span class="st">',,</span></span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a><span class="st">       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,</span></span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de determinação (R2)<span class="sc">:</span> <span class="st">' R2[format=10.4],,,</span></span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de correlação (r)<span class="sc">:</span>    <span class="st">' corr[format=10.4],,,;</span></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;</span></span>
+<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));</span></span>
+<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a><span class="st">p_valor = 2*(1-cdf('</span>t<span class="st">',abs(tcalc1),n-2));</span></span>
+<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>H0<span class="sc">:</span> Beta1 <span class="ot">=</span> <span class="dv">0</span>   <span class="st">' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];</span></span>
+<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-16"><a href="#cb90-16" aria-hidden="true" tabindex="-1"></a><span class="st">quit;</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>

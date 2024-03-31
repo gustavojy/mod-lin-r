@@ -182,7 +182,7 @@ s^2 =
 \frac{(\mathbf{y} - \mathbf{\hat{y}})' \space (\mathbf{y} - \mathbf{\hat{y}})}{n-2} =  \frac{SQRes}{n-2}
 $$
 
-Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$. *(ver pg 89-90 Rencher)*
+Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$.
 
 ::: panel-tabset
 
@@ -313,6 +313,8 @@ stderr_Beta1 <- sqrt(var_Beta1)
 stderr_Beta1
 ```
 
+Como valores da estatística t, temos:
+
 ```{r}
 t0 <- Beta0 / stderr_Beta0
 t0
@@ -327,8 +329,11 @@ $$
 \hat\beta \pm t_{\alpha/2, n-2} \sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}
 $$
 
+onde $t_{(\alpha/2, n-2)}$ é o percentil de ordem $100(1-\alpha)\%$ da distribuição $t$ com $n-2$ graus de liberdade e $\alpha$ é o nível de significância do teste.
+
 ```{r}
 ttab <- qt(0.975, n - 2) # quantil t com probabilidade 0.975 e gl = n-2
+ttab
 
 liminf0 <- Beta0 - ttab * stderr_Beta0
 liminf0
@@ -343,11 +348,14 @@ limsup1 <- Beta1 + ttab * stderr_Beta1
 limsup1
 ```
 
+Dado que o $t$ calculado para $\beta_1$ é maior que o limite superior, temos evidências para rejeitar $H_0: \beta_1 = 0$, com nível de significância de 5%.
+
 ```{r}
 #| echo: false
 
 tab3 <- data.frame(
   param = c("Bo", "B1"),
+  estimado = c(Beta0, Beta1),
   var = c(var_Beta0, var_Beta1),
   stderr = c(stderr_Beta0, stderr_Beta1),
   t = c(t0, t1),
@@ -356,7 +364,7 @@ tab3 <- data.frame(
 
 kableExtra::kbl(
   x = tab3, digits = 4, align = "c",
-  col.names = c("Parâmetro", "Variância", "Erro Padrão", "t", "IC 95%")
+  col.names = c("Parâmetro", "Estimado", "Variância", "Erro Padrão", "t", "IC 95%")
 ) |> 
   kableExtra::kable_styling(position = "center")
 ```
@@ -482,6 +490,8 @@ p_valor
 ```
 
 Onde a função `pt()` retorna a função de distribuição da estatística t.
+
+Dado que o p-valor é menor que $\alpha = 0,05$, rejeitamos $H_0: \beta_1 = 0$.
 
 Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função `lm()`.
 
