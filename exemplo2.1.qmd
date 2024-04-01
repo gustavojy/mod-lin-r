@@ -47,6 +47,8 @@ em que $r$ é o **coeficiente de correlação** entre `y1` e `y2`, variando de -
 
 O valor do coeficiente de correlação será salvo no objeto `r`. Já o objeto `pi` armazena o valor de $\pi$ com seis casas decimais.
 
+Para verificar as alterações gráficas, redefina o valor do objeto `r` (valor entre -1 e 1).
+
 ```{r}
 r <- -0.75  # Modificar este valor para verificar as alterações gráficas
 pi

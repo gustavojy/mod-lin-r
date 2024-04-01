@@ -90,7 +90,7 @@ n; p
 
 No caso da matriz `Y`, ela apresenta dimensão $28 \times 4$.
 
-A função `diag()` cria uma **matriz identidade**. Basta inserirmos dentro da função a dimensão da matriz.
+A função `diag()` cria uma **matriz identidade**. Basta inserir dentro da função a dimensão da matriz.
 
 ```{r}
 In <- diag(n)
@@ -143,12 +143,12 @@ $$
 
 Além disso, note que a matriz $\mathbf{J}$ (`Jnn`) pode ser obtida por $\mathbf{J} = \mathbf{j} \space \mathbf{j}'$, ou seja, a multiplicação do vetor coluna $\mathbf{j}$ (`jn`) pela sua transposta.
 
+No R, utilizamos a função `t()` para realizar a transposição de uma matriz ou vetor.
+
 ```{r}
 Jnn <- jn %*% t(jn)
 Jnn
 ```
-
-No R, utilizamos a função `t()` para realizar a transposição de uma matriz ou vetor.
 
 $$
 \mathbf{J} = \mathbf{j} \space \mathbf{j}' = 
