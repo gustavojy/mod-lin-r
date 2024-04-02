@@ -338,7 +338,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>No caso da matriz <code>Y</code>, ela apresenta dimensão <span class="math inline">\(28 \times 4\)</span>.</p>
-<p>A função <code><a href="https://rdrr.io/r/base/diag.html">diag()</a></code> cria uma <strong>matriz identidade</strong>. Basta inserirmos dentro da função a dimensão da matriz.</p>
+<p>A função <code><a href="https://rdrr.io/r/base/diag.html">diag()</a></code> cria uma <strong>matriz identidade</strong>. Basta inserir dentro da função a dimensão da matriz.</p>
 <div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">In</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">In</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -589,6 +589,7 @@ Jnn = \mathbf{J}_{(28 \times 28)} =
    \end{bmatrix}
 \]</span></p>
 <p>Além disso, note que a matriz <span class="math inline">\(\mathbf{J}\)</span> (<code>Jnn</code>) pode ser obtida por <span class="math inline">\(\mathbf{J} = \mathbf{j} \space \mathbf{j}'\)</span>, ou seja, a multiplicação do vetor coluna <span class="math inline">\(\mathbf{j}\)</span> (<code>jn</code>) pela sua transposta.</p>
+<p>No R, utilizamos a função <code><a href="https://rdrr.io/r/base/t.html">t()</a></code> para realizar a transposição de uma matriz ou vetor.</p>
 <div class="cell">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Jnn</span> <span class="op">&lt;-</span> <span class="va">jn</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">jn</span><span class="op">)</span></span>
 <span><span class="va">Jnn</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -682,7 +683,6 @@ Jnn = \mathbf{J}_{(28 \times 28)} =
 [28,]     1     1     1</code></pre>
 </div>
 </div>
-<p>No R, utilizamos a função <code><a href="https://rdrr.io/r/base/t.html">t()</a></code> para realizar a transposição de uma matriz ou vetor.</p>
 <p><span class="math display">\[
 \mathbf{J} = \mathbf{j} \space \mathbf{j}' =
 \begin{bmatrix}
