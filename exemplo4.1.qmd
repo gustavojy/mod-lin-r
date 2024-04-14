@@ -1,0 +1,638 @@
+# Estimação {#sec-rlmest}
+
+Em regressão múltipla, assumimos uma relação linear da variável resposta $y$ com mais de uma variável preditora $x_1, x_2, \dots, x_k$, a fim de predizer os valores de $y$. O modelo pode ser representado da seguinte maneira:
+
+$$
+y_i = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \dots \beta_kx_{ik} + \epsilon_i
+\space, \quad i = 1,2, \dots , n \space \text{observações}
+$$
+
+Matricialmente, o modelo é dado por:
+
+$$
+\begin{bmatrix}
+y_1 \\ y_2 \\ \vdots \\ y_n
+\end{bmatrix}
+= 
+\begin{bmatrix}
+1 & x_{11} & x_{12} & \dots & x_{1k} \\ 
+1 & x_{21} & x_{22} & \dots & x_{2k} \\ 
+\vdots & \vdots & \vdots & \ddots & \vdots\\ 
+1 & x_{n1} & x_{n2} & \dots & x_{nk}
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \vdots \\ \beta_k
+\end{bmatrix}
++
+\begin{bmatrix}
+\epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_k
+\end{bmatrix}
+$$
+
+$$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+
+- $\mathbf{y}$: $n \times 1$;
+
+- $\mathbf{X}$: $n \times (k + 1)$, com $n > (k+1)$ e posto $k + 1$;
+
+- $\boldsymbol{\beta}$: $(k + 1) \times 1$;
+
+- $\boldsymbol{\epsilon}$: $n \times 1$.
+
+Como suposições do modelos, temos:
+
+- $E(\boldsymbol{\epsilon}) = 0$ ou $E(\mathbf{y}) = \mathbf{X} \boldsymbol{\beta}$;
+
+- $cov(\boldsymbol{\epsilon}) = \sigma^2\mathbf{I}$ ou $cov(\mathbf{y}) = \sigma^2\mathbf{I}$.
+
+Os parâmetros $\beta$ são denominados **coeficientes parciais de regressão**, pois expressam o seu efeito coletivo em $E(\mathbf{y})$ na presença das demais variáveis no modelo. Por exemplo, $\beta_1$ mostra o efeito da variável $x_1$ sobre $E(\mathbf{y})$ na presença das demais variáveis $x$; caso seja retirado algum $x$ deste modelo, o efeito de $x_1$ pode ser diferente.
+
+Para representar esta diferença, utilizamos um asterisco nos parâmetros beta ($\beta^*$) do **modelo reduzido**.
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon \\
+y &= \beta_0^* + \beta^*_1x_1 + \epsilon \\
+\end{align}
+$$
+
+No caso anterior, a primeira equação é referente ao **modelo completo**, cujos valores de $\beta_0$ e $\beta_1$ serão diferentes de $\beta^*_0$ e $\beta^*_1$, respectivos ao **modelo reduzido**, caso retirarmos $x_2$ do modelo completo.
+
+O exemplo a seguir é baseado em Freund e Minton (1979, p. 36-39), cujo dados estão representados a seguir.
+
+```{r}
+#| echo: false
+
+data.frame(
+  Obs = 1:12,
+  y = c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14),
+  x1 = c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8),
+  x2 = c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14)
+
+x1 <- c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8)
+
+x2 <- c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+options nodate nocenter ps=1000;
+proc iml;
+reset fuzz;
+*pág.159;
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+x1 = {0,2,2,2,4,4,4,6,6,6,8,8};
+x2 = {2,6,7,5,9,8,7,10,11,9,15,13};
+```
+
+:::
+
+## Estimação dos parâmetros $\beta$
+
+Para estimar os parâmetros $\beta$, utilizamos o Método dos Mínimos Quadrados Ordinários (MQO), com base em uma amostra de $n$ observações $(y_i, x_{i1},x_{i2},\dots,x_{ik})$ para $i = 1,2, \dots , n$.
+
+Dessa forma, precisamos criar os seguintes objetos:
+
+-   `n`: número de observações $n$;
+
+-   `jn`: vetor coluna de 1's $\mathbf{j}$;
+
+-   `Jnn`: matriz de 1's $\mathbf{J}$;
+
+-   `In`: matriz identidade $\mathbf{I}$.
+
+::: panel-tabset
+
+### R
+
+```{r}
+n <- length(y)
+n
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+jn
+
+Jnn <- jn %*% t(jn)
+Jnn
+
+In <- diag(n)
+In
+```
+
+Vale a ressalva de que o vetor de $\beta_0$ corresponde ao vetor coluna de 1's $\mathbf{j}$ (`jn`):
+
+```{r}
+x0 <- jn
+colnames(x0) <- ("x0")
+
+x0
+```
+
+Em seguida, criaremos três objetos, cada qual respectivo às possíveis combinações entre as variáveis preditoras. Calcularemos as equações de predição de $y$ sobre:
+
+- $x_1$ sozinho;
+
+```{r}
+X01 <- cbind(x0, x1)
+X01
+```
+
+- $x_2$ sozinho;
+
+```{r}
+X02 <- cbind(x0, x2)
+X02
+```
+
+- $x_1$ e $x_2$ em conjunto.
+
+```{r}
+X012 <- cbind(x0, x1, x2)
+X012
+```
+
+Para cada caso anterior, unimos os vetores das variáveis preditoras, formando a matriz $\mathbf{X}$ (`X01`, `X02`, `X012`) do modelo matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$.
+
+Para obter os etimadores dos $\beta 's$ de cada um dos três modelos, utilizamos o MQO que minimiza a soma de quadrados dos desvios ($\sum^n_{i=1} (y_i - \hat{y}_i)^2$), onde
+
+$$
+\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_{i1} + \hat{\beta}_2x_{i2} + \dots \hat{\beta}_kx_{ik}
+$$
+
+é um estimador de $E(y_i)$.
+
+Assim, o valor de $\hat {\boldsymbol{\beta}} = [\hat \beta_0,\hat \beta_1,\dots,\hat \beta_k]'$ que minimiza a soma de quadrados dos desvios é:
+
+$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X'X})^{-1} \mathbf{X}' \mathbf{y}
+$$
+
+```{r}
+Beta01 <- solve(t(X01) %*% X01) %*% t(X01) %*% y
+Beta01
+```
+
+```{r}
+Beta02 <- solve(t(X02) %*% X02) %*% t(X02) %*% y
+Beta02
+```
+
+```{r}
+Beta012 <- solve(t(X012) %*% X012) %*% t(X012) %*% y
+Beta012
+```
+
+Dessa forma, obtemos as seguintes equações de predição de $y$:
+
+$$
+\begin{align}
+\hat{y} &= 1,86 + 1,30 x_1 \\
+\hat{y} &= 0,86 + 0,78 x_2\\
+\hat{y} &= 5,38 + 3,01 x_1 - 1,29 x_2
+\end{align}
+$$
+
+Como citado anteriormente, os coeficientes de $x_1$ e $x_2$ diferem de acordo com o modelo proposto.
+
+Como propriedades dos estimadores de MQO $\hat {\boldsymbol{\beta}}$:
+
+- Se $E(\mathbf{y}) = \mathbf{X}\boldsymbol{\beta}$ então $\hat{\boldsymbol{\beta}}$ é um estimador não viesado de $\boldsymbol{\beta}$;
+
+- Se $cov(\mathbf{y}) = \sigma^2\mathbf{I}$, então $cov(\hat {\boldsymbol{\beta}}) = \sigma^2(\mathbf{X'X})^{-1}$.
+
+### SAS
+
+```{r}
+#| eval: false
+
+n = nrow(y);
+In = I(n);
+Jnn = J(n,n,1);
+x0 = j(n,1,1); *cria um vetor nx1 de uns;
+
+x01 = x0||x1;
+x02 = x0||x2;
+x012 = x0||x1||x2;
+
+* Estima vetor Beta nos três modelos;
+Beta01 = inv(t(X01)*X01)*t(X01)*y;
+Beta02 = inv(t(X02)*X02)*t(X02)*y;
+Beta012 = inv(t(X012)*X012)*t(X012)*y;
+print '  Modelo: y = b0 + b1*x1 + e          =>     Beta = ' Beta01[format=10.4],,,
+      '  Modelo: y = b0 + b2*x2 + e          =>     Beta = ' Beta02[format=10.4],,,
+	  '  Modelo: y = b0 + b1*x1 + b2*x2 + e  =>     Beta = ' Beta012[format=10.4],,,,;
+print Beta01[format=10.4] Beta02[format=10.4] Beta012[format=10.4];
+```
+
+:::
+
+## Estimação da variância ($\sigma^2$)
+
+Estimaremos a variância $\sigma^2$ do modelo completo por uma média das variâncias das amostras:
+
+$$
+s^2 = \frac{\mathbf{y'y} - \hat {\boldsymbol{\beta}'}' \mathbf{X'} \mathbf{y}}{n-k-1} = \frac{\text{SQResíduo}}{n-k-1}
+$$
+
+onde $n$ é o tamanho amostral e $k$, o número de variáveis $x$.
+
+::: panel-tabset
+
+### R
+
+No objeto `k`, definimos o número de variáveis $x$ do modelo completo, ou seja, duas variáveis ($x_1$ e $x_2$). Além disso, anteriormente, já definimos ao objeto `n` o número de observações (12 observações).
+
+```{r}
+k <- 2
+k
+
+n
+```
+
+Dessa forma, com a expressão apresentada anteriormente, obtemos a variância estimada $s^2$.
+
+```{r}
+s2 <- as.numeric((t(y) %*% y) - (t(Beta012) %*% t(X012) %*% y)) / (n - k - 1)
+s2
+```
+
+::: {.callout-note}
+
+A variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar, realizada para o caso da regressão linear simples:
+
+```{r}
+#| eval: false
+
+k <- 2
+
+y_hat <- X012 %*% Beta012
+colnames(y_hat) <- ("y_hat")
+
+res <- y - y_hat
+
+SQRes <- t(res) %*% res
+
+s2 <- as.numeric(SQRes / (n - k - 1))
+```
+
+:::
+
+Para verificar se $s^2$ é um estimador não viesado de $cov(\hat{\boldsymbol{\beta}})$:
+
+$$\widehat{cov}(\hat{\boldsymbol{\beta}}) = s^2(\mathbf{X'X})^{-1}$$
+
+```{r}
+cov_Beta <- s2 * solve(t(X012) %*% X012)
+cov_Beta
+```
+
+Dessa forma, temos:
+
+$$
+\begin{align}
+s^2 &= 2,829 \\
+\widehat{cov} &= 
+\begin{bmatrix} 
+2.757 & 0,687 & -0,647 \\
+0,687 & 0,458 & -0,315 \\
+-0,647 & -0,315 & 0,236
+\end{bmatrix}
+\end{align}
+$$
+
+*qual a conclusão?????????????????*
+
+### SAS
+
+```{r}
+#| eval: false
+
+*pág.168;
+* Ajusta modelo com x1 e x2 + vetor de estimativas da resposta + resíduos do modelo;
+X = x0||x1||x2;
+Beta = inv(t(X)*X)*t(X)*y;
+y_hat = X*Beta;
+Nome = {'Beta0','Beta1','Beta2'};
+print Nome Beta[format=10.4] '   ' X '   ' y[format=10.] '   ' y_hat[format=10.4],,;
+
+* Calcula estimativa de sigma2 no modelo inicial;
+res = y-y_hat;
+SQRes = t(res)*res;
+s2 = SQRes/(n-k-1);
+cov_Beta = s2*inv(t(X)*X);
+
+print s2[format=10.3] cov_Beta[format=10.5];;
+```
+
+:::
+
+## Modelo de Regressão na Forma Centrada
+
+O modelo de regressão múltipla pode ser escrito, para cada $y_i$, em termos das variáveis $x$ centradas em suas respectivas médias:
+
+$$
+\begin{align}
+y_i &= \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \dots \beta_kx_{ik} + \epsilon_i \\
+&= \alpha + \beta_1(x_{i1} - \bar{x}_1) + \beta_2(x_{i2} - \bar{x}_2) + \dots + \beta_k(x_{ik} - \bar{x}_k) + \epsilon_i
+\end{align}
+$$
+
+em que $\alpha = \beta_0 + \beta_1\bar{x}_1 + \beta_2\bar{x}_2 + \dots + \beta_k\bar{x}_k$, com $\bar{x}_j = \frac{(\sum^n_{i=1} x_{ij})}n$, $j = 1,2,\dots,k$.
+
+Na forma matricial, temos:
+
+$$
+\mathbf{y} = 
+\begin{bmatrix}
+\mathbf{j} & \mathbf{X}_c
+\end{bmatrix}
+\begin{bmatrix}
+\alpha \\ \boldsymbol{\beta_1}
+\end{bmatrix}
++
+\boldsymbol{\epsilon}
+$$
+
+onde $\mathbf{j}$ é o vetor coluna de 1's, $\boldsymbol{\beta_1} = [\boldsymbol{\beta_1,\beta_2,\dots,\beta_k}]'$ e 
+
+$$
+\mathbf{X}_c = \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{X_1} = 
+\begin{bmatrix}
+x_{11} - \bar{x}_1 & x_{12} - \bar{x}_2 & \dots & x_{1k} - \bar{x}_k \\
+x_{21} - \bar{x}_1 & x_{22} - \bar{x}_2 & \dots & x_{2k} - \bar{x}_k \\
+\vdots & \vdots & \ddots & \vdots & \\
+x_{n1} - \bar{x}_1 & x_{n2} - \bar{x}_2 & \dots & x_{nk} - \bar{x}_k \\
+\end{bmatrix}
+$$
+
+em que $\mathbf{X_1} = \begin{bmatrix}\mathbf{x_1} & \mathbf{x_2} & \dots & \mathbf{x_k}\end{bmatrix}$.
+
+Os estimadores de MQO de $\alpha$ e $\boldsymbol{\beta_1}$ são dados por:
+
+$$
+\begin{bmatrix}
+\hat{\alpha} \\ \hat{\boldsymbol{\beta_1}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\bar{y} \\ (\mathbf{X'_c X_c})^{-1} \mathbf{X'_c} \mathbf{y}
+\end{bmatrix}
+$$
+
+Na forma centrada, o vetor ajustado $\hat{\mathbf{y}}$ fica:
+
+$$
+\hat{\mathbf{y}} = \hat{\alpha}\mathbf{j} + \hat{\beta_1} (\mathbf{x_1} - \bar{\mathbf{x}}_1) + \hat{\beta_2} (\mathbf{x_2} - \bar{\mathbf{x}}_2) + \dots + \hat{\beta_k} (\mathbf{x_k} - \bar{\mathbf{x}}_k)
+$$
+
+::: panel-tabset
+
+### R
+
+Obtendo a matriz $\mathbf{X_1} = \begin{bmatrix}\mathbf{x_1} & \mathbf{x_2} & \dots & \mathbf{x_k}\end{bmatrix}$:
+
+```{r}
+x1x2 <- cbind(x1, x2)
+x1x2
+```
+
+Em seguida, obtendo os valores dos $x$ centrados a partir da expressão $\mathbf{X_c} = \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{X_1}$:
+
+```{r}
+x1x2c <- (In - (1 / n) * Jnn) %*% x1x2
+x1x2c
+
+Xc <- cbind(x0, x1x2c)
+Xc
+```
+
+Com a matriz $\mathbf{X_c}$, obtemos as estimativas dos coeficientes de regressão $\beta$ com os $x$ centrados a partir da seguinte expressão:
+
+$$
+\hat{\boldsymbol{\beta_1}} = (\mathbf{X'_c X_c})^{-1} \mathbf{X'_c} \mathbf{y}
+$$
+
+```{r}
+Betac <- solve(t(Xc) %*% Xc) %*% t(Xc) %*% y
+Betac
+```
+
+Para calcular a estimativa de $\sigma^2$ no modelo centrado, utilizamos a mesma expressão do modelo original:
+
+$$
+s^2 = \frac{\mathbf{y'y} - \hat {\boldsymbol{\beta_c}'}' \mathbf{X_c'} \mathbf{y}}{n-k-1} = \frac{\text{SQResíduo}}{n-k-1}
+$$
+
+```{r}
+s2c <- as.numeric((t(y) %*% y) - (t(Betac) %*% t(Xc) %*% y)) / (n - k - 1)
+s2c
+```
+
+::: {.callout-note}
+
+Mais uma vez, a variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar, realizada para o caso da regressão linear simples:
+
+```{r}
+#| eval: false
+
+y_hatc <- Xc %*% Betac
+colnames(y_hatc) <- ("y_hatc")
+
+res_c <- y - y_hatc
+
+SQRes_c <- t(res_c) %*% res_c
+
+s2c <- as.numeric(SQRes / (n - k - 1))
+```
+
+:::
+
+Novamente, para verificar se $s^2$ é um estimador não viesado de $cov(\hat{\boldsymbol{\beta}})$:
+
+$$\widehat{cov}(\hat{\boldsymbol{\beta}}) = s^2(\mathbf{X'X})^{-1}$$
+
+```{r}
+cov_Betac <- s2c * solve(t(X012) %*% X012)
+cov_Betac
+```
+
+Dessa forma, temos o mesmo resultado do modelo original:
+
+$$
+\begin{align}
+s^2 &= 2,829 \\
+\widehat{cov} &= 
+\begin{bmatrix} 
+2.757 & 0,687 & -0,647 \\
+0,687 & 0,458 & -0,315 \\
+-0,647 & -0,315 & 0,236
+\end{bmatrix}
+\end{align}
+$$
+
+*qual a conclusão?????????????????*
+
+### SAS
+
+```{r}
+#| eval: false
+
+x1x2 = x1||x2;
+x1x2c = (In - (1/n)*Jnn)*x1x2;
+Xc = x0||x1x2c; 
+BetaC = inv(t(Xc)*Xc)*t(Xc)*y;
+y_hatc = Xc*Betac;
+XcLXc = t(Xc)*Xc;
+
+*pág. 175;
+k = 2;
+res = y - y_hat;
+SQRes = t(res)*res;
+s2c = (1/(n-k-1))*SQRes;
+cov_Betac = s2*inv(t(X)*X);
+Nome = {'Beta0c','Beta1c','Beta2c'};
+print 'Estimativas dos parâmetros com colunas x1 e x2 centradas nas médias';
+print Nome Betac[format=10.4] '   ' Xc[format=10.4] '   ' y '   ' y_hatC[format=10.4],;
+print s2c[format=10.5] cov_Betac[format=10.5];
+```
+
+:::
+
+## Coeficiente de Determinação na Regressão com x-fixos
+
+Para calcular o coeficiente de determinação $R^2$ com x-fixos:
+
+$$
+R^2 = \frac{\mathbf{y'}\left[\mathbf{X(X'X)}^{-1}\mathbf{X'} - \frac{1}n \mathbf{J}\right]\mathbf{y}}{\mathbf{y'}[\mathbf{I} - \frac{1}n \mathbf{J}]\mathbf{y}}
+=
+\frac{\text{SQReg}}{\text{SQTot}}
+$$
+
+em que $SQReg$ é a soma de quadrados da regressão com $k$ graus de liberdade, associada somente ao efeito das variáveis regressoras $x$; e $SQTot$, a soma de quadrados total corrigida com $n - 1$ graus de liberdade.
+
+::: panel-tabset
+
+### R
+
+```{r}
+SQReg <- t(y) %*% (Xc %*% solve(t(Xc) %*% Xc) %*% t(Xc) - (1/n) * Jnn) %*% y
+SQReg
+
+SQTot <- t(y) %*% (In - (1/n) * Jnn) %*% y
+SQTot
+
+R2 <- SQReg / SQTot
+R2
+```
+
+A partir do coeficiente de determinação $R^2$, podemos calcular o coeficiente de determinação ajustado ($R^2 \text{ ajustado}$). Esta medida penaliza a inclusão de regressores ao modelo, visto que a inserção de inúmeras variáveis, mesmo que tenham pouco poder preditivo, aumentam o valor do $R^2$. O modelo proposto é dado por:
+
+$$
+R^2_{aj} = \frac{(n - 1) R^2-k}{n - k - 1}
+$$
+
+em que $n$ é o número de observações e $k$, o número de variáveis $x$.
+
+```{r}
+R2aj <- ((n - 1) * R2 - k) / (n - k - 1)
+R2aj
+```
+
+Comparativamente, percebe-se que o $R^2_{aj}$ é mais rigoroso em relação ao $R^2$.
+
+$$
+\begin{align}
+R^2 &= 0,8457 \\
+R^2_{aj} &= 0,8114
+\end{align}
+$$
+
+Todavia, para esta situação, ambos indicam uma boa qualidade no ajuste do modelo.
+
+### SAS
+
+```{r}
+#| eval: false
+
+*pág.195;
+* Calcula coeficiente de determinação;
+SQreg = t(y)*(X*inv(t(X)*X)*t(X)-(1/n)*Jnn)*y;
+SQTot = t(y)*(In-(1/n)*Jnn)*y;
+R2 = SQReg/SQTot;
+R2aj = ((n-1)*R2-k)/(n-k-1);
+print R2[format=10.4] R2aj[format=10.4];
+```
+
+:::
+
+## Resumo dos resultados
+
+Nota-se que o modelo original e o na forma centrada obtiveram diferentes coeficientes estimados.
+
+```{r}
+#| echo: false
+
+data.frame(
+  beta = Beta012,
+  betac = Betac
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("Beta", "Beta Centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Apesar disso, os estimadores de $\sigma^2$ de ambos os modelos são os mesmos, bem como $cov(\hat\beta)$ e os valores estimados $\mathbf{\hat y}$.
+
+```{r}
+#| echo: false
+
+data.frame(
+  s2 = s2,
+  s2c = s2c
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("s2", "s2 centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+```{r}
+#| echo: false
+
+cat("Cov_Beta:\n")
+print(cov_Beta, digits = 4)
+
+cat("Cov_Beta Centrado:\n")
+print(cov_Betac, digits = 4)
+```
+
+```{r}
+#| echo: false
+
+data.frame(
+  y_hat = X012 %*% Beta012 |> round(3),
+  y_hatc = Xc %*% Betac |> round(3)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("y_hat", "y_hat centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```

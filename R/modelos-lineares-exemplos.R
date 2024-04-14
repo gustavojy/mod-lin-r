@@ -84,7 +84,7 @@ data.frame(Y, DM2, rank)
 # 2. Gráfico Normal Bivariada ------------------------------------------------
 
 ## Biblioteca
-install.packages("plotly")
+# install.packages("plotly")
 library(plotly)
 
 ## Vetores
@@ -474,3 +474,751 @@ p_valor
 ## Visão geral
 modelo <- lm(y ~ x1)
 summary(modelo)
+
+# 6. Regressão Linear Múltipla - Estimação ----------------------------------
+
+## Dados
+y <- c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14)
+
+x1 <- c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8)
+
+x2 <- c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+
+## Estimação dos parâmetros beta
+
+n <- length(y)
+n
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+jn
+
+Jnn <- jn %*% t(jn)
+Jnn
+
+In <- diag(n)
+In
+
+x0 <- jn
+colnames(x0) <- ("x0")
+x0
+
+### x1 sozinho
+X01 <- cbind(x0, x1)
+X01
+
+Beta01 <- solve(t(X01) %*% X01) %*% t(X01) %*% y
+Beta01
+
+### x2 sozinho
+X02 <- cbind(x0, x2)
+X02
+
+Beta02 <- solve(t(X02) %*% X02) %*% t(X02) %*% y
+Beta02
+
+### x1 e x2 em conjunto
+X012 <- cbind(x0, x1, x2)
+X012
+
+Beta012 <- solve(t(X012) %*% X012) %*% t(X012) %*% y
+Beta012
+
+## Estimação da variância
+
+k <- 2
+
+### Opção 1
+s2 <- as.numeric((t(y) %*% y) - (t(Beta012) %*% t(X012) %*% y)) / (n - k - 1)
+s2
+
+### Opção 2
+y_hat <- X012 %*% Beta012
+colnames(y_hat) <- ("y_hat")
+
+res <- y - y_hat
+
+SQRes <- t(res) %*% res
+
+s2 <- as.numeric(SQRes / (n - k - 1))
+
+### cov(beta)
+cov_Beta <- s2 * solve(t(X012) %*% X012)
+cov_Beta
+
+## Modelo de Regressão na Forma Centrada
+x1x2 <- cbind(x1, x2)
+x1x2
+
+x1x2c <- (In - (1 / n) * Jnn) %*% x1x2
+x1x2c
+
+Xc <- cbind(x0, x1x2c)
+Xc
+
+Betac <- solve(t(Xc) %*% Xc) %*% t(Xc) %*% y
+Betac
+
+### Variância centrada
+#### Opção 1
+s2c <- as.numeric((t(y) %*% y) - (t(Betac) %*% t(Xc) %*% y)) / (n - k - 1)
+s2c
+
+#### Opção 2
+y_hatc <- Xc %*% Betac
+colnames(y_hatc) <- ("y_hatc")
+
+res_c <- y - y_hatc
+
+SQRes_c <- t(res_c) %*% res_c
+
+s2c <- as.numeric(SQRes / (n - k - 1))
+
+cov_Betac <- s2c * solve(t(X012) %*% X012)
+cov_Betac
+
+## Coeficiente de Determinação na Regressão com x-fixos
+SQReg <- t(y) %*% (Xc %*% solve(t(Xc) %*% Xc) %*% t(Xc) - (1/n) * Jnn) %*% y
+SQReg
+
+SQTot <- t(y) %*% (In - (1/n) * Jnn) %*% y
+SQTot
+
+R2 <- SQReg / SQTot
+R2
+
+R2aj <- ((n - 1) * R2 - k) / (n - k - 1)
+R2aj
+
+## Resumo dos resultados
+### Betas
+data.frame(
+  beta = Beta012,
+  betac = Betac
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("Beta", "Beta Centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+
+### s2
+data.frame(
+  s2 = s2,
+  s2c = s2c
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("s2", "s2 centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+
+### cov(Beta)
+cat("Cov_Beta:\n")
+print(cov_Beta, digits = 4)
+
+cat("Cov_Beta Centrado:\n")
+print(cov_Betac, digits = 4)
+
+### y_hat
+data.frame(
+  y_hat = X012 %*% Beta012 |> round(3),
+  y_hatc = Xc %*% Betac |> round(3)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("y_hat", "y_hat centrado")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+
+
+
+# 7.1 Regressão Linear Múltipla - Teste Hip ------------------------------
+
+## Dados
+
+y <- c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14)
+
+x0 <- matrix(data = 1, nrow = length(y), ncol = 1)
+colnames(x0) <- ("x0")
+
+x1 <- c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8)
+
+x2 <- c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+
+X <- cbind(x0, x1, x2)
+X
+
+### Matrizes de interesse
+
+k <- 2
+
+n <- length(y)
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+
+Jnn <- jn %*% t(jn)
+
+In <- diag(n)
+
+X12 <- cbind(x1, x2)
+X12
+
+### Matriz X12 centrada
+
+Xc <- (In - (1 / n) * Jnn) %*% X12
+Xc
+
+## Teste de Regressão Global (beta1 = 0)
+
+### Total
+
+#### Soma de quadrados
+SQTot <- t(y) %*% (In - (1 / n) * Jnn) %*% y
+SQTot
+
+#### Graus de Liberdade
+gl_tot <- n - 1
+gl_tot
+
+### Regressão
+
+#### Beta1
+Beta1 <- solve(t(Xc) %*% Xc) %*% t(Xc) %*% y
+Beta1
+
+#### Soma de quadrados
+SQReg <- t(Beta1) %*% t(Xc) %*% y
+SQReg
+
+#### Graus de Liberdade
+gl_reg <- k
+gl_reg
+
+#### Quadrado Médio
+QMReg <- SQReg / gl_reg
+QMReg
+
+### Resíduos
+
+#### Soma de quadrados
+SQRes <- SQTot - SQReg
+SQRes
+
+#### Graus de Liberdade
+gl_res <- n - k - 1
+gl_res
+
+#### Quadrado Médio
+QMRes <- SQRes / gl_res
+QMRes
+
+### Estatística F e p-valor
+Fcalc1 <- QMReg / QMRes
+Fcalc1
+
+ftab1 <- qf(0.95, k, n - k - 1)
+ftab1
+
+p_valor1 <- 1 - pf(Fcalc1, k, n - k - 1)
+p_valor1
+
+## Teste sobre um subconjunto dos betas (beta2 = 0)
+
+X01 <- cbind(x0, x1)  # Variáveis importantes em X1Beta1
+X01
+
+X2 <- as.matrix(x2)   # Variáveis desprezíveis em X2Beta2
+X2
+
+A1 <- X %*% solve(t(X) %*% X) %*% t(X) 
+A1
+
+A2 <- X01 %*% solve(t(X01) %*% X01) %*% t(X01)
+A2
+
+SQB2_B1 <- t(y) %*% (A1 - A2) %*% y
+SQB2_B1
+
+h <- ncol(X2)
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc2 <- QMB2_B1 / QMRes
+Fcalc2
+
+ftab2 <- qf(0.95, h, n - k - 1)
+ftab2
+
+p_valor2 <- 1 - pf(Fcalc2, h, n - k - 1)
+p_valor2
+
+## Hipótese Linear Geral (H0: C*Beta = 0 ou H0: beta1=beta2=0)
+### H0: B1 = B2 = 0 usando HIPÓTESE LINEAR GERAL
+
+C <- matrix(data = c(0, 1, 0, 0, 0, 1), ncol = 3, byrow = TRUE)
+C
+
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y
+Beta
+
+CBeta <- C %*% Beta
+CBeta
+
+SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+SQHip
+
+gl_hip <- nrow(C)
+gl_hip
+
+QMHip <- SQHip / gl_hip
+QMHip
+
+Fcalc3 <- QMHip / QMRes
+Fcalc3
+
+ftab3 <- qf(0.95, gl_hip, n - k - 1)
+ftab3
+
+p_valor3 <- 1 - pf(Fcalc3, gl_hip, n - k - 1)
+p_valor3
+
+
+
+# 7.2 Regressão Linear Múltipla - Teste Hip -------------------------------
+
+## Dados
+
+y1 <- c(41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6)
+
+y2 <- c(45.9,53.3,57.5,58.8,60.6,58.0,58.6,52.4,56.9,55.4,46.9,57.3,55.0,58.9,50.3,61.1,62.9,60.0,60.6)
+
+n <- length(y2)
+x0 <- rep(1, n)
+
+x1 <- c(162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160)
+
+x2 <- c(23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34)
+
+x3 <- c(3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5)
+
+x11 <- x1*x1
+
+x22 <- x2*x2
+
+x33 <- x3*x3
+
+x12 <- x1*x2
+
+x13 <- x1*x3
+
+x23 <- x2*x3
+
+X <- cbind(x0, x1, x2, x3, x11, x22, x33, x12, x13, x23)
+X
+
+Jnn <- matrix(data = 1, nrow = n, ncol = n)
+
+In <- diag(n)
+
+## Modelo completo
+
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y2
+Beta |> round(4)
+
+SQTotal <- t(y2) %*% (In - (1 / n) * Jnn) %*% y2
+SQTotal
+
+gltotal <- n - 1
+gltotal
+
+SQReg <- t(y2) %*% (X %*% solve(t(X) %*% X) %*% t(X) - (1 / n) * Jnn) %*% y2
+SQReg
+
+k <- ncol(X) - 1
+gl_reg <- k
+gl_reg
+
+SQRes <- SQTotal - SQReg
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+## Hipótese 1 - H0: Beta4 = Beta5 = Beta6 = Beta7 = Beta8 = Beta9 = 0
+X1 <- cbind(x0, x1, x2, x3)
+X1
+
+SQReg1 <- t(y2) %*% (X1 %*% solve(t(X1) %*% X1) %*% t(X1) - (1 / n) * Jnn) %*% y2
+SQReg1
+
+gl_regB1 <- ncol(X1) - 1
+gl_regB1
+
+SQB2_B1 <- SQReg - SQReg1
+SQB2_B1
+
+gl_regB2 <- gl_reg - gl_regB1
+h <- gl_regB2
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc1 <- QMB2_B1 / QMRes
+Fcalc1
+
+p_valor1 <- 1 - pf(Fcalc1, h, gl_res)
+p_valor1
+
+
+## Hipótese 2 - H0: Beta1 = Beta2 = Beta3 = 0
+X1 <- cbind(x0, x11, x22, x33, x12, x13, x23)
+X1
+
+SQReg1 <- t(y2) %*% (X1 %*% solve(t(X1) %*% X1) %*% t(X1) - (1 / n) * Jnn) %*% y2
+SQReg1
+
+gl_regB1 <- ncol(X1) - 1
+gl_regB1
+
+SQB2_B1 <- SQReg - SQReg1
+SQB2_B1
+
+gl_regB2 <- gl_reg - gl_regB1
+h <- gl_regB2
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc2 <- QMB2_B1 / QMRes
+Fcalc2
+
+p_valor2 <- 1 - pf(Fcalc2, h, gl_res)
+p_valor2
+
+
+## Hipótese Linear Geral (Global)
+### H0: Beta1 = Beta2 = Beta3 = 0
+C <- matrix(
+  c(0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 3, byrow = TRUE
+)
+C
+
+CBeta <- C %*% Beta
+CBeta
+
+SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+SQHip
+
+q <- nrow(C)
+
+QMHip <- SQHip / q
+QMHip
+
+Fcalc3 <- QMHip / QMRes
+Fcalc3
+
+p_valor3 <- 1 - pf(Fcalc3, q, gl_res)
+p_valor3
+
+### H0: Beta1 = Beta2 = Beta3
+C1 <- matrix(
+  c(0, 1, -1,  0, 0, 0, 0, 0, 0, 0,
+    0, 0,  1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C1
+
+C2 <- matrix(
+  c(0, 2, -1, -1, 0, 0, 0, 0, 0, 0,
+    0, 0,  1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C2
+
+C3 <- matrix(
+  c(0, 1, 0,  -1, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C3
+
+#### Função
+hlg <- function(C) {
+  
+  # Calculando CBeta
+  CBeta <- C %*% Beta |> round(3)
+  
+  # Calculando SQHip
+  SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+  
+  # Obtendo o número de linhas de C
+  q <- nrow(C)
+  
+  # Calculando QMHip
+  QMHip <- SQHip / q
+  
+  # Calculando Fcalc
+  Fcalc3 <- QMHip / QMRes
+  
+  # Calculando p_valor
+  p_valor3 <- 1 - pf(Fcalc3, q, gl_res)
+  
+  # Retornando resultados
+  return(list(CBeta = CBeta, SQHip = SQHip, QMHip = QMHip, Fcalc = Fcalc3, p_valor = p_valor3))
+}
+
+#### Teste
+# Definindo os valores para C
+C_lista <- list(C1 = C1, C2 = C2, C3 = C3)
+
+# Criando uma lista para armazenar os resultados
+resultados <- list()
+
+# Calculando os resultados para cada objeto C
+for (i in 1:length(C_lista)) {
+  resultados[[paste0("C", i)]] <- hlg(C_lista[[i]])
+}
+
+#### Resultado
+tabela_resultados <- data.frame(
+  SQHip = sapply(resultados, function(x) x$SQHip),
+  QMHip = sapply(resultados, function(x) x$QMHip),
+  Fcalc = sapply(resultados, function(x) x$Fcalc),
+  p_valor = sapply(resultados, function(x) x$p_valor)
+)
+
+tabela_resultados
+
+
+
+# 7.3 Regressão Linear Múltipla - Teste Hip -------------------------------
+
+## Dados
+y1 <- c(41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6)
+
+n <- length(y1)
+x0 <- rep(1, n)
+
+x1 <- c(162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160)
+
+x2 <- c(23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34)
+
+x3 <- c(3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5)
+
+Jnn <- matrix(data = 1, nrow = n, ncol = n)
+
+In <- diag(n)
+
+X <- cbind(x0, x1, x2, x3)
+X
+
+k <- ncol(X) - 1	     # número de variáveis regressoras
+k
+
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y1
+Beta |> round(4)
+
+## Hipótese 1 - Teste de Regressão Global - H0: 2Beta1 = 2Beta2 = 2Beta3 = 0
+
+C <- matrix(
+  c(0, -2,  2,  0, 
+    0,  0,  2, -1),
+  nrow = 2, byrow = TRUE
+)
+C
+
+CBeta <- C %*% Beta
+CBeta
+
+SQHip <- t(CBeta) %*% solve(C %*% (solve(t(X) %*% X)) %*% t(C)) %*% CBeta
+SQHip
+
+gl_Hip <- nrow(C)
+gl_Hip
+
+QMHip <- SQHip / gl_Hip
+QMHip
+
+SQRes <- t(y1) %*% (In - X %*% solve(t(X) %*% X) %*% t(X)) %*% y1
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+Fcalc1 <- QMHip / QMRes
+Fcalc1
+
+Ftab1 <- qf(0.95, gl_Hip, gl_res)
+Ftab1
+
+p_valor1 <- 1 - pf(Fcalc1, gl_Hip, gl_res) 
+p_valor1
+
+## Hipótese 2 - Teste de Regressão Hipótese Linear Geral para diversas matrizes C - H0: Beta1 = Beta2 = Beta3 = 0
+
+### Matriz C1
+
+C1 <- matrix(
+  c(0, 1, -1,  0, 
+    0, 0,  1, -1),
+  nrow = 2, byrow = TRUE
+)
+C1
+
+SQ_C1Beta <- t(C1 %*% Beta) %*% solve(C1 %*% (solve(t(X) %*% X)) %*% t(C1)) %*% C1 %*% Beta
+SQ_C1Beta
+
+### Matriz C2
+
+C2 <- matrix(
+  c(0, 1, -1,  0, 
+    0, 1,  0, -1),
+  nrow = 2, byrow = TRUE
+)
+C2
+
+SQ_C2Beta <- t(C2 %*% Beta) %*% solve(C2 %*% (solve(t(X) %*% X)) %*% t(C2)) %*% C2 %*% Beta
+SQ_C2Beta
+
+### Matriz C3
+
+C3 <- matrix(
+  c(0, 2, -1, -1, 
+    0, 0,  1, -1),
+  nrow = 2, byrow = TRUE
+)
+C3
+
+SQ_C3Beta <- t(C3 %*% Beta) %*% solve(C3 %*% (solve(t(X) %*% X)) %*% t(C3)) %*% C3 %*% Beta
+SQ_C3Beta
+
+## Hipótese 3 - H0: Beta1 = Beta2
+
+### Hipótese Linear Geral
+
+C <- matrix(c(0, 1, -1, 0), nrow = 1, byrow = TRUE)
+C
+
+CBeta <- C %*% Beta
+CBeta
+
+gl_Hip <- nrow(C)
+gl_Hip
+
+SQHip <- t(CBeta) %*% solve(C %*% (solve(t(X) %*% X)) %*% t(C)) %*% CBeta
+SQHip
+
+QMHip <- SQHip / gl_Hip
+QMHip
+
+Fcalc2 <- QMHip / QMRes
+Fcalc2
+
+p_valor2 <- 1 - pf(Fcalc2, gl_Hip, gl_res)
+p_valor2
+
+
+### Modelo completo e modelo reduzido
+
+x12 <- x1 + x2           # Modelo reduzido: y = B0 + B12(x1+x2) + B3x3 + e
+x12
+
+Xr <- cbind(x0, x12, x3) # Matriz Xr do modelo reduzido
+Xr
+
+SQHip2 <- t(y1) %*% (X %*% solve(t(X) %*% X) %*% t(X) - Xr %*% solve(t(Xr) %*% Xr) %*% t(Xr)) %*% y1
+SQHip2
+
+
+
+# 7.4 Regressão Linear Múltipla - Métodos Bonferroni e Scheffé ------------
+
+y <- c(2,3,2,7,6,8,10,7,8,12,11,14)
+
+n <- length(y)
+
+x0 <- rep(1, n)
+
+x1 <- c(0,2,2,2,4,4,4,6,6,6,8,8)
+
+x2 <- c(2,6,7,5,9,8,7,10,11,9,15,13)
+
+X <- cbind(x0, x1, x2)
+X
+
+k <- ncol(X) - 1
+
+In <- diag(n)
+
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y
+Beta
+
+a0 <- matrix(data = c(1, 0, 0), ncol = 1, byrow = TRUE)
+a0
+
+Beta0 <- t(a0) %*% Beta
+Beta0
+
+a1 <- matrix(data = c(0, 1, 0), ncol = 1, byrow = TRUE)
+a1
+
+Beta1 <- t(a1) %*% Beta
+Beta1
+
+a2 <- matrix(data = c(0,0,1), ncol = 1, byrow = TRUE)
+a2
+
+Beta2 <- t(a2) %*% Beta
+Beta2
+
+SQRes <- t(y) %*% (In - X %*% solve(t(X) %*% X) %*% t(X)) %*% y
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+s <- sqrt(QMRes)
+s
+
+G <- solve(t(X) %*% X)
+G
+
+t1 <- Beta1 / (s %*% sqrt(t(a1) %*% G %*% a1))
+t1
+
+t2 <- Beta2 / (s %*% sqrt(t(a2) %*% G %*% a2))
+t2
+
+p_valor_t1 <- 2 * (1 - pt(abs(t1), gl_res))
+p_valor_t1
+
+p_valor_t2 <- 2 * (1 - pt(abs(t2), gl_res))
+p_valor_t2
+
+p <- 1 - 0.05 / (2 * k)
+p
+
+t_tab <- qt(0.975, n - k - 1)
+t_tab
+
+t_Bon <- qt(p, n - k - 1) 		# calcula t-tabelado para Método de Bonferroni
+t_Bon
+
+t_Scheffe <- sqrt((k + 1) %*% qf(0.95, k + 1, n - k - 1)) |> as.numeric() # calcula t-tabelado para Método de Scheffé
+t_Scheffe

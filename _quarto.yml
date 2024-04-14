@@ -33,9 +33,13 @@ book:
       chapters:
         - exemplo3.1.qmd
 
-    # - part: "Regressão Linear Múltipla"
-    #   chapters:
-    #     - exemplo4.1.qmd
+    - part: "Regressão Linear Múltipla"
+      chapters:
+        - exemplo4.1.qmd
+        - exemplo4.2.qmd
+        - exemplo4.3.qmd
+        - exemplo4.4.qmd
+        - exemplo4.5.qmd
 
 format:
   html:

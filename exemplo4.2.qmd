@@ -1,0 +1,577 @@
+# Teste de Hipótese - Exemplo 1
+
+Desenvolveremos testes de hipóteses para os parâmetros do vetor $\boldsymbol{\beta} = [\beta_1, \beta_2,\dots, \beta_k]'$ no modelo
+
+$$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+
+Faremos a mesma suposição realizada no @sec-rlmest, em que $\boldsymbol{\epsilon} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$ ou $\mathbf{y} \sim N_n(\mathbf{X}\boldsymbol{\beta},\sigma^2\mathbf{I})$, onde $\mathbf{X}$ é uma matriz $n \times(k+1)$, de posto $k+1 < n$, sendo $n$ o número de observações e $k$, o número de variáveis $x$.
+
+Isso garante que as somas de quadrados da regressão e dos resíduos são formas quadráticas independentes, sendo pressuposições importantes para a realização da análise de variância.
+
+Do @sec-rlmest, sabemos que:
+
+- Modelo de regressão múltipla na forma centrada:
+
+$$
+\mathbf{y} = 
+\begin{bmatrix}
+\mathbf{j} & \mathbf{X}_c
+\end{bmatrix}
+\begin{bmatrix}
+\alpha \\ \boldsymbol{\beta_1}
+\end{bmatrix}
++
+\boldsymbol{\epsilon}
+=
+\alpha \mathbf{j} + \mathbf{X}_c \boldsymbol{\beta_1} + \boldsymbol{\epsilon}
+$$
+
+em que 
+
+$$\mathbf{X}_c = \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{X_1}$$
+
+e $\mathbf{X_1} = \begin{bmatrix}\mathbf{x_1} & \mathbf{x_2} & \dots & \mathbf{x_k}\end{bmatrix}$.
+
+- Estimadores de MQO de $\alpha$ e $\boldsymbol{\beta_1}$:
+
+$$
+\begin{bmatrix}
+\hat{\alpha} \\ \hat{\boldsymbol{\beta_1}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\bar{y} \\ (\mathbf{X'_c X_c})^{-1} \mathbf{X'_c} \mathbf{y}
+\end{bmatrix}
+$$
+
+- Soma de quadrados da regressão (`SQReg`):
+
+$$
+SQReg = \mathbf{y'}\left[\mathbf{X(X'X)}^{-1}\mathbf{X'} - \frac{1}n \mathbf{J}\right]\mathbf{y} \space, \quad \text{ com k graus de liberdade}
+$$
+
+- Soma de quadrados total corrigida (`SQTot`):
+
+$$
+SQTot = \mathbf{y'}[\mathbf{I} - \frac{1}n \mathbf{J}]\mathbf{y} \space, \quad \text{ com n-1 graus de liberdade}
+$$
+
+- Soma de quadrados de resíduo (`SQRes`):
+
+$$
+SQRes = \mathbf{y'} (\mathbf{I - X(X'X)^{-1}X')y} \space, \quad \text{ com (n-k-1) graus de liberdade}
+$$
+
+Para o exemplo, utilizaremos os mesmos dados do @sec-rlmest.
+
+```{r}
+#| echo: false
+
+data.frame(
+  Obs = 1:12,
+  y = c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14),
+  x1 = c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8),
+  x2 = c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14)
+
+x0 <- matrix(data = 1, nrow = length(y), ncol = 1)
+colnames(x0) <- ("x0")
+
+x1 <- c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8)
+
+x2 <- c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+
+X <- cbind(x0, x1, x2)
+X
+```
+
+```{r}
+k <- 2    # número de variáveis regressoras x
+
+n <- length(y)
+
+jn <- matrix(data = 1, nrow = n, ncol = 1)
+
+Jnn <- jn %*% t(jn)
+
+In <- diag(n)
+
+X12 <- cbind(x1, x2)
+X12
+
+Xc <- (In - (1 / n) * Jnn) %*% X12    # Matriz X12 centrada
+Xc
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc iml;
+
+* Exemplo 8.1 - usando dados do Exemplo 7.2  (Tabela 7.1);
+* (Freund & Minton, 1979, pág.36-39);
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+X = {1 0 2,1 2 6,1 2 7,1 2 5,1 4 9,1 4 8,1 4 7,1 6 10,1 6 11,1 6 9,1 8 15,1 8 13};
+print y '   '  X;
+```
+
+```{r}
+#| eval: false
+
+n = nrow(y);
+k = 2; 	* número de variáveis regressoras x's;
+X1 = X[,2:3];
+In = I(n);
+Jnn = J(n,n,1);
+Xc = (In - (1/n)*Jnn)*X1;	* Matriz X1 centrada;
+```
+
+:::
+
+## Teste de Regressão Global (Geral)
+
+Como hipóteses do teste de regressão global, assumiremos: 
+
+$$
+\begin{align}
+H_0&: \boldsymbol{\beta_1} = 0 \\
+H_a&: \text{Pelo menos um dos } \beta's \text{ não é nulo}
+\end{align}
+$$
+
+onde $\boldsymbol{\beta_1} = [\beta_1, \dots, \beta_k]'$.
+
+Em outras palavras:
+
+$$
+\begin{align}
+H_0&: \text{Nenhum dos x's prediz y} \\
+H_a&: \text{Pelo menos uma das variáveis x's é importante na predição de y}
+\end{align}
+$$
+
+O quadro da ANOVA para o teste F de $H_0: \boldsymbol{\beta_1} = 0$ fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Devida a Beta1", "Resíduo", "Total"),
+  "gl" = c("k", "n-k-1", "n-1"),
+  "QM" = c("SQReg/k", "SQRes/(n-k-1)", "SQTot/(n-1)"),
+  "F" = c("QMReg/QMRes", NA, NA)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+onde $n$ são os números de observações e $k$, o número de variáveis $x$.
+
+::: panel-tabset
+
+### R
+
+A soma de quadrados e os graus de liberdade totais são obtidos da seguinte maneira:
+
+```{r}
+SQTot <- t(y) %*% (In - (1 / n) * Jnn) %*% y
+SQTot
+
+gl_tot <- n - 1
+gl_tot
+```
+
+Já a soma de quadrados, quadrado médio e os graus de liberdade da regressão:
+
+```{r}
+Beta1 <- solve(t(Xc) %*% Xc) %*% t(Xc) %*% y
+Beta1
+
+SQReg <- t(Beta1) %*% t(Xc) %*% y
+SQReg
+
+gl_reg <- k
+gl_reg
+
+QMReg <- SQReg / gl_reg
+QMReg
+```
+
+Para os resíduos, temos as seguintes soma de quadrados, quadrado médio e graus de liberdade:
+
+```{r}
+SQRes <- SQTot - SQReg
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+A estatística F e o p-valor:
+
+```{r}
+Fcalc1 <- QMReg / QMRes
+Fcalc1
+
+p_valor1 <- 1 - pf(Fcalc1, k, n - k - 1)
+p_valor1
+```
+
+Dessa forma, o quadro da ANOVA para o teste $H_0: \boldsymbol{\beta_1} = 0$ fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab1 <- qf(0.95, k, n - k - 1)
+
+data.frame(
+  "FV" = c("Regressão", "Resíduo", "Total"),
+  "gl" = c(gl_reg, gl_res, gl_tot),
+  "SQ" = c(SQReg, SQRes, SQTot) |> round(3),
+  "QM" = c(QMReg, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc1, NA, NA) |> round(3),
+  "Ftab" = c(ftab1, NA, NA) |> round(2),
+  "p.valor" = c(p_valor1, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão Global - H0: Beta1 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 2, 9)$, há evidência para rejeitarmos $H_0: \boldsymbol{\beta_1} = 0$ ao nível de 5% de significância, ou seja, pelo menos uma das variáveis regressoras, $x_1$ ou $x_2$, é importante para predizer $y$. Da mesma maneira, o p-valor corrobora com o resultado, pois é menor que 0,05.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* Cálculo das SQ´s para testar hipótese H0: Beta1 = 0;
+SQTotal = t(y)*(In - (1/n)*Jnn)*y;	* Calcula SQTotal;
+gl_total = n-1;
+
+Beta1 = inv(t(Xc)*Xc)*t(Xc)*y;		* Calcula Beta1;
+SQReg = t(Beta1)*t(Xc)*y;
+gl_reg = k;
+QMReg = SQReg/gl_reg;
+
+SQRes = SQTotal - SQReg;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+
+Fcalc1 = QMReg/QMRes;
+p_valor1 = 1-cdf('F',Fcalc1,k,n-k-1);
+
+print 'Seção 8.1: TESTE DE REGRESSÃO GLOBAL - H0: Beta1 = 0',;
+print 'Regressão' gl_reg   SQReg[format=10.4] QMReg[format=10.4] Fcalc1[format=10.3] p_valor1[format=10.6],,
+      'Resíduo  ' gl_res   SQRes[format=10.4] QMRes[format=10.4],,
+      'Total    ' gl_total SQTotal[format=10.4],,,,;
+```
+
+:::
+
+### Teste para um subconjunto de $\beta's$
+
+Neste caso, estamos interessados em testar a hipótese de que um subconjunto das variáveis regressoras $x's$ não é importante em predizer $y$.
+
+Como hipóteses do teste de regressão, assumiremos: 
+
+$$
+\begin{align}
+H_0&: \boldsymbol{\beta_2} = 0 \\
+H_a&: \boldsymbol{\beta_2} \ne 0
+\end{align}
+$$
+
+O **modelo completo**, que inclui todas as variáveis, pode ser escrito como:
+
+$$
+\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}
+=
+\begin{bmatrix}
+\mathbf{X_1} & \mathbf{X_2}
+\end{bmatrix}
+\begin{bmatrix}
+\boldsymbol{\beta_1} \\ \boldsymbol{\beta_2}
+\end{bmatrix}
++
+\boldsymbol{\epsilon}
+=
+\mathbf{X_1} \boldsymbol{\beta_1} + \mathbf{X}_2 \boldsymbol{\beta_2} + \boldsymbol{\epsilon}
+$$
+
+onde $\boldsymbol{\beta_2}$ apresenta os parâmetros a serem testados em $H_0: \boldsymbol{\beta_2} = 0$.
+
+Já o **modelo reduzido** pela hipótese $H_0: \boldsymbol{\beta_2} = 0$ será:
+
+$$
+\mathbf{y} = \mathbf{X_1} \boldsymbol{\beta_1}^* + \boldsymbol{\epsilon}^*
+$$
+
+Seja $h$ o número de parâmetros em $\boldsymbol{\beta_2}$, temos:
+
+- $\mathbf{X_2}$ uma matriz $n \times h$ e $\boldsymbol{\beta_2}$ $h \times 1$;
+
+- $\mathbf{X_1}$ uma matriz $n \times (k+1-h)$ e $\boldsymbol{\beta_1}$ $(k+1-h) \times 1$.
+
+::: panel-tabset
+
+### R
+
+No caso do nosso exemplo, sob a hipótese $H_0: \boldsymbol{\beta_2} = 0$, os vetores de parâmetros ficam:
+
+$$
+\boldsymbol{\beta_1} = 
+\begin{bmatrix}
+\beta_0 \\ \beta_1
+\end{bmatrix}
+\text{ e }
+\boldsymbol{\beta_2} = \beta_2
+$$
+
+```{r}
+X01 <- cbind(x0, x1)  # Variáveis importantes em X1Beta1
+X01
+
+X2 <- as.matrix(x2)   # Variáveis desprezíveis em X2Beta2
+X2
+```
+
+Para desenvolver uma estatística para testar $H_0: \boldsymbol{\beta_2} = 0$, precisamos escrever as somas de quadrados em termos de formas quadráticas de $\mathbf{y}$, dado por:
+
+$$
+SQ(\boldsymbol{\beta_2} \mid \beta_1) = \mathbf{y'} [\mathbf{A_1-A_2}] \mathbf{y}
+$$
+
+onde $A_1 = \mathbf{X(X'X)^{-1}X'}$ e $A_2 = \mathbf{X_1(X'_1X_1)^{-1}X'_1}$.
+
+```{r}
+A1 <- X %*% solve(t(X) %*% X) %*% t(X) 
+A1
+
+A2 <- X01 %*% solve(t(X01) %*% X01) %*% t(X01)
+A2
+
+SQB2_B1 <- t(y) %*% (A1 - A2) %*% y
+SQB2_B1
+```
+
+Tendo a soma de quadrados $SQ(\boldsymbol{\beta_2} \mid \beta_1)$, podemos calcular o seu quadrado médio ($QM(\boldsymbol{\beta_2} \mid \beta_1)$), bem como a estatística F e o p-valor.
+
+```{r}
+h <- ncol(X2)         # Número de parâmetros x em Beta2 (g.l de Beta2|Beta1)
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc2 <- QMB2_B1 / QMRes
+Fcalc2
+
+p_valor2 <- 1 - pf(Fcalc2, h, n - k - 1)
+p_valor2
+```
+
+Dessa forma, o quadro da ANOVA para o teste $H_0: \boldsymbol{\beta_2} = 0$ fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab2 <- qf(0.95, h, n - k - 1)
+
+data.frame(
+  "FV" = c("Devida a Beta2 ajust. Beta1", "Resíduo", "Total"),
+  "gl" = c(h, gl_res, gl_tot),
+  "SQ" = c(SQB2_B1, SQRes, SQTot) |> round(3),
+  "QM" = c(QMB2_B1, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc2, NA, NA) |> round(3),
+  "Ftab" = c(ftab2, NA, NA) |> round(2),
+  "p.valor" = c(p_valor2, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão de Subconjunto - H0: Beta2 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 1, 9)$, há evidência para rejeitarmos $H_0: \boldsymbol{\beta_2} = 0$ ao nível de 5% de significância, ou seja, os termos de segunda ordem (em $\boldsymbol{\beta_2}$) não são todos nulos e são importantes para a predição de $\mathbf{y}$.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* SQ´s para testar hipótese H0: Beta2 = 0;
+X1 = X[,1:2]; 	* Variáveis importantes em X1Beta1;
+X2 = X[,3];   	* Variáveis desprezíveis em X2Beta2; 
+A1 = X*inv(t(X)*X)*t(X);
+A2 = X1*inv(t(X1)*X1)*t(X1);
+h = ncol(X2);
+SQB2_B1 = t(y)*(A1-A2)*y;
+QMB2_B1 = SQB2_B1/h;
+
+Fcalc2 = QMB2_B1/QMRes;
+p_valor2 = 1-cdf('F',Fcalc2,h,n-k-1);
+
+print 'Seção 8.2: TESTE PARA SUBCONJUNTO DOS BETA´S - H0: Beta2 = 0',
+      '                (MODELO COMPLETO versus MODELO REDUZIDO)',;
+print 'Beta2 | Beta1' h SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc2[format=10.4] p_valor2[format=10.4],
+      'Resíduo      ' gl_res SQRes[format=10.4] QMRes[format=10.4],,,,;
+```
+
+:::
+
+## Hipótese Linear Geral {#sec-hlg}
+
+Na hipótese linear geral, assumimos a hipótese $H_0: \mathbf{C} \boldsymbol{\beta} = 0$, onde $\mathbf{C}$ é uma matriz de coeficientes $q \times (k+1)$ e de posto $q \le k+1$.
+
+$$
+\begin{align}
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 0 \\
+H_a &: \mathbf{C} \boldsymbol{\beta} \ne 0 
+\end{align}
+$$
+
+Dessa maneira, podemos expressar qualquer tipo de hipótese, de acordo com os coeficientes presentes na matriz $\mathbf{C}$.
+
+Para o exemplo até então utilizado, podemos formular a hipótese $H_0: \boldsymbol{\beta_1} = \boldsymbol{\beta_2} = 0$ usando a hipótese linear geral.
+
+$$
+\begin{align}
+H_0 &: \boldsymbol{\beta_1} = \boldsymbol{\beta_2} = 0 \\
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &:
+\begin{bmatrix}
+\beta_1 \\ \beta_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C <- matrix(data = c(0, 1, 0, 0, 0, 1), ncol = 3, byrow = TRUE)
+C
+
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y
+Beta
+
+CBeta <- C %*% Beta
+CBeta
+```
+
+A soma de quadrados da hipótese ($SQHip$) é dado por:
+
+$$
+SQHip = (\mathbf{C} \hat{\boldsymbol{\beta}})'[\mathbf{C (X'X)^{-1} C'}]^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}})
+$$
+
+com $q = \text{ posto}(\mathbf{C}) = \text{número linhas de }\mathbf{C}$ graus de liberdade.
+
+```{r}
+SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+SQHip
+
+gl_hip <- nrow(C)
+gl_hip
+
+QMHip <- SQHip / gl_hip
+QMHip
+
+Fcalc3 <- QMHip / QMRes
+Fcalc3
+
+p_valor3 <- 1 - pf(Fcalc3, gl_hip, n - k - 1)
+p_valor3
+```
+
+Dessa forma, o quadro da ANOVA para o teste $H_0: \boldsymbol{\beta_1} = \boldsymbol{\beta_2} = 0$ utilizando a hipótese linear geral, fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab3 <- qf(0.95, gl_hip, n - k - 1)
+
+data.frame(
+  "FV" = c("H0:B1=B2=0", "Resíduo", "Total"),
+  "gl" = c(gl_hip, gl_res, gl_tot),
+  "SQ" = c(SQHip, SQRes, SQTot) |> round(3),
+  "QM" = c(QMHip, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc3, NA, NA) |> round(3),
+  "Ftab" = c(ftab3, NA, NA) |> round(2),
+  "p.valor" = c(p_valor3, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão para hipótese linear geral - H0: Beta1 = Beta2 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 2, 9)$, há evidência para rejeitarmos $H_0: \boldsymbol{\beta_1} = \boldsymbol{\beta_2} = 0$ ao nível de 5% de significância.
+
+### SAS
+
+```{r}
+#| eval: false
+
+*Hipótese Linear Geral H0: C*Beta = 0 ou H0: beta1=beta2=0;
+C = {0 1 0, 0 0 1};
+gl_hip = nrow(C);
+Beta = inv(t(X)*X)*t(X)*y;
+SQHip = t(C*Beta)*inv(C*inv(t(X)*X)*t(C))*C*Beta;
+QMHip = SQHip/gl_hip;
+Fcalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,gl_hip,n-k-1);
+
+print 'Seção 8.3: H0: B1 = B2 = 0 usando HIPÓTESE LINEAR GERAL',;
+print 'H0: B1 = B2 = 0   ' gl_hip SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.3] p_valor3[format=10.6],,
+      'Resíduo           ' gl_res SQRes[format=10.4] QMRes[format=10.4],,,,;
+```
+
+:::

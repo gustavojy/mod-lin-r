@@ -1,0 +1,44 @@
+options nodate nocenter;
+* ---------------------------------------------- ;
+* Exemplo 8.5.2 da 1a edição do livro do Rencher ;
+* ---------------------------------------------- ;
+proc iml;
+*pág.286;
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+n = nrow(y);
+x0 = j(n,1,1);
+x1 = {0,2,2,2,4,4,4,6,6,6,8,8};
+x2 = {2,6,7,5,9,8,7,10,11,9,15,13};
+X = x0||x1||x2;
+k = ncol(X)-1;
+In = I(n);
+
+Beta = inv(t(X)*X)*t(X)*y;
+a0 = {1,0,0}; Beta0 = t(a0)*Beta; 
+a1 = {0,1,0}; Beta1 = t(a1)*Beta;
+a2 = {0,0,1}; Beta2 = t(a2)*Beta;
+
+SQRes = t(y)*(In - X*inv(t(X)*X)*t(X))*y;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+s = sqrt(QMRes);
+G = inv(t(X)*X);
+
+t1 = Beta1/(s*sqrt(t(a1)*G*a1));
+t2 = Beta2/(s*sqrt(t(a2)*G*a2));
+p_valor_t1 = 2*(1-cdf('t',abs(t1),gl_res));
+p_valor_t2 = 2*(1-cdf('t',abs(t2),gl_res));
+
+p = 1-0.05/(2*k);
+t_tab = tinv(0.975,n-k-1);  					* calcula t-tabelado;
+t_Bon = tinv(p,n-k-1);  						* calcula t-tabelado para Método de Bonferroni;
+t_Scheffe = sqrt((k+1)*finv(0.95,k+1,n-k-1));	* calcula t-tabelado para Método de Scheffé;
+print 'Exemplo 8.5.2' ,, 'Testes de hipótese H0: Bi = 0 vs Ha: Bi dif 0',,
+	  'H01: B1 = 0  ' 't_cal1 =' t1[format=8.4] '     p-valor = ' p_valor_t1[format=10.4],,
+	  'H02: B2 = 0  ' 't_cal2 =' t2[format=8.4] '     p-valor = ' p_valor_t2[format=10.4],,,,
+	  '----------------------------------------------',
+	  'alfa = 5% => t(0,025; 9 g.l.) ='  t_tab[format=12.4],
+	  '----------------------------------------------',,,
+	  'Método de Bonferroni', 't(0,0125; 9 g.l.) =' t_Bon[format=12.4],,,,
+	  'Método de Scheffé   ', 't-Scheffé         =' t_Scheffe[format=12.4];
+quit;

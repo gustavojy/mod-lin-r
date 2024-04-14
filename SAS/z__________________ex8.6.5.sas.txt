@@ -1,0 +1,49 @@
+* ------------------------------------------------------------------------------;
+* Exercício 8.6.5 da 1a edição do livro do Rencher - Intervalo de predição (95%);
+* ------------------------------------------------------------------------------;
+options nocenter ls=90 ps=1000;
+proc iml;
+*pág.301;
+y  = {95,80,0,0,79,77,72,66,98,90, 0,95,35,50,72,55,75,66};
+x1 = {96,77,0,0,78,64,89,47,90,93,18,86, 0,30,59,77,74,67};
+n = nrow(y);
+jn = j(n,1,1);
+X = jn||x1;
+k = ncol(X)-1;
+In = I(n);
+Jnn = J(n,n,1);
+
+Beta = inv(t(X)*X)*t(X)*y;
+y_hat = X*Beta;
+Beta0 = Beta[1,1]; 	Beta1 = Beta[2,1];
+xbarra = t(jn)*x1/n;
+SQX = t(x1)*(In-(1/n)*Jnn)*x1;
+x0 = 80;
+y0 = Beta0 + Beta1*x0;
+t_tab = tinv(0.975,n-k-1);
+SQRes = t(y)*(In-X*inv(t(X)*X)*t(X))*y;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+s = sqrt(QMRes);
+d = sqrt(1+(1/n)+((x0-xbarra)**2)/SQX);
+liminf = y0-t_tab*s*d;
+limsup = y0+t_tab*s*d;
+print 'Solução: ' Beta[format=8.5],,, y x1 y_hat[format=8.4];
+print 'Exercício 8.6.5 - Intervalo de predição (95%) para x0 = 80',,
+      'Intervalo de predição (95%) =  [' liminf[format=8.4] ',' limsup[format=8.4] ']',,,
+      'em que:', x0 y0[format=10.4] s[format=10.4]  t_tab[format=10.4];
+
+dados = y||x1; 
+create Exemplo8_6_5 from dados;
+append from dados;
+close Exemplo8_6_5;
+quit;
+
+data Exemplo8_6_5;
+ set Exemplo8_6_5;
+ rename COL1=y COL2=x1;
+
+proc reg data=Exemplo8_6_5;
+model y = x1 / r cli clm;
+run;
+

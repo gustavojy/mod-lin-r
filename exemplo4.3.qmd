@@ -1,0 +1,801 @@
+# Teste de Hipótese - Exemplo 2 {#sec-th2}
+
+```{r}
+#| echo: false
+
+options(scipen = 999999, knitr.kable.NA = '')
+```
+
+Nesta seção, traremos outro exemplo de teste de hipótese em regressão linear múltipla.
+
+Considere uma reação química para formar um determinado material desejado. Seja a variável dependente $y_2$ o percentual convertido no material desejado e $y_1$ e $y_1$ o percentual de material não convertido.
+
+Como variáveis preditoras temos:
+
+- $x_1$ = Temperatura (°C);
+
+- $x_2$ = Concentração do reagente (%);
+
+- $x_3$ = Tempo de reação (horas).
+
+O **modelo completo** de regressão múltipla de $y_2$ é dado por:
+
+$$
+\begin{align}
+y_2 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_4x_1^2 + \beta_5x_2^2 + \beta_6x_3^2 + \beta_7x_1x_2 +\\
+&+ \beta_8x_1x_3 + \beta_9x_2x_3 + \epsilon
+\end{align}
+$$
+
+Os dados estão descritos a seguir:
+
+```{r}
+#| echo: false
+
+data.frame(
+  y1 = c(41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6),
+  y2 = c(45.9,53.3,57.5,58.8,60.6,58.0,58.6,52.4,56.9,55.4,46.9,57.3,55.0,58.9,50.3,61.1,62.9,60.0,60.6),
+  x1 = c(162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160),
+  x2 = c(23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34),
+  x3 = c(3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+::: panel-tabset
+
+### R
+
+```{r}
+y1 <- c(41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6)
+
+y2 <- c(45.9,53.3,57.5,58.8,60.6,58.0,58.6,52.4,56.9,55.4,46.9,57.3,55.0,58.9,50.3,61.1,62.9,60.0,60.6)
+
+n <- length(y2)
+x0 <- rep(1, n)
+
+x1 <- c(162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160)
+
+x2 <- c(23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34)
+
+x3 <- c(3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5)
+
+x11 <- x1*x1
+  
+x22 <- x2*x2
+
+x33 <- x3*x3
+
+x12 <- x1*x2
+
+x13 <- x1*x3
+
+x23 <- x2*x3
+```
+
+```{r}
+X <- cbind(x0, x1, x2, x3, x11, x22, x33, x12, x13, x23)
+X
+```
+
+```{r}
+Jnn <- matrix(data = 1, nrow = n, ncol = n)
+
+In <- diag(n)
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+options nodate nocenter ps=1000 ls=120;
+
+proc iml;
+reset noprint;
+*pág.245;
+y1 = {41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6};
+* y1 = % de material que não reagiu;
+y2 = {45.9,53.3,57.5,58.8,60.6,58.0,58.6,52.4,56.9,55.4,46.9,57.3,55.0,58.9,50.3,61.1,62.9,60.0,60.6};
+* y2 = % convertida ao material desejado;
+n = nrow(y1);
+print n;
+In = I(n);
+Jnn = J(n,n,1);
+* c1 = temperatura; * c2 = concentração de reagente; * c3 = tempo de reação;
+c0 = j(n,1,1);
+c1 = {162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160};  
+c2 = {23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34};	    
+c3 = {3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5};					
+c11 = c1#c1; * eleva C1 ao quadrado;
+c22 = c2#c2; 
+c33 = c3#c3; 
+c12 = c1#c2; 
+c13 = c1#c3;
+c23 = c2#c3;
+X = c0||c1||c2||c3||c11||c22||c33||c12||c13||c23;
+```
+
+:::
+
+## Modelo Completo
+
+Para estimar os parâmetros $\beta$ do **modelo completo**, utilizamos o Método dos Mínimos Quadrados Ordinários (MQO):
+
+$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X'X})^{-1} \mathbf{X}' \mathbf{y}
+$$
+
+Além disso, calcularemos as somas de quadrados e o quadrado médio do modelo completo.
+
+$$
+\begin{align}
+&SQReg = \mathbf{y'}\left[\mathbf{X(X'X)}^{-1}\mathbf{X'} - \frac{1}n \mathbf{J}\right]\mathbf{y}, \\
+&\text{ com k graus de liberdade}
+\end{align}
+$$
+
+$$
+SQTot = \mathbf{y'}[\mathbf{I} - \frac{1}n \mathbf{J}]\mathbf{y} \space, \quad \text{ com n-1 graus de liberdade}
+$$
+
+$$
+SQRes = SQTot - SQReg = \mathbf{y'} (\mathbf{I - X(X'X)^{-1}X')y} \space, \quad \text{ com (n-k-1) graus de liberdade}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y2
+Beta |> round(4)
+```
+
+```{r}
+SQTotal <- t(y2) %*% (In - (1 / n) * Jnn) %*% y2
+SQTotal
+
+gltotal <- n - 1
+gltotal
+```
+
+```{r}
+SQReg <- t(y2) %*% (X %*% solve(t(X) %*% X) %*% t(X) - (1 / n) * Jnn) %*% y2
+SQReg
+
+k <- ncol(X) - 1
+gl_reg <- k
+gl_reg
+```
+
+```{r}
+SQRes <- SQTotal - SQReg
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+Beta = inv(t(X)*X)*t(X)*y2;
+print Beta[format=12.4];
+```
+
+```{r}
+#| eval: false
+
+* Modelo completo;
+SQTotal = t(y2)*(In-(1/n)*Jnn)*y2;
+gltotal = n-1;
+SQReg = t(y2)*(X*inv(t(X)*X)*t(X)-(1/n)*Jnn)*y2;
+k = ncol(X)-1;
+gl_reg = k;
+SQRes = SQTotal-SQReg;
+glres = n-k-1;
+QMRes = SQRes/glres;
+
+print 'Modelo completo:',,, gl_reg SQReg[format=10.4] SQRes[format=10.4] SQTotal[format=10.4],,,;
+```
+
+:::
+
+## Hipótese 1
+
+Como primeira hipótese ao nosso modelo, assumiremos $H_0: \beta_4 = \beta_5 = \beta_6 = \beta_7 = \beta_8 = \beta_9 = 0$, ou seja, vamos testar se os termos de segunda ordem do modelo não são importantes na predição de $y_2$.
+
+$$
+\begin{align}
+H_0&: \beta_4 = \beta_5 = \beta_6 = \beta_7 = \beta_8 = \beta_9 = 0 \\
+H_a&: \text{Pelo menos um dos } \beta's \text{ não é nulo}
+\end{align}
+$$
+
+Com essa hipótese, temos como **modelo reduzido**:
+
+$$y_2 = \beta_0^* + \beta_1^*x_1 + \beta_2^*x_2 + \beta_3^*x_3 + \epsilon^*$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+X1 <- cbind(x0, x1, x2, x3)
+X1
+```
+
+A seguir, calcularemos os graus de liberdade, somas de quadrados, quadrados médios, estatística F e p-valor do modelo reduzido.
+
+```{r}
+SQReg1 <- t(y2) %*% (X1 %*% solve(t(X1) %*% X1) %*% t(X1) - (1 / n) * Jnn) %*% y2
+SQReg1
+
+gl_regB1 <- ncol(X1) - 1
+gl_regB1
+
+SQB2_B1 <- SQReg - SQReg1
+SQB2_B1
+
+gl_regB2 <- gl_reg - gl_regB1
+h <- gl_regB2
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc1 <- QMB2_B1 / QMRes
+Fcalc1
+
+p_valor1 <- 1 - pf(Fcalc1, h, gl_res)
+p_valor1
+```
+
+Dessa forma, o quadro da ANOVA sob a hipótese $H_0: \beta_4 = \beta_5 = \beta_6 = \beta_7 = \beta_8 = \beta_9 = 0$ usando a abordagem de modelo completo e modelo reduzido, fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab1 <- qf(0.95, gl_regB2, gl_res)
+
+data.frame(
+  "FV" = c("H0", "Resíduo", "Total"),
+  "gl" = c(gl_regB2, gl_res, gltotal),
+  "SQ" = c(SQB2_B1, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMB2_B1, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc1, NA, NA) |> round(3),
+  "Ftab" = c(ftab1, NA, NA) |> round(2),
+  "p.valor" = c(p_valor1, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão Global - H0: Beta4 = Beta5 = Beta6 = Beta7 = Beta8 = Beta9 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 6, 9)$, há evidência para rejeitarmos $H_0: \beta_4 = \beta_5 = \beta_6 = \beta_7 = \beta_8 = \beta_9 = 0$ ao nível de 5% de significância, ou seja, os termos de segunda ordem não são todos nulos e são importantes para a predição de $\mathbf{y_2}$.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* ----------------------------------------------------------------------------;
+* Modelo completo vs reduzido para testar H0: B11 = B22 = B33 = B12 = B13 = B23 = 0 ;
+* ----------------------------------------------------------------------------;
+X1 = c0||c1||c2||c3;
+gl_regB1 = ncol(X1)-1;
+* Modelo reduzido (1);
+SQReg1 = t(y2)*(X1*inv(t(X1)*X1)*t(X1)-(1/n)*Jnn)*y2;
+SQB2_B1 = SQReg - SQReg1;
+gl_regB2 = gl_reg - gl_regB1;
+h = gl_regB2;
+QMB2_B1 = SQB2_B1/h;
+Fcalc1 = QMB2_B1/QMRes;
+p_valor1 = 1-cdf('F',Fcalc1,h,glres);
+
+print '------------------------------------------------------------',
+      'Teste da hipótese H01: B11 = B22 = B33 = B12 = B13 = B23 = 0',
+      'usando abordagem Modelo completo x Modelo reduzido',
+	  '------------------------------------------------------------';
+print 'g.l. do modelo completo .............................................' gl_reg,
+      'g.l. do modelo reduzido por H0: B11 = B22 = B33 = B12 = B13 = B23 = 0' gl_regB1,
+      'g.l. da diferença (Modelo completo - Modelo reduzido)................' h,,;
+print 'Quadro de ANOVA para testar H01: B11 = B22 = B33 = B12 = B13 = B23 = 0',,
+'H01      ' h       SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc1[format=10.4] p_valor1[format=10.4],,
+'Resíduo  ' glres   SQRes[format=10.4]   QMRes[format=10.4],,
+'Total    ' gltotal SQTotal[format=10.4],,,,;
+```
+
+:::
+
+## Hipótese 2
+
+Também podemos testar se todos os termos lineares do modelo são nulos, ou seja, $H_0: \beta_1 = \beta_2 = \beta_3 = 0$.
+
+$$
+\begin{align}
+H_0&: \beta_1 = \beta_2 = \beta_3 = 0 \\
+H_a&: \text{Pelo menos um dos } \beta's \text{ não é nulo}
+\end{align}
+$$
+
+Com essa hipótese, temos como **modelo reduzido**:
+
+$$y_2 = \beta_4^*x_1^2 + \beta_5^*x_2^2 + \beta_6^*x_3^2 + \beta_7^*x_1x_2 + \beta_8^*x_1x_3 + \beta_9^*x_2x_3 + \epsilon^*$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+X1 <- cbind(x0, x11, x22, x33, x12, x13, x23)
+X1
+```
+
+Novamente, calcularemos os graus de liberdade, somas de quadrados, quadrados médios, estatística F e p-valor para o novo modelo reduzido.
+
+```{r}
+SQReg1 <- t(y2) %*% (X1 %*% solve(t(X1) %*% X1) %*% t(X1) - (1 / n) * Jnn) %*% y2
+SQReg1
+
+gl_regB1 <- ncol(X1) - 1
+gl_regB1
+
+SQB2_B1 <- SQReg - SQReg1
+SQB2_B1
+
+gl_regB2 <- gl_reg - gl_regB1
+h <- gl_regB2
+h
+
+QMB2_B1 <- SQB2_B1 / h
+QMB2_B1
+
+Fcalc2 <- QMB2_B1 / QMRes
+Fcalc2
+
+p_valor2 <- 1 - pf(Fcalc2, h, gl_res)
+p_valor2
+```
+
+Dessa forma, o quadro da ANOVA sob a hipótese $H_0: \beta_1 = \beta_2 = \beta_3 = 0$ usando a abordagem de modelo completo e modelo reduzido, fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab2 <- qf(0.95, gl_regB2, gl_res)
+
+data.frame(
+  "FV" = c("H0", "Resíduo", "Total"),
+  "gl" = c(gl_regB2, gl_res, gltotal),
+  "SQ" = c(SQB2_B1, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMB2_B1, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc2, NA, NA) |> round(3),
+  "Ftab" = c(ftab2, NA, NA) |> round(2),
+  "p.valor" = c(p_valor2, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão Global - H0: Beta1 = Beta2 = Beta3 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 3, 9)$, há evidência para rejeitarmos $H_0: \beta_1 = \beta_2 = \beta_3 = 0$ ao nível de 5% de significância, ou seja, pelo menos um dos termos lineares do modelo não são nulos ($x_1$, $x_2$ ou $x_3$), sendo importante para predizer $\mathbf{y_2}$.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* ---------------------------------------------------------------;
+*  Modelo completo vs reduzido para testar H02: B1 = B2 = B3 = 0 ;
+* ---------------------------------------------------------------;
+* Modelo reduzido (2);
+X1 = c0||c11||c22||c33||c12||c13||c23;
+gl_regB1 = ncol(X1)-1;
+SQReg1 = t(y2)*(X1*inv(t(X1)*X1)*t(X1)-(1/n)*Jnn)*y2;
+SQB2_B1 = SQReg - SQReg1;
+gl_regB2 = gl_reg - gl_regB1;
+h = gl_regB2;
+QMB2_B1 = SQB2_B1/h;
+Fcalc2 = QMB2_B1/QMRes;
+p_valor2 = 1-cdf('F',Fcalc2,h,glres);
+
+print '--------------------------------------------------',
+      'Teste da Hipótese H02: B1 = B2 = B3 = 0           ',
+      'usando abordagem Modelo completo x Modelo reduzido',
+      '--------------------------------------------------',;
+
+print 'g.l. do modelo completo ................................' gl_reg,
+      'g.l. do modelo reduzido por H0: B1 = B2 = B3 = 0 .......' gl_regB1,
+      'g.l. da diferença (Modelo completo - Modelo reduzido)...' h,,;
+print 'Quadro de ANOVA para testar H02: B1 = B2 = B3 = 0',,
+'H02      ' h       SQB2_B1[format=10.4] QMB2_B1[format=10.4] Fcalc2[format=10.4] p_valor2[format=10.4],,
+'Resíduo  ' glres   SQRes[format=10.4]   QMRes[format=10.4],,
+'Total    ' gltotal SQTotal[format=10.4],,,,;
+```
+
+:::
+
+
+## Hipótese Linear Geral
+
+Os detalhes sobre a hipótese linear geral estão na @sec-hlg.
+
+$$
+\begin{align}
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 0 \\
+H_a &: \mathbf{C} \boldsymbol{\beta} \ne 0 
+\end{align}
+$$
+
+Aqui, realizaremos o teste sobre a hipótese $H_0: \beta_1 = \beta_2 = \beta_3 = 0$ com a seguinte proposta de matriz de coeficientes $\mathbf{C}$.
+
+$$
+\begin{align}
+H_0 &: \beta_1 = \beta_2 = \beta_3 = 0 \\
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0 \\ 0
+\end{bmatrix} \\
+H_0 &:
+\begin{bmatrix}
+\beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0 \\ 0
+\end{bmatrix}
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C <- matrix(
+  c(0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 3, byrow = TRUE
+)
+C
+```
+
+```{r}
+CBeta <- C %*% Beta
+CBeta
+
+SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+SQHip
+
+q <- nrow(C)
+
+QMHip <- SQHip / q
+QMHip
+
+Fcalc3 <- QMHip / QMRes
+Fcalc3
+
+p_valor3 <- 1 - pf(Fcalc3, q, gl_res)
+p_valor3
+```
+
+O quadro da ANOVA sob a hipótese $H_0: \beta_1 = \beta_2 = \beta_3 = 0$ usando a abordagem da hipótese linear geral, fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab3 <- qf(0.95, q, gl_res)
+
+data.frame(
+  "FV" = c("H0", "Resíduo", "Total"),
+  "gl" = c(q, gl_res, gltotal),
+  "SQ" = c(SQHip, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMHip, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc3, NA, NA) |> round(3),
+  "Ftab" = c(ftab3, NA, NA) |> round(2),
+  "p.valor" = c(p_valor3, NA, NA) |> round(6)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão com hipótese linear geral - H0: Beta1 = Beta2 = Beta3 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} > F_{tab}$, para $F(0.05, 3, 9)$, há evidência para rejeitarmos $H_0: \beta_1 = \beta_2 = \beta_3 = 0$ ao nível de 5% de significância, ou seja, pelo menos um dos termos lineares do modelo não são nulos ($x_1$, $x_2$ ou $x_3$), sendo importante para predizer $\mathbf{y_2}$.
+
+Com isso, nota-se que tanto a abordagem de modelo completo e modelo reduzido, como a da hipótese linear geral geram o mesmo resultado.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* ----------------------------------------------------------------;
+* Hipótese linear geral (C*Beta=0) para testar H0:B1 = B2 = B3 = 0;
+* ----------------------------------------------------------------;
+C = {0 1 0 0 0 0 0 0 0 0,
+     0 0 1 0 0 0 0 0 0 0,
+	   0 0 0 1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'Hipótese H0: B1 = B2 = B3 = 0 usando abordagem C*Beta = 0',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+```
+
+:::
+
+Agora, demonstraremos que a matriz de coeficientes $\mathbf{C}$ pode assumir mais de uma forma para o teste de uma mesma hipótese. Construiremos três matrizes de coeficientes $\mathbf{C}$ (`C1`, `C2` e `C3`), tendo como hipótese $H_0: \beta_1 = \beta_2 = \beta_3$.
+
+$$H_0: \beta_1 = \beta_2 = \beta_3$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_1} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & -1 &  0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 &  1 & -1 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3 \\ \beta_4 \\ \beta_5 \\ \beta_6 \\ \beta_7 \\ \beta_8 \\ \beta_9
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &:
+\begin{bmatrix}
+\beta_1 - \beta_2 \\ \beta_2 - \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}
+\iff
+\beta_1 = \beta2 \quad ; \quad \beta_2 = \beta3
+\end{align}
+$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_2} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 2 & -1 & -1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 &  1 & -1 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3 \\ \beta_4 \\ \beta_5 \\ \beta_6 \\ \beta_7 \\ \beta_8 \\ \beta_9
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &:
+\begin{bmatrix}
+2\beta_1 - \beta_2 - \beta_3 \\ \beta_2 - \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}
+\iff
+2\beta_1 = \beta2 + \beta_3 \quad ; \quad \beta_2 = \beta3
+\end{align}
+$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_3} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & 0 & -1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & -1 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3 \\ \beta_4 \\ \beta_5 \\ \beta_6 \\ \beta_7 \\ \beta_8 \\ \beta_9
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &:
+\begin{bmatrix}
+\beta_1 - \beta_3 \\ \beta_2 - \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}
+\iff
+\beta_1 = \beta3 \quad ; \quad \beta_2 = \beta3
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C1 <- matrix(
+  c(0, 1, -1,  0, 0, 0, 0, 0, 0, 0,
+    0, 0,  1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C1
+```
+
+```{r}
+C2 <- matrix(
+  c(0, 2, -1, -1, 0, 0, 0, 0, 0, 0,
+    0, 0,  1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C2
+```
+
+```{r}
+C3 <- matrix(
+  c(0, 1, 0,  -1, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, -1, 0, 0, 0, 0, 0, 0), 
+  ncol = 10, nrow = 2, byrow = TRUE
+)
+C3
+```
+
+Para aplicarmos cada uma das matrizes de coeficientes, criaremos uma função.
+
+```{r}
+hlg <- function(C) {
+
+  # Calculando CBeta
+  CBeta <- C %*% Beta |> round(3)
+  
+  # Calculando SQHip
+  SQHip <- t(CBeta) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% CBeta
+  
+  # Obtendo o número de linhas de C
+  q <- nrow(C)
+  
+  # Calculando QMHip
+  QMHip <- SQHip / q
+  
+  # Calculando Fcalc
+  Fcalc3 <- QMHip / QMRes
+  
+  # Calculando p_valor
+  p_valor3 <- 1 - pf(Fcalc3, q, gl_res)
+  
+  # Retornando resultados
+  return(list(CBeta = CBeta, SQHip = SQHip, QMHip = QMHip, Fcalc = Fcalc3, p_valor = p_valor3))
+}
+```
+
+Para cada um dos $\mathbf{C}'s$ (`C1`, `C2` e `C3`), aplicaremos o teste com a função criada `hlg()`.
+
+```{r}
+# Definindo os valores para C
+C_lista <- list(C1 = C1, C2 = C2, C3 = C3)
+
+# Criando uma lista para armazenar os resultados
+resultados <- list()
+
+# Calculando os resultados para cada objeto C
+for (i in 1:length(C_lista)) {
+  resultados[[paste0("C", i)]] <- hlg(C_lista[[i]])
+}
+```
+
+```{r}
+tabela_resultados <- data.frame(
+  SQHip = sapply(resultados, function(x) x$SQHip),
+  QMHip = sapply(resultados, function(x) x$QMHip),
+  Fcalc = sapply(resultados, function(x) x$Fcalc),
+  p_valor = sapply(resultados, function(x) x$p_valor)
+)
+
+tabela_resultados
+```
+
+Apesar de diferentes matrizes de coeficientes $\mathbf{C}$, obtemos os mesmos valores para os testes de hipótese. Como conclusão, não temos evidências para rejeitar a hipótese nula $H_0: \beta_1 = \beta_2 = \beta_3$, ao nível de 5% de significância.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* ------------------------------------------------------------------------- ;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 1) ;
+*                           (Matriz C não é única!)                         ;
+* ------------------------------------------------------------------------- ;
+C = {0 1 -1  0 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 1)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+```
+
+```{r}
+#| eval: false
+
+* ------------------------------------------------------------------------- ;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 2) ;
+* ------------------------------------------------------------------------- ;
+C = {0 2 -1 -1 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 2)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+```
+
+```{r}
+#| eval: false
+
+* -------------------------------------------------------------------------;
+* Hipótese linear geral (C*Beta=0) para testar H0: B1 = B2 = B3 (SOLUÇÃO 3);
+* -------------------------------------------------------------------------;
+C = {0 1  0 -1 0 0 0 0 0 0,
+     0 0  1 -1 0 0 0 0 0 0};
+CBeta = C*Beta;
+SQHip = t(CBeta)*inv(C*inv(t(X)*X)*t(C))*CBeta;
+q = nrow(C);
+QMHip = SQHip/q;
+FCalc3 = QMHip/QMRes;
+p_valor3 = 1-cdf('F',Fcalc3,q,glres);
+print 'H0: B1 = B2 = B3 usando C*Beta = 0 (SOLUÇÃO 3)',,,
+'Hipótese H0' q       SQHip[format=10.4] QMHip[format=10.4] Fcalc3[format=10.4] p_valor3[format=10.4],,
+'Resíduo    ' glres   SQRes[format=10.4] QMRes[format=10.4],,
+'Total      ' gltotal SQTotal[format=10.4],,,,;
+quit;
+```
+
+:::

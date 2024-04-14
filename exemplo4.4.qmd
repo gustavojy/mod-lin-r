@@ -1,0 +1,514 @@
+# Teste de Hipótese - Exemplo 3
+
+Daremos continuidade à Hipótese Linear Geral, realizando novas hipóteses e combinações de coeficientes da matriz $\mathbf{C}$.
+
+$$
+\begin{align}
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 0 \\
+H_a &: \mathbf{C} \boldsymbol{\beta} \ne 0 
+\end{align}
+$$
+
+Utilizaremos o mesmo caso abordado no @sec-th2, referente a uma reação química para formar um determinado material desejado.
+
+Aqui, consideraremos o seguinte modelo:
+
+$$
+y_{1i} = \beta_0 + \beta_1x_{i1} + \beta_2x_{i2} + \beta_3x_{i3} + \epsilon_i
+$$
+
+Realizaremos testes sobre a variável $y_1$, referente ao percentual de material não convertido.
+
+::: panel-tabset
+
+### R
+
+```{r}
+y1 <- c(41.5,33.8,27.7,21.7,19.9,15.0,12.2,4.3,19.3,6.4,37.6,18.0,26.3,9.9,25.0,14.1,15.2,15.9,19.6)
+
+n <- length(y1)
+x0 <- rep(1, n)
+
+x1 <- c(162,162,162,162,172,172,172,172,167,177,157,167,167,167,167,177,177,160,160)
+
+x2 <- c(23,23,30,30,25,25,30,30,27.5,27.5,27.5,32.5,22.5,27.5,27.5,20,20,34,34)
+
+x3 <- c(3,8,5,8,5,8,5,8,6.5,6.5,6.5,6.5,6.5,9.5,3.5,6.5,6.5,7.5,7.5)
+```
+
+```{r}
+Jnn <- matrix(data = 1, nrow = n, ncol = n)
+
+In <- diag(n)
+```
+
+```{r}
+X <- cbind(x0, x1, x2, x3)
+X
+```
+
+```{r}
+k <- ncol(X) - 1	     # número de variáveis regressoras
+k
+```
+
+Os parâmetros estimados de $\beta$ do modelo completo é dado por:
+
+```{r}
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y1
+Beta |> round(4)
+```
+
+$$
+\hat{y}_{1} = 332,111 - 1,546 x_{1} - 1,425 x_{2} - 2,237 x_{3} + \epsilon
+$$
+
+### SAS
+
+```{r}
+#| eval: false
+
+data ChemReaction;
+* x1=temperature x2=concentration x3=time y1=unchanged y2=converted;
+input x1 x2 x3 y1 y2;
+cards;
+162    23.0    3.0    41.5    45.9
+162    23.0    8.0    33.8    53.3
+162    30.0    5.0    27.7    57.5
+162    30.0    8.0    21.7    58.8
+172    25.0    5.0    19.9    60.6
+172    25.0    8.0    15.0    58.0
+172    30.0    5.0    12.2    58.6
+172    30.0    8.0     4.3    52.4
+167    27.5    6.5    19.3    56.9
+177    27.5    6.5     6.4    55.4
+157    27.5    6.5    37.6    46.9
+167    32.5    6.5    18.0    57.3
+167    22.5    6.5    26.3    55.0
+167    27.5    9.5     9.9    58.9
+167    27.5    3.5    25.0    50.3
+177    20.0    6.5    14.1    61.1
+177    20.0    6.5    15.2    62.9
+160    34.0    7.5    15.9    60.0
+160    34.0    7.5    19.6    60.6
+;
+
+proc iml;
+*pág.262;
+* Outra forma de leitura dos dados: a partir de um dataset já criado;
+use ChemReaction;
+read all var{x1} into x1;
+read all var{x2} into x2;
+read all var{x3} into x3;
+read all var{y1} into y1;
+read all var{y2} into y2;
+
+y = y1;
+n = nrow(y);
+jn = j(n,1,1);
+In = I(n);
+X = jn||x1||x2||x3;
+k = ncol(X)-1;	* k = número de variáveis regressoras;
+
+Beta = inv(t(X)*X)*t(X)*y;
+print Beta [format=12.4];
+```
+
+:::
+
+## Hipótese 1
+
+A primeira hipótese que testaremos é:
+
+$$
+\begin{align}
+H_0 &: 2\beta_1 - 2\beta_2 = 2\beta_2 - \beta_3 = 0 \\
+H_0 &: \mathbf{C} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & -1 &  0 \\
+0 & 0 &  2 & -1  \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &: \begin{cases}
+\beta_1 - \beta_2 = 0 \\
+2\beta_2 - \beta_3 = 0
+\end{cases} 
+\iff
+H_0: 2\beta_1 = 2\beta_2 = \beta_3 = 0
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C <- matrix(
+  c(0, -2,  2,  0, 
+    0,  0,  2, -1),
+  nrow = 2, byrow = TRUE
+)
+C
+```
+
+```{r}
+CBeta <- C %*% Beta
+CBeta
+
+SQHip <- t(CBeta) %*% solve(C %*% (solve(t(X) %*% X)) %*% t(C)) %*% CBeta
+SQHip
+
+gl_Hip <- nrow(C)
+gl_Hip
+
+QMHip <- SQHip / gl_Hip
+QMHip
+```
+
+```{r}
+SQRes <- t(y1) %*% (In - X %*% solve(t(X) %*% X) %*% t(X)) %*% y1
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+```{r}
+Fcalc1 <- QMHip / QMRes
+Fcalc1
+
+Ftab1 <- qf(0.95, gl_Hip, gl_res)
+Ftab1
+
+p_valor1 <- 1 - pf(Fcalc1, gl_Hip, gl_res) 
+p_valor1
+```
+
+Dessa forma, o quadro da ANOVA sob a hipótese $H_0: 2\beta_1 - 2\beta_2 = 2\beta_2 - \beta_3 = 0$ ou $H_0: 2\beta_1 = 2\beta_2 = \beta_3$, fica:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab1 <- qf(0.95, gl_Hip, gl_res)
+
+data.frame(
+  "FV" = c("H0", "Resíduo"),
+  "gl" = c(gl_Hip, gl_res),
+  "SQ" = c(SQHip, SQRes) |> round(3),
+  "QM" = c(QMHip, QMRes) |> round(3),
+  "Fcal" = c(Fcalc1, NA) |> round(3),
+  "Ftab" = c(ftab1, NA) |> round(3),
+  "p.valor" = c(p_valor1, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão Global - H0: 2Beta1 = 2Beta2 = 2Beta3 = 0",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} < F_{tab}$, para $F(0.05, 2, 15)$, não podemos rejeitar $H_0: \beta_1 - \beta_2 = 2\beta_2 - \beta_3 = 0$ ou $H_0: 2\beta_1 = 2\beta_2 = \beta_3$ ao nível de 5% de significância.
+
+### SAS
+
+```{r}
+#| eval: false
+
+C = {0 -2 2  0, 
+     0 0  2 -1};
+gl_H0 = nrow(C);
+CBeta = C*Beta;
+SQH0 = t(CBeta)*inv(C*(inv(t(X)*X))*t(C))*CBeta;
+QMH0 = SQH0/gl_H0;
+
+SQRes = t(y)*(In - X*inv(t(X)*X)*t(X))*y;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+
+Fcalc = QMH0/QMRes;
+p_valor = 1-cdf('F',Fcalc,gl_H0,gl_res);
+
+print 'Exemplo 8.4.1(b): Exemplo com dados de reação química (Tabela 7.4)',,
+	  'Teste H0: 2B1 = 2B2 = B3 ou H0: B1 - B2 = 2B2 - B3 = 0',;
+print 'H0        ' gl_H0  SQH0[format=8.4]  QMH0[format=8.4]  Fcalc[format=8.4] p_valor[format=8.4],,
+      'Resíduo   ' gl_res SQRes[format=8.4] QMRes[format=8.4],,,,;
+```
+
+:::
+
+## Hipótese 2
+
+Agora, testaremos a hipótese $H_0: \beta_1 = \beta_2 = \beta_3$ utilizando diferentes matrizes $\mathbf{C}$:
+
+$$
+H_0: \beta_1 = \beta_2 = \beta_3
+$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_1} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & -1 &  0 \\
+0 & 0 &  1 & -1  \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &: \begin{cases}
+\beta_1 - \beta_2 = 0 \\
+\beta_2 - \beta_3 = 0
+\end{cases}
+\iff
+\beta_1 = \beta2 \quad ; \quad \beta_2 = \beta_3
+\end{align}
+$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_2} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 1 & -1 &  0 \\
+0 & 1 &  0 & -1  \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &: \begin{cases}
+\beta_1 - \beta_2 = 0 \\
+\beta_1 - \beta_3 = 0
+\end{cases}
+\iff
+\beta_1 = \beta_2 \quad ; \quad \beta_1 = \beta_3
+\end{align}
+$$
+
+$$
+\begin{align}
+H_0 &: \mathbf{C_3} \boldsymbol{\beta} = 
+\begin{bmatrix}
+0 & 2 & -1 & -1 \\
+0 & 0 &  1 & -1  \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\ \beta_1 \\ \beta_2 \\ \beta_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix} \\
+H_0 &: \begin{cases}
+2\beta_1 - \beta_2 - \beta_3 = 0 \\
+\beta_2 - \beta_3 = 0
+\end{cases}
+\iff
+2\beta_1 = \beta_2 + \beta_3 \quad ; \quad \beta_2 = \beta_3
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C1 <- matrix(
+  c(0, 1, -1,  0, 
+    0, 0,  1, -1),
+  nrow = 2, byrow = TRUE
+)
+C1
+
+SQ_C1Beta <- t(C1 %*% Beta) %*% solve(C1 %*% (solve(t(X) %*% X)) %*% t(C1)) %*% C1 %*% Beta
+SQ_C1Beta
+```
+
+```{r}
+C2 <- matrix(
+  c(0, 1, -1,  0, 
+    0, 1,  0, -1),
+  nrow = 2, byrow = TRUE
+)
+C2
+
+SQ_C2Beta <- t(C2 %*% Beta) %*% solve(C2 %*% (solve(t(X) %*% X)) %*% t(C2)) %*% C2 %*% Beta
+SQ_C2Beta
+```
+
+```{r}
+C3 <- matrix(
+  c(0, 2, -1, -1, 
+    0, 0,  1, -1),
+  nrow = 2, byrow = TRUE
+)
+C3
+
+SQ_C3Beta <- t(C3 %*% Beta) %*% solve(C3 %*% (solve(t(X) %*% X)) %*% t(C3)) %*% C3 %*% Beta
+SQ_C3Beta
+```
+
+```{r}
+#| echo: false
+
+data.frame(
+  SQ_C1 = SQ_C1Beta,
+  SQ_C2 = SQ_C2Beta,
+  SQ_C3 = SQ_C3Beta
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão Hipótese Linear Geral para diversas matrizes C - H0: Beta1 = Beta2 = Beta3 = 0"
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+* Testar a hipótese H0: B1=B2=B3 usando a hipótese linear geral;
+C1 = {0  1 -1  0, 
+      0  0  1 -1};
+SQ_C1Beta = t(C1*Beta)*inv(C1*(inv(t(X)*X))*t(C1))*C1*Beta;
+C2 = {0  1 -1  0, 
+      0  1  0 -1};
+SQ_C2Beta = t(C2*Beta)*inv(C2*(inv(t(X)*X))*t(C2))*C2*Beta;
+C3 = {0  2 -1 -1, 
+      0  0  1 -1};
+SQ_C3Beta = t(C3*Beta)*inv(C3*(inv(t(X)*X))*t(C3))*C3*Beta;
+
+print 'SQH0 para a hipótese H0: B1=B2=B3 usando diferentes matrizes C, em C*Beta=0',,,
+     SQ_C1Beta[format=12.4] SQ_C2Beta[format=12.4]SQ_C3Beta[format=12.4];
+```
+
+:::
+
+## Hipótese 3
+
+O próximo teste de hipótese a ser realizado é:
+
+$$
+H_0: \beta_1 = \beta_2
+$$
+
+Realizaremos o teste utilizando a hipótese linear geral e a abordagem do modelo completo e modelo reduzido.
+
+:::panel-tabset
+
+### R
+
+Pela hipótese linear geral, dada a matriz $\mathbf{C} = [0, 1, -1, 0]$, temos:
+
+```{r}
+C <- matrix(c(0, 1, -1, 0), nrow = 1, byrow = TRUE)
+C
+```
+
+```{r}
+CBeta <- C %*% Beta
+CBeta
+
+gl_Hip <- nrow(C)
+gl_Hip
+
+SQHip <- t(CBeta) %*% solve(C %*% (solve(t(X) %*% X)) %*% t(C)) %*% CBeta
+SQHip
+
+QMHip <- SQHip / gl_Hip
+QMHip
+
+Fcalc2 <- QMHip / QMRes
+Fcalc2
+
+p_valor2 <- 1 - pf(Fcalc2, gl_Hip, gl_res)
+p_valor2
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+ftab2 <- qf(0.95, gl_Hip, gl_res)
+
+data.frame(
+  "FV" = c("H0", "Resíduo"),
+  "gl" = c(gl_Hip, gl_res),
+  "SQ" = c(SQHip, SQRes) |> round(3),
+  "QM" = c(QMHip, QMRes) |> round(3),
+  "Fcal" = c(Fcalc2, NA) |> round(3),
+  "Ftab" = c(ftab2, NA) |> round(3),
+  "p.valor" = c(p_valor2, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "Teste de Regressão com Hipótese Linear Geral - H0: Beta1 = Beta2",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Pelo método do modelo completo e modelo reduzido, note que a soma de quadrados da hipótese é a mesma da hipótese linear geral.
+
+```{r}
+x12 <- x1 + x2           # Modelo reduzido: y = B0 + B12(x1+x2) + B3x3 + e
+x12
+
+Xr <- cbind(x0, x12, x3) # Matriz Xr do modelo reduzido
+Xr
+
+SQHip2 <- t(y1) %*% (X %*% solve(t(X) %*% X) %*% t(X) - Xr %*% solve(t(Xr) %*% Xr) %*% t(Xr)) %*% y1
+SQHip2
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+* Teste da hipótese H0: Beta1=Beta2;
+* (1) Usando C*Beta=0;
+C = {0  1 -1  0};
+gl_H0 = nrow(C);
+
+CBeta = C*Beta;
+SQH0 = t(CBeta)*inv(C*(inv(t(X)*X))*t(C))*CBeta;
+QMH0 = SQH0/gl_H0;
+Fcalc = QMH0/QMRes;
+p_valor = 1-cdf('F',Fcalc,gl_H0,gl_res);
+
+print 'Teste H0: B1 = B2 usando Hipótese Linear Geral',;
+print 'H0        ' gl_H0  SQH0[format=8.4]  QMH0[format=8.4]  Fcalc[format=8.4] p_valor[format=8.4],,
+      'Resíduo   ' gl_res SQRes[format=8.4] QMRes[format=8.4],,,,;
+
+* (2) Incorporando H0: Beta1 = Beta2 ao modelo;
+x12=x1+x2; * Modelo reduzido: y = B0 + B12(x1+x2) + B3x3 + e;
+Xr = jn||x12||x3; * Matriz Xr do modelo reduzido;
+
+SQH0r = t(y)*(X*inv(t(X)*X)*t(X)-Xr*inv(t(Xr)*Xr)*t(Xr))*y;
+print 'SQ de H0:B1=B2, usando modelo completo x modelo reduzido:'
+    ,,SQH0r[format=12.4]; 
+
+quit;
+```
+
+:::

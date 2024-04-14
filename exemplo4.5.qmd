@@ -1,0 +1,259 @@
+# Método de Bonferroni e Método de Scheffé
+
+Em muitos dos casos, estamos interessados em realizar **diversos** testes de hipótese **separados**, como:
+
+$$
+\begin{align}
+H_0 &: \beta_j = 0 , \quad \text{para  j = 1,2,...,k} \\
+&\text{ou} \\
+H_0 &: \boldsymbol{a'_i\beta} = 0 , \quad \text{para  i = 1,2,...}
+\end{align}
+$$
+
+Quando testamos diversas hipóteses como as apresentadas anteriormente, temos dois diferentes níveis de significância ($\alpha$):
+
+- Nível de significância **geral** (*Familywise*) ($\alpha_f$);
+
+- Nível de significância **por comparação** (*Comparison-wise*) ($\alpha_c$).
+
+Quando realizamos um único teste de hipótese (como os apresentados nos exemplos anteriores do material), utilizamos um nível de significância **geral** $\alpha_f$.
+
+Contudo, ao realizar mais de um teste de hipótese para um mesmo caso, utilizamos um nível de significância **por comparação** $\alpha_c$. Isso acarreta em um **aumento** do nível de significância geral ($\alpha_f$). Probabilisticamente tem-se:
+
+$$\alpha_f = 1 - (1 - \alpha_c)^k$$
+
+em que $k$ é o número de execuções do teste de hipótese ao nível $\alpha_c$ de significância por teste realizado.
+
+Com isso, fixando um nível de significância $\alpha_c = 0,05$ para cada teste, conforme aumentarmos o número de testes, o nível de significância geral ($\alpha_f$) aumenta.
+
+```{r}
+#| echo: false
+
+n_teste <- 1:10
+
+tibble::tibble(
+  n_teste = n_teste,
+  alpha_f = 1 - (1 - 0.05)^(n_teste) |> round(4)
+) |> 
+  tidyr::pivot_wider(names_from = n_teste, values_from = alpha_f) |> 
+  dplyr::mutate(`Nº testes` = "Alpha f", .before = 1) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Para isso, serão apresentados dois métodos de comparação que protegem a inflação do nível $\alpha$-global quando diversos testes são feitos: **método de Bonferroni** e **método de Scheffé**.
+
+Como exemplo, novamente, utilizaremos os dados do @sec-rlmest.
+
+```{r}
+#| echo: false
+
+data.frame(
+  Obs = 1:12,
+  y = c(2, 3, 2, 7, 6, 8, 10, 7, 8, 12, 11, 14),
+  x1 = c(0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8),
+  x2 = c(2, 6, 7, 5, 9, 8, 7, 10, 11, 9, 15, 13)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(2,3,2,7,6,8,10,7,8,12,11,14)
+
+n <- length(y)
+
+x0 <- rep(1, n)
+
+x1 <- c(0,2,2,2,4,4,4,6,6,6,8,8)
+
+x2 <- c(2,6,7,5,9,8,7,10,11,9,15,13)
+
+X <- cbind(x0, x1, x2)
+X
+
+k <- ncol(X) - 1
+
+In <- diag(n)
+```
+
+```{r}
+Beta <- solve(t(X) %*% X) %*% t(X) %*% y
+Beta
+
+a1 <- matrix(data = c(0, 1, 0), ncol = 1, byrow = TRUE)
+a1
+
+Beta1 <- t(a1) %*% Beta
+Beta1
+
+a2 <- matrix(data = c(0,0,1), ncol = 1, byrow = TRUE)
+a2
+
+Beta2 <- t(a2) %*% Beta
+Beta2
+```
+
+```{r}
+SQRes <- t(y) %*% (In - X %*% solve(t(X) %*% X) %*% t(X)) %*% y
+SQRes
+
+gl_res <- n - k - 1
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes     # QMRes = s²
+```
+
+Vamos assumir que os testes para $H_0: \beta_j = 0$, para $j = 1,2,\dots,k$, serão executados sem considerar se a hipótese global $H_0: \boldsymbol{\beta_1 = 0}$ foi rejeitada.
+
+Usamos a seguinte estatística:
+
+$$
+t_j = \frac{\hat{\beta}_j}{s\sqrt{g_{(j+1,j+1)}}}
+$$
+
+```{r}
+s <- sqrt(QMRes)
+s
+
+g <- solve(t(X) %*% X)
+g
+
+t1 <- Beta1 / (s %*% sqrt(t(a1) %*% g %*% a1))
+t1
+
+t2 <- Beta2 / (s %*% sqrt(t(a2) %*% g %*% a2))
+t2
+
+t_tab <- qt(0.975, n - k - 1)
+t_tab
+
+p_valor_t1 <- 2 * (1 - pt(abs(t1), gl_res))
+p_valor_t1
+
+p_valor_t2 <- 2 * (1 - pt(abs(t2), gl_res))
+p_valor_t2
+```
+
+Aqui, consideramos que foram realizados dois testes, com nível de significância de 5% para cada teste.
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Teste" = c("H0: Beta1 = 0", "H0: Beta2 = 0"),
+  "t_calc" = c(t1, t2),
+  "t_tab" = c(t_tab, t_tab),
+  "p_valor" = c(p_valor_t1, p_valor_t2) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("Teste", "t_calc", "t_tab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+
+```{r}
+p <- 1 - 0.05 / (2 * k)
+p
+
+t_tab_Bon <- qt(p, n - k - 1)
+t_tab_Bon
+
+t_tab_Scheffe <- sqrt((k + 1) %*% qf(0.95, k + 1, n - k - 1)) |> as.numeric()
+t_tab_Scheffe
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Metodo" = c("t", "Bonferroni", "Scheffé"),
+  "t" = c("(0,025; 9 gl)", "(0,0125; 9 gl)", "(0,025; 9 gl)"),
+  "t_tab" = c(t_tab, t_tab_Bon, t_tab_Scheffe)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    col.names = c("Método", "t", "t_tab")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc iml;
+y = {2,3,2,7,6,8,10,7,8,12,11,14};
+n = nrow(y);
+x0 = j(n,1,1);
+x1 = {0,2,2,2,4,4,4,6,6,6,8,8};
+x2 = {2,6,7,5,9,8,7,10,11,9,15,13};
+X = x0||x1||x2;
+k = ncol(X)-1;
+In = I(n);
+```
+
+```{r}
+#| eval: false
+
+Beta = inv(t(X)*X)*t(X)*y;
+a0 = {1,0,0}; Beta0 = t(a0)*Beta; 
+a1 = {0,1,0}; Beta1 = t(a1)*Beta;
+a2 = {0,0,1}; Beta2 = t(a2)*Beta;
+```
+
+```{r}
+#| eval: false
+
+SQRes = t(y)*(In - X*inv(t(X)*X)*t(X))*y;
+gl_res = n-k-1;
+QMRes = SQRes/gl_res;
+s = sqrt(QMRes);
+G = inv(t(X)*X);
+```
+
+```{r}
+#| eval: false
+
+t1 = Beta1/(s*sqrt(t(a1)*G*a1));
+t2 = Beta2/(s*sqrt(t(a2)*G*a2));
+p_valor_t1 = 2*(1-cdf('t',abs(t1),gl_res));
+p_valor_t2 = 2*(1-cdf('t',abs(t2),gl_res));
+```
+
+```{r}
+#| eval: false
+
+p = 1-0.05/(2*k);
+t_tab = tinv(0.975,n-k-1);  					* calcula t-tabelado;
+t_Bon = tinv(p,n-k-1);  						* calcula t-tabelado para Método de Bonferroni;
+t_Scheffe = sqrt((k+1)*finv(0.95,k+1,n-k-1));	* calcula t-tabelado para Método de Scheffé;
+```
+
+```{r}
+#| eval: false
+
+print 'Exemplo 8.5.2' ,, 'Testes de hipótese H0: Bi = 0 vs Ha: Bi dif 0',,
+	  'H01: B1 = 0  ' 't_cal1 =' t1[format=8.4] '     p-valor = ' p_valor_t1[format=10.4],,
+	  'H02: B2 = 0  ' 't_cal2 =' t2[format=8.4] '     p-valor = ' p_valor_t2[format=10.4],,,,
+	  '----------------------------------------------',
+	  'alfa = 5% => t(0,025; 9 g.l.) ='  t_tab[format=12.4],
+	  '----------------------------------------------',,,
+	  'Método de Bonferroni', 't(0,0125; 9 g.l.) =' t_Bon[format=12.4],,,,
+	  'Método de Scheffé   ', 't-Scheffé         =' t_Scheffe[format=12.4];
+quit;
+```
+
+:::

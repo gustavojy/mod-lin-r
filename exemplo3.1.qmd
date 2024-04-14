@@ -1,4 +1,4 @@
-# Regressão Linear Simples
+# Estimação e Teste de Hipóteses
 
 O modelo de regressão linear simples para $n$ observações pode ser escrito como:
 
@@ -73,9 +73,9 @@ ggplot(data = notas, aes(x = x1, y = y)) +
 
 Primeiramente, criamos um *data frame* com as notas dos alunos. Em seguida, com a função `ggplot()`, atribuímos a variável nota nas tarefas (`x1`) ao eixo das abscissas e a nota na prova (`y`) ao eixo das ordenadas. Com a `geom_point()`, adicionamos a camada gráfica referente à geometria de pontos, ou seja, a geometria do gráfico de dispersão. Note que as funções `ggplot()` e `geom_point()` são ligadas pelo operador `+`.
 
-## Estimação dos parâmetros $\beta_0$ e $\beta_1$
+## Estimação dos parâmetros $\beta_0$ e $\beta_1$ {#sec-estima-beta}
 
-Para estimar os parâmetros $\beta_0$ e $\beta_1$, utilizaremos o **Método dos Mínimos Quadrados Ordinários (MQO)**. O método consiste em achar os estimadores $\hat\beta_0$ e $\hat\beta_1$ que minimizem a soma de quadrados dos desvios $y_i - \hat{y}_i$.
+Para estimar os parâmetros $\beta_0$ e $\beta_1$, utilizaremos o **Método dos Mínimos Quadrados Ordinários (MQO)**. O método consiste em achar os estimadores $\hat\beta_0$ e $\hat\beta_1$ que minimizem a soma de quadrados dos desvios $\sum^n_{i=1} (y_i - \hat{y}_i)^2$.
 
 Primeiramente, criaremos os seguintes objetos:
 
@@ -173,7 +173,7 @@ print 'Estimativas dos parâmetros da reta:' Beta0[format=8.4] Beta1[format=8.4]
 
 :::
 
-## Estimação da variância ($\sigma^2$)
+## Estimação da variância ($\sigma^2$) {#sec-estvar}
 
 Para estimar a variância $\sigma^2$, utilizamos a seguinte expressão:
 
@@ -182,7 +182,7 @@ s^2 =
 \frac{(\mathbf{y} - \mathbf{\hat{y}})' \space (\mathbf{y} - \mathbf{\hat{y}})}{n-2} =  \frac{SQRes}{n-2}
 $$
 
-Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$.
+Em que $SQRes$ é a soma de quadrados dos resíduos e $\hat{y}$, os valores estimados de $\mathbf{y}$.
 
 ::: panel-tabset
 
@@ -397,11 +397,11 @@ print Beta0[format=10.4] var_Beta0[format=10.4] stderr_Beta0[format=10.4]
 
 :::
 
-## Coeficiente de Determinação ($r^2$)
+## Coeficiente de Determinação ($R^2$)
 
-O coeficiente de determinação ($r^2$) indica a proporção da variação em $y$ que é explicada pelo modelo ou que é devida à regressão em $x$. É definido como:
+O coeficiente de determinação ($R^2$) indica a proporção da variação em $y$ que é explicada pelo modelo ou que é devida à regressão em $x$. É definido como:
 
-$$r^2 = \frac{SQReg}{SQTotal} = 1 - \frac{SQRes}{SQTotal}$$
+$$R^2 = \frac{SQReg}{SQTotal} = 1 - \frac{SQRes}{SQTotal}$$
 
 em que: 
 
@@ -448,7 +448,7 @@ R2 <- SQReg / SQTotal
 R2
 ```
 
-O **coeficiente de correlação** ($r$) é dado pela raiz quadrada do coeficiente de determinação ($r^2$).
+O **coeficiente de correlação** ($r$) é dado pela raiz quadrada do coeficiente de determinação ($R^2$).
 
 ```{r}
 r <- sqrt(R2)
