@@ -471,13 +471,6 @@ print 'Total     ' glTotal[format=8.0] SQTotal[format=12.4] ;
 
 Também podemos calcular as somas de quadrados utilizando a abordagem da hipótese linear geral com as matrizes CA, CB e CAxB.
 
-$$
-\begin{align}
-CA &= (\alpha_1 - \alpha_2) + \frac{1}3 (\gamma_{11} + \gamma_{12} + \gamma_{13}) - \frac{1}3 (\gamma_{21} + \gamma_{22} +\gamma_{23}) \\
-CB &= \\
-CA \times B &= 
-\end{align}
-$$
 
 ::: panel-tabset
 
@@ -512,13 +505,6 @@ SQ_CB
 SQ_CAxB <- t(CAxB %*% Beta) %*% solve(CAxB %*% ginv(t(X) %*% X) %*% t(CAxB)) %*% (CAxB %*% Beta)
 SQ_CAxB
 ```
-
-```{r}
-#| echo: false
-
-
-```
-
 
 ### SAS
 
