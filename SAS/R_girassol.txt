@@ -1,0 +1,112 @@
+# Exercicio teste de tendencia --------------------------------------------
+
+(y <- c(85.0, 86.0, 84.0, 94.5, 96.0, 95.8, 99.5, 98.0, 104.0, 93.0, 96.0, 90.5, 83.0, 80.0, 78.5))
+(n <- length(y))
+jnx1 <- matrix(1, n, 1)#Intercepto
+Jnxn <- matrix(1, n, n)
+Inxn <- diag(n)
+Z1 <- c(0, 0, 0, 25, 25, 25, 50, 50, 50, 75, 75, 75, 100, 100, 100)
+dados <- data.frame(Girassol = Z1, Ganhos_de_Peso = y)
+delin.matriz <- as.matrix(model.matrix(aov(Ganhos_de_Peso~as.factor(Girassol),data = dados)))
+delin.matriz <- delin.matriz[,-1]
+XT <- cbind(rep(1,15),c(rep(1,3),rep(0,12)),delin.matriz)
+
+
+
+(Beta0 <- ginv(t(XT) %*% XT) %*% t(XT) %*% y) # Solução baseada na inversa de Moore-Penrose
+
+y0 <- c(y, 0)
+T1 <- c(0, 1, 0, 0, 0, 0)  # Condição: G0 = 0 (Restrição do R)
+# T1 <- c(0, 1, 1, 1, 1, 1); Condição: Soma dos efeitos = zero;
+# T1 <- c(0, 0, 0, 0, 0, 1); Condição: G100 = 0 (Restrição do SAS);
+XT1 <- rbind(XT, T1)
+(Beta <- round(solve(t(XT1) %*% XT1) %*% t(XT1) %*% y0,3)) #usando a restrição do R
+row.names(Beta) <- NULL
+print(Beta0, digits = 4)# Solução baseada na inversa
+print(Beta, digits = 4)#Solução usando a restrição do R
+
+#Total
+AT <- Inxn - (1/n) * Jnxn
+SQTotal <- t(y) %*% AT %*% y
+gl_total <- sum(diag(AT %*% ginv(AT)))
+
+#Tratamento
+AG <- XT %*% ginv(t(XT) %*% XT) %*% t(XT) - (1/n) * Jnxn
+SQGirassol <- t(y) %*% AG %*% y
+gl_girassol <- sum(diag(AG %*% ginv(AG)))
+QMGirassol <- SQGirassol / gl_girassol
+
+#Residuo
+AR <- Inxn - XT %*% ginv(t(XT) %*% XT) %*% t(XT)
+SQResiduo <- t(y) %*% AR %*% y
+gl_res <- sum(diag(AR %*% ginv(AR)))
+QMResiduo <- SQResiduo / gl_res
+
+#Teste F
+(Fcalc <- QMGirassol / QMResiduo)
+(p_valor <- 1 - pf(Fcalc, gl_girassol, gl_res))
+
+
+#Tabela de analise de variancia (ANOVA)
+data.frame(F.variação=c("Tratamento","Resíduo","Total"),
+           GL=round(c(gl_girassol,gl_res,gl_total),4), 
+           SQs=round(c(SQGirassol,SQResiduo,SQTotal),4),
+           QMs=round(c(QMGirassol,QMResiduo,NA),4), 
+           F.cal=round(c(Fcalc,NA,NA),4),
+           p.valor=c(p_valor,NA,NA))
+
+
+# Testando os contrastes ---------------------------------------------------
+#Montando os contrastes
+L1 <- c(0, -2, -1, 0, 1, 2)  #Grau 1
+L2 <- c(0, 2, -1, -2, -1, 2) #Grau 2
+L3 <- c(0, -1, 2, 0, -2, 1)  #Grau 3
+L4 <- c(0, 1, -4, 6, -4, 1)  #Grau 4
+
+#Soma de quadrado dos contrastes
+SQGrau1 <- t(t(L1) %*% Beta) %*% solve(t(L1) %*% ginv(t(XT) %*% XT) %*% L1) %*% t(L1) %*% Beta
+SQGrau2 <- t(t(L2) %*% Beta) %*% solve(t(L2) %*% ginv(t(XT) %*% XT) %*% L2) %*% t(L2) %*% Beta
+SQGrau3 <- t(t(L3) %*% Beta) %*% solve(t(L3) %*% ginv(t(XT) %*% XT) %*% L3) %*% t(L3) %*% Beta
+SQGrau4 <- t(t(L4) %*% Beta) %*% solve(t(L4) %*% ginv(t(XT) %*% XT) %*% L4) %*% t(L4) %*% Beta
+gl <- 1
+
+#Teste F
+Fcalc1 <- SQGrau1 / QMResiduo
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)#grau 1
+
+Fcalc2 <- SQGrau2 / QMResiduo
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)#grau 2
+
+Fcalc3 <- SQGrau3 / QMResiduo
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)#grau 2
+
+Fcalc4 <- SQGrau4 / QMResiduo
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)#grau 4
+
+cat("QUADRO DE ANOVA - Testes de tendência\n")
+cat("Grau 1", gl, format(SQGrau1, digits = 4), format(Fcalc1, digits = 4), format(p_valor1, digits = 4), "\n")
+cat("Grau 2", gl, format(SQGrau2, digits = 4), format(Fcalc2, digits = 4), format(p_valor2, digits = 4), "\n")
+cat("Grau 3", gl, format(SQGrau3, digits = 4), format(Fcalc3, digits = 4), format(p_valor3, digits = 4), "\n")
+cat("Grau 4", gl, format(SQGrau4, digits = 4), format(Fcalc4, digits = 4), format(p_valor4, digits = 4), "\n")
+
+SomaSQ <- SQGrau1 + SQGrau2 + SQGrau3 + SQGrau4
+cat("SomaSQ =", format(SomaSQ, digits = 4), "   =", format(SQGirassol, digits = 4), "\n") #comparando SQtrat e SQcontrastes
+
+
+
+# Modelo quadratico -------------------------------------------------------
+
+#Modelo de regressão quadratica
+Z2 <- Z1 * Z1
+Z <- cbind(jnx1, Z1, Z2)
+
+(Beta_Reg <- solve(t(Z) %*% Z) %*% t(Z) %*% y)#estimativas do modelo quadrático
+
+y_hat <- Z %*% Beta_Reg #Valores preditos
+res <- y - y_hat #Residuos
+data.frame(y, y_hat, res)#
+
+SQReg <- t(Beta_Reg) %*% t(Z) %*% y - t(y) %*% ((1/n) * Jnxn %*% y)
+R2 <- SQReg / SQTotal
+data.frame(SQReg, SQTotal, R2)
+
