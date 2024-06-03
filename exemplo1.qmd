@@ -65,7 +65,7 @@ Close Cork;
 
 ## Matriz de Variâncias e Covariâncias 
 
-Para obtermos a matriz de variâncias e covariâncias, precisamos dos seguintes escalares, vetores e matrizes:
+Para obtermos a matriz de variâncias e covariâncias, precisamos dos seguintes objetos:
 
 -   `n`: número de observações $n$;
 
@@ -88,7 +88,7 @@ p <- ncol(Y)
 n; p
 ```
 
-No caso da matriz `Y`, ela apresenta dimensão $28 \times 4$.
+No caso da matriz `Y`, apresenta dimensão $28 \times 4$.
 
 A função `diag()` cria uma **matriz identidade**. Basta inserir dentro da função a dimensão da matriz.
 
@@ -98,7 +98,7 @@ In
 ```
 
 $$
-\mathbf{I}_{(n)} = 
+\mathbf{I}_{(28)} = 
   \begin{bmatrix}
    1 & 0 & 0 & \dots & 0 \\
    0 & 1 & 0 & \dots & 0 \\
@@ -195,7 +195,9 @@ $$
    \end{bmatrix}
 $$
 
-## Matriz de Correlações
+Os elementos da diagonal principal são as variâncias e os demais elementos, as covariâncias. Note que a matriz de variâncias e covariâncias é simétrica.
+
+## Matriz de Correlações {#sec-corr}
 
 Para calcular a matriz de correlação ($\mathbf{\rho}_{ij}$), utilizamos a seguinte expressão:
 
@@ -310,6 +312,8 @@ Ordenando os valores do vetor da distância de Mahalanobis, temos:
 rank <- rank(DM2)
 data.frame(Y, DM2, rank)
 ```
+
+A observação 13 apresenta a menor distância, enquanto a 16, a maior distância de Mahalanobis.
 
 ### SAS
 

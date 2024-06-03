@@ -1,0 +1,606 @@
+# ANOVA balanceada com um fator - Teste de Hipótese
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+options(scipen = 999999, knitr.kable.NA = '')
+
+library(MASS)
+```
+
+Para exemplificar o teste de hipótese em modelos ANOVA balanceada com um fator, considere o seguinte caso: *Três métodos (A, B, C) de armazenar alimentos congelados foram comparados. A variável resposta é a quantidade de ácido ascórbico (mg/100g) e os dados estão representados a seguir:*
+
+```{r}
+#| echo: false
+
+data.frame(
+  A = c(14.29, 19.10, 19.09, 16.25, 15.09, 16.61, 19.63),
+  B = c(20.06, 20.64, 18.00, 19.56, 19.47, 19.07, 18.38),
+  C = c(20.04, 26.23, 22.74, 24.04, 23.37, 25.02, 23.27)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Como suposições do modelo $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ consideraremos:
+
+- $E(\boldsymbol{\epsilon}) = \mathbf{0}$;
+
+- $var(\boldsymbol{\epsilon}) = \sigma^2 \mathbf{I}$;
+
+- $cov(\mathbf{\boldsymbol{\epsilon}}) = 0$;
+
+- $\boldsymbol{\epsilon} \sim N(\mathbf{0}, \sigma^2 \mathbf{I})$.
+
+Novamente, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de uma matriz.
+
+```{r}
+#| eval: false
+
+install.packages("MASS")
+library(MASS)
+```
+
+## Estimação de parâmetros
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- as.vector(
+  c(14.29, 19.10, 19.09, 16.25, 15.09, 16.61, 19.63,
+    20.06, 20.64, 18.00, 19.56, 19.47, 19.07, 18.38,
+    20.04, 26.23, 22.74, 24.04, 23.37, 25.02, 23.27)
+)
+y
+```
+
+A matriz de delineamento $\mathbf{X}$ do modelo matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ é dada por:
+
+```{r}
+X <- matrix(c(
+  rep(1,21),
+  rep(1,7),rep(0,14),
+  rep(0,7),rep(1,7),rep(0,7),
+  rep(0,14),rep(1,7)
+),
+ncol = 4, byrow = FALSE)
+X
+```
+
+No objeto `kn`, guardaremos o número de vlaores observados; no `p`, o número de variáveis; e no `k`, o posto de $\mathbf{X}$.
+
+```{r}
+kn <- length(y)
+kn
+
+p <- ncol(X)
+p
+
+k <- sum(diag(X %*% ginv(X)))
+k
+```
+
+Calculando $\mathbf{X'X}$ e $\mathbf{X'y}$, temos:
+
+```{r}
+XLX <- t(X) %*% X
+XLX
+
+XLy <- t(X) %*% y
+XLy
+```
+
+Com os resultados anteriores, calcularemos duas estimativas de $\boldsymbol{\beta}$:
+
+- Vetor com as estimativas a partir da inversa generalizada:
+
+```{r}
+Beta <- ginv(XLX) %*% XLy
+Beta
+```
+
+- Vetor com as estimativas a partir da inversa generalizada utilizando a submatriz diagonal:
+
+```{r}
+igXLX <- (1/7) * matrix(
+  c(0, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1),
+  ncol = 4, byrow = TRUE
+)
+igXLX |> fractions()
+
+Beta2 <- igXLX %*% XLy
+Beta2
+```
+
+A partir das duas soluções de $\mathbf{\beta}'s$, verificaremos se as seguintes funções são estimáveis:
+
+- $\beta = \alpha_1 - \alpha_2$:
+
+```{r}
+L1 <- c(0, 1, -1, 0)
+L1
+
+L1Beta <- t(L1) %*% Beta
+L1Beta
+
+L1Beta2 <- t(L1) %*% Beta2
+L1Beta2
+```
+
+- $\beta = \alpha_1 + \alpha_2 + \alpha_3$:
+
+```{r}
+L2 <- c(0, 1, 1, 1)
+L2
+
+L2Beta <- t(L2) %*% Beta
+L2Beta
+
+L2Beta2 <- t(L2) %*% Beta2
+L2Beta2
+```
+
+Como se pode notar, $\beta = \alpha_1 - \alpha_2$ é uma função estimável e $\beta = \alpha_1 + \alpha_2 + \alpha_3$ é uma função não estimável.
+
+### SAS
+
+```{r}
+#| eval: false
+
+options nodate nocenter ps=1000;
+
+proc iml;
+*reset print;
+reset fuzz;
+y = {14.29,19.10,19.09,16.25,15.09,16.61,19.63,
+     20.06,20.64,18.00,19.56,19.47,19.07,18.38,
+     20.04,26.23,22.74,24.04,23.37,25.02,23.27};
+X = {1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,
+     1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,
+     1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1};
+print X[format=5.0] y[format=8.2];
+kn = nrow(y); 
+p = ncol(X); 
+k = round(trace(X*ginv(X))); * Calcula o posto de XlinhaX;
+print 'rank(X) =' k;
+XLX = t(X)*X;
+XLy = t(X)*y;
+print 'Sistema de equações normais:' XLX XLy;
+
+Beta = ginv(XLX)*XLy; 	* Usando inversa generalizada de Moore-Penrose;
+
+igXLX = (1/7)*{0 0 0 0,
+               0 1 0 0, 
+               0 0 1 0, 
+               0 0 0 1}; 
+Beta2 = igXLX*XLy;
+print 'Duas soluções:' Beta[format=12.4] Beta2[format=12.4];
+
+L = {0, 1,-1,0}; * Lambda da função alfa1-alfa2 (estimável!);
+LBeta = t(L)*Beta;
+LBeta2 = t(L)*Beta2;
+print 'Função estimável: alfa1-alfa2:',,LBeta[format=12.4] LBeta2[format=12.4];
+
+L = {0,1,1,1}; * Lambda da função alfa1+alfa2+alfa3 (NÃO estimável!);
+LBeta = t(L)*Beta;
+LBeta2 = t(L)*Beta2;
+print 'Função NÃO estimável: alfa1+alfa2+alfa3:',,LBeta[format=12.4] LBeta2[format=12.4];
+```
+
+:::
+
+## Teste de hipótese
+
+A seguir, testaremos a seguinte hipótese:
+
+$$
+\begin{align}
+H_0&: \mu_1 = \mu_2 = \mu_3 \\
+H_a&: \text{Pelo menos duas médias diferem entre si}
+\end{align}
+$$
+
+Como $\mu_i = \mu + \alpha_i$, a hipótese anterior é equivalente a seguinte:
+
+$$
+\begin{align}
+H_0&: \alpha_1 = \alpha_2 = \alpha_3 \\
+H_a&: \text{Pelo menos dois tratamentos diferem entre si}
+\end{align}
+$$
+
+Utilizaremos duas abordagens para a realização do teste de hipótese: **modelo completo x modelo reduzido** e **contrastes**.
+
+### Modelo Completo x Modelo Reduzido
+
+::: panel-tabset
+
+### R
+
+```{r}
+In <- diag(kn)
+Jn <- matrix(1, nrow = kn, ncol = kn)
+```
+
+A soma de quadrados total (`SQTotal`) é dada por: 
+
+$$
+SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
+$$
+
+E seus graus de liberdade, pelo traço do produto de sua matriz núcleo pela inversa generalizada.
+
+```{r}
+# Total
+Tot <- In - (1 / kn) * Jn
+
+SQTotal <- t(y) %*% Tot %*% y
+SQTotal
+
+gl_total <- round(sum(diag(Tot %*% ginv(Tot))))
+gl_total
+```
+
+A soma de quadrados para os $\alpha's$ ajustada para $\mu$ ($SQ(\alpha \mid \mu)$) pode ser expressa como uma forma quadrática de $\mathbf{y}$:
+
+$$
+SQ(\alpha \mid \mu) = \mathbf{y'} \left[\mathbf{X(X'X)^-X'} - \frac{1}n \mathbf{J}\right] \mathbf{y}
+$$
+
+```{r}
+# Tratamentos
+A <- X %*% ginv(t(X) %*% X) %*% t(X) - (1 / kn) * Jn
+
+SQTrat <- t(y) %*% A %*% y
+SQTrat
+
+gl_trat <- round(sum(diag(A %*% ginv(A))))
+gl_trat
+
+QMTrat <- SQTrat / gl_trat
+QMTrat
+```
+
+A soma de quadrados dos resíduos (`SQRes`) é dada por:
+
+$$
+SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
+$$
+
+```{r}
+# Resíduo
+B <- In - X %*% ginv(t(X) %*% X) %*% t(X)
+
+SQRes <- t(y) %*% B %*% y
+SQRes
+
+gl_res <- round(sum(diag(B %*% ginv(B))))
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+Com os quadrados médios de tratamento (`QMTrat`) e dos resíduos (`QMRes`), calculamos a estatística F, bem como o p-valor.
+
+```{r}
+Fcalc <- QMTrat / QMRes
+Fcalc
+
+ftab <- qf(0.95, gl_trat, gl_res)
+ftab
+
+p_valor <- 1 - pf(Fcalc, gl_trat, gl_res)
+p_valor
+```
+
+A seguir, os resultado estão descritos no quadro de ANOVA:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Tratamento", "Resíduo", "Total"),
+  "gl" = c(gl_trat, gl_res, gl_total),
+  "SQ" = c(SQTrat, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMTrat, QMRes, NA) |> round(3),
+  "Fcal" = c(Fcalc, NA, NA) |> round(3),
+  "Ftab" = c(ftab, NA, NA) |> round(3),
+  "p.valor" = c(p_valor, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA para os dados de ácido ascórbico",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que $F_{cal} > F_{tab}$, para $F_{(0,05;2;18)}$, rejeita-se a hipótese $H_0: \mu_1 = \mu_2 = \mu_3$, indicando que as médias de pelo menos dois métodos de congelamento diferem entre si.
+
+### SAS
+
+```{r}
+#| eval: false
+
+T = I(kn)-(1/kn)*J(kn,kn,1);	* Matriz núcleo;
+SQTotal = t(y)*T*y;				* Calcula SQTotal corrigida pela média;
+gl_total = round(trace(T*ginv(T))); 
+
+A = X*ginv(t(X)*X)*t(X) -(1/kn)*J(kn,kn,1); 	* Matriz núcleo;
+SQTrat = t(y)*A*y;								* Calcula SQTrat;
+gl_trat = round(trace(A*ginv(A)));
+QMTrat = SQTrat/gl_trat;
+
+B = I(kn) - X*ginv(t(X)*X)*t(X);	* Matriz núcleo;
+SQRes = t(y)*B*y;					* Calcula SQResiduo;
+gl_res = round(trace(B*ginv(B)));
+QMRes = SQRes/gl_res;
+
+Fcalc = QMTrat/QMRes;
+p_valor = 1-cdf('F',Fcalc,gl_trat,gl_Res);
+
+print 'TABELA 12.3 - ANOVA para os dados de ácido ascórbico da Tabela 13.2',; 
+print 'Método ' gl_trat  SQTrat[format=12.4] QMTrat[format=12.4] Fcalc[format=10.4] p_valor[format=12.4],,
+      'Resíduo' gl_res   SQRes[format=12.4]  QMRes[format=12.4],,
+	  'Total  ' gl_total SQTotal[format=12.4];
+```
+
+:::
+
+### Contrastes
+
+#### Caso 1: As linhas são linearmente independentes (l.i.) e ortogonais {.unnumbered}
+
+Considerando os **constrastes ortogonais** $2\mu_1 - \mu_2 - \mu_3$ e $\mu_2 - \mu_3$, podemos representá-los da seguinte maneira:
+
+$$
+\begin{align}
+2\mu_1 - \mu_2 - \mu_3 &= 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
+\mu_2 - \mu_3 &= \alpha_2 - \alpha_3 = [0,0,1,-1]\boldsymbol{\beta} = \mathbf{c'_2}\boldsymbol{\beta}
+\end{align}
+$$
+
+As hipóteses $H_{01}: \mathbf{c'_1}\boldsymbol{\beta} = 0$ e $H_{02}: \mathbf{c'_2}\boldsymbol{\beta} = 0$ comparam a média do primeiro tratamento com a dos outros dois e a média do segundo tratamento com a do terceiro, respectivamente.
+
+$$
+\begin{align}
+H_{01} &:\mathbf{c'_1}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_1 = \frac{\mu_2 + \mu_3}2 \\
+H_{02} &: \mathbf{c'_2}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_2 = \mu_3
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C1 <- c(0, 2, -1, -1)
+C1Beta <- C1 %*% Beta
+C1Beta
+
+C2 <- c(0, 0, 1, -1)
+C2Beta <- C2 %*% Beta
+C2Beta
+
+# Partição da SQTrat
+SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
+SQC1Beta
+
+SQC2Beta <- t(C2Beta) %*% solve(t(C2) %*% ginv(t(X) %*% X) %*% C2) %*% (C2Beta)
+SQC2Beta
+
+SomaSQ <- SQC1Beta + SQC2Beta
+SomaSQ
+
+SQTrat
+
+# QM
+QMC1Beta <- SQC1Beta / 1
+QMC1Beta
+
+QMC2Beta <- SQC2Beta / 1
+QMC2Beta
+
+# F e p-valor
+FC1 <- QMC1Beta / QMRes
+FC1
+
+FC2 <- QMC2Beta / QMRes
+FC2
+
+ftab <- qf(0.95, 1, 18)
+ftab
+
+p_valorC1 <- 1 - pf(FC1, 1, gl_res)
+p_valorC1
+
+p_valorC2 <- 1 - pf(FC2, 1, gl_res)
+p_valorC2
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Contraste c'1", "Contraste c'2", "Resíduo", "Total"),
+  "gl" = c(1, 1, gl_res, gl_total),
+  "SQ" = c(SQC1Beta, SQC2Beta, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMC1Beta, QMC2Beta, QMRes, NA) |> round(3),
+  "Fcal" = c(FC1, FC2, NA, NA) |> round(3),
+  "Ftab" = c(ftab, ftab, NA, NA) |> round(3),
+  "p.valor" = c(p_valorC1, p_valorC2, NA, NA) |> round(5)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA para contrastes ortogonais dos dados de ácido ascórbico",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Ambos os $F_{cal}$ são superiores ao valor tabelado $F_{(0,05;1,18)}$. Assim, Ambas as hipóteses $H_{01}$ e $H_{02}$ são rejeitadas e se conclui que:
+
+$$
+\mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_2 \ne \mu_3
+$$
+
+### SAS
+
+```{r}
+#| eval: false
+
+C1 ={0 2 -1 -1};
+C2 ={0 0  1 -1};
+C1Beta = C1*Beta;
+C2Beta = C2*Beta;
+SQC1Beta = t(C1*Beta)*inv(C1*ginv(t(X)*X)*t(C1))*C1*Beta;
+SQC2Beta = t(C2*Beta)*inv(C2*ginv(t(X)*X)*t(C2))*C2*Beta;
+Soma = SQC1Beta + SQC2Beta;
+print 'Partição da SQTrat usando k=2 contrastes l.i. e ortogonais',,
+      'SQcontraste1 = ' SQC1Beta[format=8.4],, 'SQcontraste2 = ' SQC2Beta[format=8.4],,
+      'Soma SQs     = ' Soma[format=8.4] '    SQTrat = ' SQTrat[format=8.4];
+```
+
+:::
+
+#### Caso 2: As linhas são l.i. e não ortogonais {.unnumbered}
+
+Agora, consideraremos os **constrastes não ortogonais** $2\mu_1 - \mu_2 - \mu_3$ e $\mu_1 - \mu_3$, podemos representá-los da seguinte maneira:
+
+$$
+\begin{align}
+2\mu_1 - \mu_2 - \mu_3 &= 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
+\mu_1 - \mu_3 &= \alpha_1 - \alpha_3 = [0,1,0,-1]\boldsymbol{\beta} = \mathbf{c'_3}\boldsymbol{\beta}
+\end{align}
+$$
+
+As hipóteses $H_{01}: \mathbf{c'_1}\boldsymbol{\beta} = 0$ e $H_{03}: \mathbf{c'_3}\boldsymbol{\beta} = 0$ são:
+
+$$
+\begin{align}
+H_{01} &:\mathbf{c'_1}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_1 = \frac{\mu_2 + \mu_3}2 \\
+H_{03} &: \mathbf{c'_3}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_1 = \mu_3
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+C1 <- c(0, 2, -1, -1)
+C1Beta <- C1 %*% Beta
+C1Beta
+
+C3 <- c(0, 1, 0, -1)
+C3Beta <- C3 %*% Beta
+C3Beta
+
+# Partição da SQTrat
+SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
+SQC1Beta
+
+SQC3Beta <- t(C3Beta) %*% solve(t(C3)%*% ginv(t(X) %*% X) %*% C3) %*% (C3Beta)
+SQC3Beta
+
+# QM
+QMC1Beta <- SQC1Beta / 1
+QMC1Beta
+
+QMC3Beta <- SQC3Beta / 1
+QMC3Beta
+
+# F e p-valor
+FC1 <- QMC1Beta / QMRes
+FC1
+
+FC3 <- QMC3Beta / QMRes
+FC3
+
+ftab <- qf(0.95, 1, 18)
+ftab
+
+p_valorC1 <- 1 - pf(FC1, 1, gl_res)
+p_valorC1
+
+p_valorC3 <- 1 - pf(FC3, 1, gl_res)
+p_valorC3
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Contraste c'1", "Contraste c'2", "Resíduo", "Total"),
+  "gl" = c(1, 1, gl_res, gl_total),
+  "SQ" = c(SQC1Beta, SQC3Beta, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMC1Beta, QMC3Beta, QMRes, NA) |> round(3),
+  "Fcal" = c(FC1, FC3, NA, NA) |> round(3),
+  "Ftab" = c(ftab, ftab, NA, NA) |> round(3),
+  "p.valor" = c(p_valorC1, p_valorC3, NA, NA) |> round(5)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA para contrastes não ortogonais dos dados de ácido ascórbico",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Ambos os $F_{cal}$ são superiores ao valor tabelado $F_{(0,05;1,18)}$. Assim, Ambas as hipóteses $H_{01}$ e $H_{03}$ são rejeitadas e se conclui que:
+  
+$$
+\mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_1 \ne \mu_3
+$$
+
+Contudo, nota-se que a soma das somas de quadrados dos contrastes não ortogonais não resulta na soma de quadrados dos tratamentos:
+
+```{r}
+SomaSQ <- SQC1Beta + SQC3Beta
+SomaSQ
+
+SQTrat
+```
+
+```{r}
+#| echo: false
+
+cat(
+  "Soma das SQ de contrastes não ortogonais =", SomaSQ, "\n",
+  "SQTrat =", SQTrat
+  )
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+C1 ={0  2 -1 -1};
+C2 ={0  1  0 -1};
+C1Beta = C1*Beta;
+C2Beta = C2*Beta;
+SQC1Beta = t(C1*Beta)*inv(C1*ginv(t(X)*X)*t(C1))*C1*Beta;
+SQC2Beta = t(C2*Beta)*inv(C2*ginv(t(X)*X)*t(C2))*C2*Beta;
+Soma = SQC1Beta + SQC2Beta;
+print 'Partição da SQTrat usando contrastes l.i. mas não ortogonais',,
+      'SQcontraste1 = ' SQC1Beta[format=8.4],, 'SQcontraste2 = 'SQC2Beta[format=8.4],,
+      'Soma SQs     = ' Soma[format=8.4] '    SQTrat = ' SQTrat[format=8.4];
+quit;
+```
+
+:::

@@ -1,6 +1,8 @@
 # Propriedades
 
-## Exemplo 1 (4.4(a))
+A seguir, serão apresentados exemplos para ilustrar as propriedades da distribuição normal multivariada.
+
+## Exemplo 1
 
 Para os exemplos dos Teoremas 1, 2 e 3 considere um vetor aleatório $\mathbf{y} \sim N_3(\mathbf{\mu}, \mathbf{\Sigma})$, em que:
 
@@ -46,9 +48,9 @@ Sigma = {4 0 2, 0 1 -1, 2 -1 3};
 
 :::
 
-### Teorema 1.1 (4.4A. i)
+### Teorema 1.1
 
-Sejam $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{a}$ um vetor $p \times 1$ de constantes. Então, a **variável aleatória**:
+Seja $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{a}$ um vetor $p \times 1$ de constantes. Então, a **variável aleatória** $z$ é dada por:
 
 $$z = \mathbf{a'}\mathbf{y} \sim N(\mathbf{a' \mu}, \mathbf{a'\Sigma a})$$
 
@@ -95,9 +97,9 @@ print y mi Sigma,,,,, 'item (i)   ',,'z = y1-2y2+y3   ' mi_z var_z;
 
 :::
 
-### Teorema 1.2 (4.4A. ii)
+### Teorema 1.2
 
-Sejam $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{A}$ uma matriz $k \times p$ de constantes e posto $k \le p$. Então, o **vetor aleatório**:
+Seja $\mathbf{y} \sim N_p(\mathbf{\mu}, \mathbf{\Sigma})$ e $\mathbf{A}$ uma matriz $k \times p$ de constantes e posto $k \le p$. Então, o **vetor aleatório** $\mathbf{z}$ é dado por:
 
 $$\mathbf{z} = \mathbf{A} \mathbf{y} \sim N_k(\mathbf{A \mu}, \mathbf{A\Sigma A'})$$
 
@@ -169,7 +171,7 @@ print 'item (ii)',,  ZZ '     ' mi_ZZ '     ' Sigma_ZZ;
 
 :::
 
-### Teorema 2 (4.4B.) {#sec-T2}
+### Teorema 2 {#sec-T2}
 
 Se $\mathbf{y} \sim N_p(\mathbf{\mu, \Sigma})$, então **qualquer subvetor** $r \times 1$ de $\mathbf{y}$ tem uma distribuição normal $r$-variada com médias, variâncias e covariâncias iguais às da distribuição normal $p$-variada original.
 
@@ -253,7 +255,7 @@ print mi_13 Sigma_13;
 
 :::
 
-### Teorema 3 (4.4C.)
+### Teorema 3
 
 Se o vetor particionado $\mathbf{v} = \begin{bmatrix} \mathbf{y} \\ \mathbf{x} \end{bmatrix} \sim N_{p+q}(\mathbf{\mu, \Sigma})$ então os subvetores aleatórios $\mathbf{y}$ e $\mathbf{x}$ são **independentes** se $\mathbf{\Sigma}_{xy} = 0$.
 
@@ -267,6 +269,8 @@ a1
 
 b2 <- c(0, 1, 0)
 b2
+
+Sigma
 
 cov_12 <- t(a1) %*% Sigma %*% b2
 cov_12
@@ -285,9 +289,9 @@ print cov_12;
 
 :::
 
-## Exemplo 2 (4.4(b))
+## Exemplo 2
 
-### Teorema 4 (4.4D.) {#sec-T4}
+### Teorema 4 {#sec-T4}
 
 Se $\mathbf{y}$ e $\mathbf{x}$ têm distribuição conjunta normal multivariada com $\mathbf{\Sigma}_{yx} \ne 0$ então a **distribuição condicional** de $\mathbf{y}$ dado $\mathbf{x}$, $f(\mathbf{y} \mid \mathbf{x})$, é **normal multivariada** com vetor de médias e matriz de covariâncias dados por:
 
@@ -298,7 +302,7 @@ cov(\mathbf{y} \mid \mathbf{x}) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \m
 \end{aligned}
 $$
 
-Para ilustrar o Teorema 4 (4.4D.), considere o vetor aleatório $\mathbf{v} \sim N_4(\mathbf{\mu, \Sigma})$ em que:
+Para ilustrar o Teorema 4, considere o vetor aleatório $\mathbf{v} \sim N_4(\mathbf{\mu, \Sigma})$ em que:
 
 $$
 \begin{aligned}
@@ -328,7 +332,7 @@ mi
 Sigma <- matrix(
   c(9, 0, 3, 3, 0, 1, -1, 2, 3, -1, 6, -3, 3, 2, -3, 7), 
   nrow = 4, byrow = TRUE
-  )
+)
 Sigma
 ```
 
@@ -471,9 +475,9 @@ var(y_2) = 1 \text{ e } var(y_2 \mid x_1, x_2) = 0,42
 \end{aligned}
 $$
 
-## Exemplo 3 (4.4(c))
+## Exemplo 3
 
-### Teorema 4 (4.4D.) - Corolário 1
+### Teorema 4 (Corolário)
 
 Considere: 
 
@@ -509,7 +513,7 @@ var(y \mid \mathbf{x}) = \sigma_{y}^2 - \mathbf{\sigma}_{yx}' \mathbf{\Sigma}_{x
 \end{aligned}
 $$
 
-Como exemplo, seguimos com o vetor $\mathbf{v}$ utilizado no [Teorema 4 (4.4D) -@sec-T4].
+Como exemplo, seguimos com o vetor $\mathbf{v}$ utilizado no [Teorema 4-@sec-T4].
 
 $$
 \mathbf{v} \sim N_4(\mathbf{\mu}, \mathbf{\Sigma})

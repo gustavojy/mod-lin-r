@@ -1,0 +1,129 @@
+options nodate nocenter ps=1000;
+
+proc iml;
+*reset print;
+reset fuzz;
+y = {14.29,19.10,19.09,16.25,15.09,16.61,19.63,
+     20.06,20.64,18.00,19.56,19.47,19.07,18.38,
+     20.04,26.23,22.74,24.04,23.37,25.02,23.27};
+X = {1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,1 1 0 0,
+     1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,1 0 1 0,
+     1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1,1 0 0 1};
+print X[format=5.0] y[format=8.2];
+kn = nrow(y); 
+p = ncol(X); 
+k = round(trace(X*ginv(X))); * Calcula o posto de XlinhaX;
+print 'rank(X) =' k;
+XLX = t(X)*X;
+XLy = t(X)*y;
+print 'Sistema de equações normais:' XLX XLy;
+
+Beta = ginv(XLX)*XLy; 	* Usando inversa generalizada de Moore-Penrose;
+
+igXLX = (1/7)*{0 0 0 0,
+               0 1 0 0, 
+               0 0 1 0, 
+               0 0 0 1}; 
+Beta2 = igXLX*XLy;
+print 'Duas soluções:' Beta[format=12.4] Beta2[format=12.4];
+
+L = {0, 1,-1,0}; * Lambda da função alfa1-alfa2 (estimável!);
+LBeta = t(L)*Beta;
+LBeta2 = t(L)*Beta2;
+print 'Função estimável: alfa1-alfa2:',,LBeta[format=12.4] LBeta2[format=12.4];
+
+L = {0,1,1,1}; * Lambda da função alfa1+alfa2+alfa3 (NÃO estimável!);
+LBeta = t(L)*Beta;
+LBeta2 = t(L)*Beta2;
+print 'Função NÃO estimável: alfa1+alfa2+alfa3:',,LBeta[format=12.4] LBeta2[format=12.4];
+
+
+T = I(kn)-(1/kn)*J(kn,kn,1);	* Matriz núcleo;
+SQTotal = t(y)*T*y;				* Calcula SQTotal corrigida pela média;
+gl_total = round(trace(T*ginv(T))); 
+
+A = X*ginv(t(X)*X)*t(X) -(1/kn)*J(kn,kn,1); 	* Matriz núcleo;
+SQTrat = t(y)*A*y;								* Calcula SQTrat;
+gl_trat = round(trace(A*ginv(A)));
+QMTrat = SQTrat/gl_trat;
+
+B = I(kn) - X*ginv(t(X)*X)*t(X);	* Matriz núcleo;
+SQRes = t(y)*B*y;					* Calcula SQResiduo;
+gl_res = round(trace(B*ginv(B)));
+QMRes = SQRes/gl_res;
+
+Fcalc = QMTrat/QMRes;
+p_valor = 1-cdf('F',Fcalc,gl_trat,gl_Res);
+
+print 'TABELA 12.3 - ANOVA para os dados de ácido ascórbico da Tabela 13.2',; 
+print 'Método ' gl_trat  SQTrat[format=12.4] QMTrat[format=12.4] Fcalc[format=10.4] p_valor[format=12.4],,
+      'Resíduo' gl_res   SQRes[format=12.4]  QMRes[format=12.4],,
+	  'Total  ' gl_total SQTotal[format=12.4];
+
+* CASO 1: As linhas são l.i. e ortogonais;
+C1 ={0 2 -1 -1};
+C2 ={0 0  1 -1};
+C1Beta = C1*Beta;
+C2Beta = C2*Beta;
+SQC1Beta = t(C1*Beta)*inv(C1*ginv(t(X)*X)*t(C1))*C1*Beta;
+SQC2Beta = t(C2*Beta)*inv(C2*ginv(t(X)*X)*t(C2))*C2*Beta;
+Soma = SQC1Beta + SQC2Beta;
+print 'Partição da SQTrat usando k=2 contrastes l.i. e ortogonais',,
+      'SQcontraste1 = ' SQC1Beta[format=8.4],, 'SQcontraste2 = ' SQC2Beta[format=8.4],,
+      'Soma SQs     = ' Soma[format=8.4] '    SQTrat = ' SQTrat[format=8.4];
+
+* CASO 2: As linhas são l.i., mas não são ortogonais;
+C1 ={0  2 -1 -1};
+C2 ={0  1  0 -1};
+C1Beta = C1*Beta;
+C2Beta = C2*Beta;
+SQC1Beta = t(C1*Beta)*inv(C1*ginv(t(X)*X)*t(C1))*C1*Beta;
+SQC2Beta = t(C2*Beta)*inv(C2*ginv(t(X)*X)*t(C2))*C2*Beta;
+Soma = SQC1Beta + SQC2Beta;
+print 'Partição da SQTrat usando contrastes l.i. mas não ortogonais',,
+      'SQcontraste1 = ' SQC1Beta[format=8.4],, 'SQcontraste2 = 'SQC2Beta[format=8.4],,
+      'Soma SQs     = ' Soma[format=8.4] '    SQTrat = ' SQTrat[format=8.4];
+quit;
+
+data Exemplo12_3;
+input Metodo$ Rep Acido;
+cards;
+  A     1   14.29
+  A     2   19.10
+  A     3   19.09
+  A     4   16.25
+  A     5   15.09
+  A     6   16.61
+  A     7   19.63
+  B     1   20.06
+  B     2   20.64
+  B     3   18.00
+  B     4   19.56
+  B     5   19.47
+  B     6   19.07
+  B     7   18.38
+  C     1   20.04
+  C     2   26.23
+  C     3   22.74
+  C     4   24.04
+  C     5   23.37
+  C     6   25.02
+  C     7   23.27
+;
+proc glm data=Exemplo12_3;
+ class Metodo;
+ model Acido = Metodo / ss3;
+* estimate 'A' intercept 1 metodo 1 0 0;
+* estimate 'B' intercept 1 metodo 0 1 0;
+* estimate 'C' intercept 1 metodo 0 0 1;
+* estimate 'A+B+C' metodo 1 1 1;
+* estimate 'alfa1'	 metodo 1 0 0;
+
+ contrast '(1) 2a1-a2-a3' metodo 2 -1 -1;
+ contrast '(2) a2-a3    ' metodo 0  1 -1;
+ contrast 'Conjunto:(1) e (2)' metodo 2 -1 -1, metodo 0  1 -1;
+
+ contrast '(3) a1-a2    ' metodo 1 -1  0;
+ contrast '(4) a1-a3    ' metodo 1  0 -1;
+ contrast 'Conjunto:(3) e (4)' metodo 1 -1  0, metodo 1  0 -1;
+run;

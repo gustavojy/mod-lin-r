@@ -60,6 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./exemplo5.1.html" rel="next">
 <link href="./exemplo4.4.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -232,6 +233,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Modelos de Análise de Variância (ANOVA)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Estimação</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Teste de Hipótese</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">ANOVA balanceada com dois fatores</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
     </ul>
 </div>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
@@ -269,8 +299,8 @@ H_0 &amp;: \boldsymbol{a'_i\beta} = 0 , \quad \text{para  i = 1,2,...}
 <li><p>Nível de significância <strong>geral</strong> (<em>Familywise</em>) (<span class="math inline">\(\alpha_f\)</span>);</p></li>
 <li><p>Nível de significância <strong>por comparação</strong> (<em>Comparison-wise</em>) (<span class="math inline">\(\alpha_c\)</span>).</p></li>
 </ul>
-<p>Quando realizamos um único teste de hipótese (como os apresentados nos exemplos anteriores do material), utilizamos um nível de significância <strong>geral</strong> <span class="math inline">\(\alpha_f\)</span>.</p>
-<p>Contudo, ao realizar mais de um teste de hipótese para um mesmo caso, utilizamos um nível de significância <strong>por comparação</strong> <span class="math inline">\(\alpha_c\)</span>. Isso acarreta em um <strong>aumento</strong> do nível de significância geral (<span class="math inline">\(\alpha_f\)</span>). Probabilisticamente tem-se:</p>
+<p>Quando realizamos um único teste de hipótese (como os apresentados nos capítulos anteriores), utilizamos um nível de significância <strong>geral</strong> <span class="math inline">\(\alpha_f\)</span>.</p>
+<p>Contudo, ao realizar mais de um teste de hipótese para um mesmo caso, utilizamos um nível de significância <strong>por comparação</strong> <span class="math inline">\(\alpha_c\)</span>. Isso acarreta em um <strong>aumento</strong> do nível de significância geral (<span class="math inline">\(\alpha_f\)</span>). Probabilisticamente, tem-se:</p>
 <p><span class="math display">\[\alpha_f = 1 - (1 - \alpha_c)^k\]</span></p>
 <p>em que <span class="math inline">\(k\)</span> é o número de execuções do teste de hipótese ao nível <span class="math inline">\(\alpha_c\)</span> de significância por teste realizado.</p>
 <p>Com isso, fixando um nível de significância <span class="math inline">\(\alpha_c = 0,05\)</span> para cada teste, conforme aumentarmos o número de testes, o nível de significância geral (<span class="math inline">\(\alpha_f\)</span>) aumenta.</p>
@@ -588,30 +618,33 @@ x2 -0.2287066 -0.1111987  0.08359621</code></pre>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
 <thead><tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">Método</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">t</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Parâmetros</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">t_calc</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">t_tab</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">t_Bonferroni</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">t_Scheffé</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">t</td>
-<td style="text-align: center;">(0,025; 9 gl)</td>
+<td style="text-align: center;">Beta1</td>
+<td style="text-align: center;">4.448205</td>
 <td style="text-align: center;">2.262157</td>
+<td style="text-align: center;">2.685011</td>
+<td style="text-align: center;">3.404063</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">Bonferroni</td>
-<td style="text-align: center;">(0,0125; 9 gl)</td>
+<td style="text-align: center;">Beta2</td>
+<td style="text-align: center;">-2.643478</td>
+<td style="text-align: center;">2.262157</td>
 <td style="text-align: center;">2.685011</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Scheffé</td>
-<td style="text-align: center;">(0,025; 9 gl)</td>
 <td style="text-align: center;">3.404063</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<p>Nota-se que o valor do <span class="math inline">\(t\)</span> calculado (<code>t_calc</code>) para o estimador de <span class="math inline">\(\beta_1\)</span> é maior do que as estatísticas de <span class="math inline">\(t\)</span> tabelado, de <span class="math inline">\(t\)</span> de Bonferroni e de <span class="math inline">\(t\)</span> de Scheffé, assim, rejeita-se a hipótese <span class="math inline">\(H_0: \beta_1 = 0\)</span>, com um nível de significância geral <span class="math inline">\(\alpha_f = 0, 05\)</span>.</p>
+<p>Por outro lado, para o estimador de <span class="math inline">\(\beta_2\)</span>, obteve-se um valor absoluto de <span class="math inline">\(t\)</span> maior que o <span class="math inline">\(t\)</span> tabelado, porém inferior a do <span class="math inline">\(t\)</span> de Bonferroni e do <span class="math inline">\(t\)</span> de Scheffé. Assim, utilizando os dois métodos de nível de significância por comparação, não temos evidências para rejeitar a hipótese <span class="math inline">\(H_0: \beta_2 = 0\)</span>.</p>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
@@ -905,6 +938,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./exemplo5.1.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Estimação</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

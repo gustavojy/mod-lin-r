@@ -233,6 +233,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Modelos de Análise de Variância (ANOVA)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Estimação</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Teste de Hipótese</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">ANOVA balanceada com dois fatores</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
     </ul>
 </div>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
@@ -282,7 +311,7 @@ y_i = \beta_0 + \beta_1 x_i + \epsilon_i \space , \quad \text{para } i = 1, \dot
 <li><p><span class="math inline">\(var(\epsilon_i) = \sigma^2, \forall \space i = 1,\dots,n\)</span> e <span class="math inline">\(var(y_i) = \sigma^2\)</span>, ou seja, a variância não depende dos valores de <span class="math inline">\(x_i\)</span> (homocedasticidade);</p></li>
 <li><p><span class="math inline">\(cov(\epsilon_i, \epsilon_j) = 0, \forall \space i \ne j\)</span> e <span class="math inline">\(cov(y_i, y_j) = 0\)</span>, portanto, não correlacionados entre si.</p></li>
 </ul>
-<p>O exemplo a seguir trata da seguinte situação: <em>Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame (</em><span class="math inline">\(y\)</span>) e das tarefas (<span class="math inline">\(x\)</span>) para os 18 alunos da classe foram:</p>
+<p>O exemplo a seguir trata da seguinte situação: <em>Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame (<span class="math inline">\(y\)</span>) e das tarefas (<span class="math inline">\(x\)</span>) para os 18 alunos da classe foram</em>:</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist">
 <li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" aria-current="page">R</a></li>
@@ -478,7 +507,7 @@ y_i = \beta_0 + \beta_1 x_i + \epsilon_i \space , \quad \text{para } i = 1, \dot
 [18,]     0     0     0     0     1</code></pre>
 </div>
 </div>
-<p>A operação matricial para obter <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(\hat\beta_0\)</span> é:</p>
+<p>As operações matriciais para obter <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(\hat\beta_0\)</span> são:</p>
 <p><span class="math display">\[
 \begin{align}
 \hat\beta_1 &amp;= \frac{\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{y}\right]} {\left[\mathbf{x}' \left(\mathbf{I} - \frac{1}n \mathbf{J} \right) \mathbf{x}\right]} \\
@@ -788,8 +817,8 @@ s^2 =
 </section><section id="teste-de-hipóteses-e-intervalo-de-confiança-para-beta_1" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="teste-de-hipóteses-e-intervalo-de-confiança-para-beta_1">
 <span class="header-section-number">5.4</span> Teste de Hipóteses e Intervalo de Confiança para <span class="math inline">\(\beta_1\)</span>
 </h2>
-<p>Realizaremos um teste de hipótese para <span class="math inline">\(H_0: \beta_1 = 0\)</span>, com a suposição que <span class="math inline">\(y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)\)</span> ou <span class="math inline">\(\epsilon_i \sim N(0, \sigma^2)\)</span>.</p>
-<p>Das propriedades de <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(s^2\)</span>, temos:</p>
+<p>Realizaremos um teste de hipótese <span class="math inline">\(H_0: \beta_1 = 0\)</span>, com a suposição que <span class="math inline">\(y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)\)</span> ou <span class="math inline">\(\epsilon_i \sim N(0, \sigma^2)\)</span>.</p>
+<p>Das propriedades de <span class="math inline">\(\hat\beta_1\)</span> e <span class="math inline">\(s^2\)</span>, a estatística t é dada por:</p>
 <p><span class="math display">\[
 t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{\hat\beta_1}{\text{Erro padrão}}
 \]</span></p>
@@ -1110,7 +1139,7 @@ t = \frac{r \space \sqrt{n - 2}}{\sqrt{1-r^2}}
 </div>
 <p>Onde a função <code><a href="https://rdrr.io/r/stats/TDist.html">pt()</a></code> retorna a função de distribuição da estatística t.</p>
 <p>Dado que o p-valor é menor que <span class="math inline">\(\alpha = 0,05\)</span>, rejeitamos <span class="math inline">\(H_0: \beta_1 = 0\)</span>.</p>
-<p>Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</p>
+<p>Por fim, podemos ter uma visão geral dos resultados da análise de regressão com a função <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code>, a partir do modelo criado com a função <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">modelo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span><span class="op">)</span></span>
 <span></span>
@@ -1136,25 +1165,46 @@ Multiple R-squared:  0.8288,    Adjusted R-squared:  0.8181
 F-statistic: 77.48 on 1 and 16 DF,  p-value: 1.571e-07</code></pre>
 </div>
 </div>
+<div>
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">modelo</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-32-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-32-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="exemplo3.1_files/figure-html/unnamed-chunk-32-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> SQReg<span class="sc">/</span>SQTotal;  <span class="sc">*</span> Coeficiente de determinação <span class="sc">-</span> R2<span class="st">';</span></span>
-<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="st">corr = sqrt(R2);</span></span>
-<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>     SQTotal  <span class="ot">=</span>     SQReg   <span class="sc">+</span>    SQRes<span class="st">',,</span></span>
-<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a><span class="st">       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,</span></span>
-<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de determinação (R2)<span class="sc">:</span> <span class="st">' R2[format=10.4],,,</span></span>
-<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de correlação (r)<span class="sc">:</span>    <span class="st">' corr[format=10.4],,,;</span></span>
-<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;</span></span>
-<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));</span></span>
-<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a><span class="st">p_valor = 2*(1-cdf('</span>t<span class="st">',abs(tcalc1),n-2));</span></span>
-<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>H0<span class="sc">:</span> Beta1 <span class="ot">=</span> <span class="dv">0</span>   <span class="st">' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];</span></span>
-<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb90-16"><a href="#cb90-16" aria-hidden="true" tabindex="-1"></a><span class="st">quit;</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">=</span> SQReg<span class="sc">/</span>SQTotal;  <span class="sc">*</span> Coeficiente de determinação <span class="sc">-</span> R2<span class="st">';</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a><span class="st">corr = sqrt(R2);</span></span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>     SQTotal  <span class="ot">=</span>     SQReg   <span class="sc">+</span>    SQRes<span class="st">',,</span></span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a><span class="st">       SQTotal[format=12.4] SQReg[format=12.4] SQRes[format=12.4],,,</span></span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de determinação (R2)<span class="sc">:</span> <span class="st">' R2[format=10.4],,,</span></span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a><span class="st">      '</span>Coeficiente de correlação (r)<span class="sc">:</span>    <span class="st">' corr[format=10.4],,,;</span></span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc1 = Beta1/stderr_Beta1; * Para testar H0: Beta1 = 0;</span></span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a><span class="st">tcalc2 = corr*sqrt(n-2)/(sqrt(1-corr**2));</span></span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a><span class="st">p_valor = 2*(1-cdf('</span>t<span class="st">',abs(tcalc1),n-2));</span></span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-14"><a href="#cb91-14" aria-hidden="true" tabindex="-1"></a><span class="st">print '</span>H0<span class="sc">:</span> Beta1 <span class="ot">=</span> <span class="dv">0</span>   <span class="st">' tcalc1[format=10.4] tcalc2[format=10.4] p_valor[format=10.4];</span></span>
+<span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-16"><a href="#cb91-16" aria-hidden="true" tabindex="-1"></a><span class="st">quit;</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>

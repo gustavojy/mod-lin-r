@@ -22,7 +22,7 @@ O **modelo completo** de regressão múltipla de $y_2$ é dado por:
 
 $$
 \begin{align}
-y_2 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_4x_1^2 + \beta_5x_2^2 + \beta_6x_3^2 + \beta_7x_1x_2 +\\
+y_2 = &\beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_4x_1^2 + \beta_5x_2^2 + \beta_6x_3^2 + \beta_7x_1x_2 +\\
 &+ \beta_8x_1x_3 + \beta_9x_2x_3 + \epsilon
 \end{align}
 $$

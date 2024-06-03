@@ -1,0 +1,184 @@
+options nodate nocenter ps=1000;
+/*
+Em um experimento de substituição do farelo de soja pelo farelo de girassol 
+na ração de suínos, montou-se um experimento fatorial 2x5, com os fatores 
+Sexo (1:Macho e 2:Fêmea) e Girassol (0, 25, 50, 75 e 100% de substituição).
+Foram utilizados 30 suínos (15 machos e 15 fêmeas) castrados da raça Duroc-
+Jersey, num delineamento inteiramente casualizado com 3 repetições. Na fase 
+final do período experimental ocorreu a morte de três suínos. Os ganhos de 
+peso dos animais aos 112 dias de experimento estão apresentados a seguir:
+*/
+
+data Girassol;
+input Sexo Girassol Trat Rep GP;
+* n11=2 n12=3 n13=2 n14=3 n15=3;
+* n21=2 n22=3 n23=2 n24=3 n25=3;
+cards;
+  1   0   1   1  77.9
+  1   0   1   2  83.2
+  1   0   1   3  83.5
+  1  25   2   1  71.5
+  1  25   2   2  73.5
+  1  25   2   3  70.5
+  1  50   3   1  67.5
+  1  50   3   3  65.0
+  1  75   4   1  71.5
+  1  75   4   2  70.8
+  1  75   4   3  72.5
+  1 100   5   1  89.5
+  1 100   5   2  91.8
+  1 100   5   3  92.9
+  2   0   6   2  86.0
+  2   0   6   3  84.0
+  2  25   7   1  94.5
+  2  25   7   2  96.0
+  2  25   7   3  95.8
+  2  50   8   1  99.5
+  2  50   8   2  98.0
+  2  75   9   1  93.0
+  2  75   9   2  96.0
+  2  75   9   3  90.5
+  2 100  10   1  83.0
+  2 100  10   2  80.0
+  2 100  10   3  78.5
+;
+
+proc iml;
+varNames = {"Sexo" "Girassol" "Trat" "Rep" "GP"};
+use work.Girassol;
+read all var varNames;
+close work.Girassol;
+print Sexo Girassol Trat Rep GP;
+
+y = GP; 
+n = nrow(y);
+
+W = design(Trat);
+
+Mi = inv(t(W)*W)*t(W)*GP;
+print Mi[format=8.2];
+
+AT = I(n)-(1/n)*J(n,n,1);
+SQTotal = t(Y)*AT*y;
+gl_total = n-1;
+
+ARes = I(n)- W*inv(t(W)*W)*t(W);
+SQRes = t(y)*ARes*y;
+gl_res = round(trace(ARes*ginv(ARes)));
+QMRes = SQRes/gl_Res;
+
+ATrat = W*inv(t(W)*W)*t(W) - (1/n)*J(n,n,1);
+SQTrat = t(y)*ATrat*y;
+gl_trat = round(trace(ATrat*ginv(ATrat)));
+QMTrat = SQTrat/gl_trat;
+F_trat = QMTrat/QMRes;
+p_trat = 1-cdf('F',F_trat,gl_trat,gl_res);
+
+print 'ANOVA - modelo de médias',,
+'Tratamentos ' gl_trat SQTrat[format=12.4] QMTrat[format=12.4] F_trat[format=12.4] p_trat[format=12.4],,
+'Resíduo     ' gl_res SQRes[format=12.4] QMRes[format=12.4],,
+'Total       ' gl_total SQTotal[format=12.4];
+
+CS = { 1  1  1  1  1 -1 -1 -1 -1 -1};
+*CG = {-4  1  1  1  1 -4  1  1  1  1,
+       0 -3  1  1  1  0 -3  1  1  1,
+       0  0 -2  1  1  0  0 -2  1  1,
+       0  0  0 -1  1  0  0  0 -1  1}; 
+
+CG = {-2 -1  0  1  2 -2 -1  0  1  2,
+       2 -1 -2 -1  2  2 -1 -2 -1  2,
+	  -1  2  0 -2  1 -1  2  0 -2  1,
+	   1 -4  6 -4  1  1 -4  6 -4  1};
+CSxG = CS#CG[1,]//CS#CG[2,]//CS#CG[3,]//CS#CG[4,];
+print CS,, CG,, CSxG;
+
+SQSexo = t(CS*Mi)*inv(CS*inv(t(W)*W)*t(CS))*(CS*Mi);
+gl_Sexo = nrow(CS);
+QMSexo = SQSexo/gl_Sexo;
+F_sexo =QMSexo/QMRes;
+p_sexo = 1-cdf('F',F_sexo,gl_sexo,gl_res);
+
+SQGirassol = t(CG*Mi)*inv(CG*inv(t(W)*W)*t(CG))*(CG*Mi);
+gl_Girassol = nrow(CG);
+QMGirassol = SQGirassol/gl_Girassol;
+F_Girassol = QMGirassol/QMRes;
+p_girassol = 1-cdf('F',F_Girassol,gl_Girassol,gl_res);
+
+SQSxG = t(CSxG*Mi)*inv(CSxG*inv(t(W)*W)*t(CSxG))*(CSxG*Mi);
+gl_SxG = nrow(CSxG);
+QMSxG = SQSxG/gl_SxG;
+F_SxG = QMSxG/QMRes;
+p_SxG = 1-cdf('F',F_SxG,gl_SxG,gl_res);
+
+SQTrats = SQSexo + SQGirassol + SQSxG;
+
+print 'ANOVA - FATORIAL SEXO x GIRASSOL',,
+'Sexo            ' gl_sexo SQSexo[format=12.4] QMSexo[format=12.4] F_sexo[format=12.4] p_sexo[format=12.4],,
+'Girassol      ' gl_girassol SQGirassol[format=12.4] QMGirassol[format=12.4] F_Girassol[format=12.4] p_Girassol[format=12.4],,
+'Interação SxG   ' gl_SxG SQSxG[format=12.4] QMSxG[format=12.4] F_SxG[format=12.4] p_SxG[format=12.4],,
+'Resíduo         ' gl_res SQRes[format=12.4] QMRes[format=12.4],,
+'Total           ' gl_total SQTotal[format=12.4],,;
+
+print 'SQTrats = SQS + SQG + SQSxG = ' SQTrats[format=12.4] SQTrat[format=12.4];
+
+a1 = {1 0 0 0 0 -1  0  0  0  0};
+a2 = {0 1 0 0 0  0 -1  0  0  0};
+a3 = {0 0 1 0 0  0  0 -1  0  0};
+a4 = {0 0 0 1 0  0  0  0 -1  0};
+a5 = {0 0 0 0 1  0  0  0  0 -1};
+SQa1 = t(a1*Mi)*inv(a1*inv(t(W)*W)*t(a1))*(a1*Mi);
+SQa2 = t(a2*Mi)*inv(a2*inv(t(W)*W)*t(a2))*(a2*Mi);
+SQa3 = t(a3*Mi)*inv(a3*inv(t(W)*W)*t(a3))*(a3*Mi);
+SQa4 = t(a4*Mi)*inv(a4*inv(t(W)*W)*t(a4))*(a4*Mi);
+SQa5 = t(a5*Mi)*inv(a5*inv(t(W)*W)*t(a5))*(a5*Mi);
+gl_a = 1;
+Fa1 = SQa1/QMRes; Fa2 = SQa2/QMRes; Fa3 = SQa3/QMRes; Fa4 = SQa4/QMRes; Fa5 = SQa5/QMRes;
+p_a1 = 1-cdf('F',Fa1,1,gl_res); p_a2 = 1-cdf('F',Fa2,1,gl_res);
+p_a3 = 1-cdf('F',Fa3,1,gl_res); p_a4 = 1-cdf('F',Fa4,1,gl_res);
+p_a5 = 1-cdf('F',Fa5,1,gl_res);
+
+print '------------------------------------------------------------------------',
+      ' Desdobramento (1): Compara as médias de Sexo em cada nível de Girassol ',
+      '------------------------------------------------------------------------',,
+'Girassol=  0: M=F' gl_a SQa1[format=12.4] Fa1[format=12.4] p_a1[format=12.4],,
+'Girassol= 25: M=F' gl_a SQa2[format=12.4] Fa2[format=12.4] p_a2[format=12.4],,
+'Girassol= 50: M=F' gl_a SQa3[format=12.4] Fa3[format=12.4] p_a3[format=12.4],,
+'Girassol= 75: M=F' gl_a SQa4[format=12.4] Fa4[format=12.4] p_a4[format=12.4],,
+'Girassol=100: M=F' gl_a SQa5[format=12.4] Fa5[format=12.4] p_a5[format=12.4];
+
+quit;
+
+proc glm;
+class trat;
+model GP = trat / ss3;
+
+contrast 'Sexo' trat 1  1  1  1  1 -1 -1 -1 -1 -1;
+contrast 'Girassol'  trat -2 -1  0  1  2 -2 -1  0  1  2,
+      				 trat  2 -1 -2 -1  2  2 -1 -2 -1  2,
+	  				 trat -1  2  0 -2  1 -1  2  0 -2  1,
+	  				 trat  1 -4  6 -4  1  1 -4  6 -4  1;
+contrast 'Interação' trat -4  1  1  1  1  4 -1 -1 -1 -1,
+      				 trat  0 -3  1  1  1  0  3 -1 -1 -1,
+ 	  				 trat  0  0 -2  1  1  0  0  2 -1 -1,
+ 	  				 trat  0  0  0 -1  1  0  0  0  1 -1;
+
+contrast 'Girassol=  0: F = M' trat 1 0 0 0 0 -1  0  0  0  0;
+contrast 'Girassol= 25: F = M' trat 0 1 0 0 0  0 -1  0  0  0;
+contrast 'Girassol= 50: F = M' trat 0 0 1 0 0  0  0 -1  0  0;
+contrast 'Girassol= 75: F = M' trat 0 0 0 1 0  0  0  0 -1  0;
+contrast 'Girassol=100: F = M' trat 0 0 0 0 1  0  0  0  0 -1;
+contrast 'Machos: Girassol grau 1' trat -2 -1  0  1  2  0  0  0  0  0;
+contrast 'Machos: Girassol grau 2' trat  2 -1 -2 -1  2  0  0  0  0  0;
+contrast 'Machos: Girassol grau 3' trat -1  2  0 -2  1  0  0  0  0  0;
+contrast 'Machos: Girassol grau 4' trat  1 -4  6 -4  1  0  0  0  0  0;
+contrast 'Fêmeas: Girassol grau 1' trat  0  0  0  0  0 -2 -1  0  1  2;
+contrast 'Fêmeas: Girassol grau 2' trat  0  0  0  0  0  2 -1 -2 -1  2;
+contrast 'Fêmeas: Girassol grau 3' trat  0  0  0  0  0 -1  2  0 -2  1;
+contrast 'Fêmeas: Girassol grau 4' trat  0  0  0  0  0  1 -4  6 -4  1;
+run;
+
+proc glm;
+class Sexo Girassol;
+model GP = Sexo Girassol  / ss1 ss2 ss3;
+run;
+

@@ -1,10 +1,10 @@
 # Teste de Hipótese - Exemplo 1
 
-Desenvolveremos testes de hipóteses para os parâmetros do vetor $\boldsymbol{\beta} = [\beta_1, \beta_2,\dots, \beta_k]'$ no modelo
+Desenvolveremos testes de hipóteses para os parâmetros do vetor $\boldsymbol{\beta} = [\beta_1, \beta_2,\dots, \beta_k]'$ no modelo de regressão múltipla
 
 $$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$$
 
-Faremos a mesma suposição realizada no @sec-rlmest, em que $\boldsymbol{\epsilon} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$ ou $\mathbf{y} \sim N_n(\mathbf{X}\boldsymbol{\beta},\sigma^2\mathbf{I})$, onde $\mathbf{X}$ é uma matriz $n \times(k+1)$, de posto $k+1 < n$, sendo $n$ o número de observações e $k$, o número de variáveis $x$.
+Faremos as mesmas suposições do @sec-rlmest, em que $\boldsymbol{\epsilon} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})$ ou $\mathbf{y} \sim N_n(\mathbf{X}\boldsymbol{\beta},\sigma^2\mathbf{I})$, onde $\mathbf{X}$ é uma matriz $n \times(k+1)$, de posto $k+1 < n$, sendo $n$ o número de observações e $k$, o número de variáveis $x$.
 
 Isso garante que as somas de quadrados da regressão e dos resíduos são formas quadráticas independentes, sendo pressuposições importantes para a realização da análise de variância.
 
@@ -162,7 +162,7 @@ H_a&: \text{Pelo menos uma das variáveis x's é importante na predição de y}
 \end{align}
 $$
 
-O quadro da ANOVA para o teste F de $H_0: \boldsymbol{\beta_1} = 0$ fica:
+O quadro da ANOVA para o teste F de $H_0: \boldsymbol{\beta_1} = 0$ é:
 
 ```{r}
 #| echo: false
@@ -171,9 +171,9 @@ options(knitr.kable.NA = '')
 
 data.frame(
   "FV" = c("Devida a Beta1", "Resíduo", "Total"),
-  "gl" = c("k", "n-k-1", "n-1"),
-  "QM" = c("SQReg/k", "SQRes/(n-k-1)", "SQTot/(n-1)"),
-  "F" = c("QMReg/QMRes", NA, NA)
+  "gl" = c("k", "n - k - 1", "n - 1"),
+  "QM" = c("SQReg / k", "SQRes / (n - k - 1)", "SQTot / (n - 1)"),
+  "F" = c("QMReg / QMRes", NA, NA)
 ) |> 
   kableExtra::kbl(align = "c") |> 
   kableExtra::kable_styling(position = "center")
@@ -293,7 +293,7 @@ print 'Regressão' gl_reg   SQReg[format=10.4] QMReg[format=10.4] Fcalc1[format=
 
 ### Teste para um subconjunto de $\beta's$
 
-Neste caso, estamos interessados em testar a hipótese de que um subconjunto das variáveis regressoras $x's$ não é importante em predizer $y$.
+Neste caso, estamos interessados em testar a hipótese de que um subconjunto das variáveis regressoras $x's$ não é importante para predizer $y$.
 
 Como hipóteses do teste de regressão, assumiremos: 
 

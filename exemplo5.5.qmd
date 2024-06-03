@@ -1,0 +1,76 @@
+# Dados Desbalanceados - Modelo de médias de caselas
+
+```{r}
+dados1 <- readxl::read_excel("15.3.1-dados.xlsx", sheet = "dados1")
+dados1
+```
+
+
+```{r}
+nrow(dados1)             # Nº observações
+levels(dados1$Trat)      # Níveis
+is.na(dados1) |> sum()   # Quantidade de dados faltantes
+```
+
+```{r}
+modelo1 <- aov(Gordura ~ Trat - 1, data = dados1)
+summary(modelo1)
+```
+
+```{r}
+matriz_contraste <- matrix(
+  c( 1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  # Sexo
+     3,  3,  3,  3, -2, -2, -2, -2, -2, -2,  # Linhagem 1
+     1,  1, -1, -1,  0,  0,  0,  0,  0,  0,  # Linhagem 2
+     0,  0,  0,  0,  1,  1, -2, -2,  1,  1,  # Linhagem 3
+     0,  0,  0,  0,  1,  1,  0,  0, -1, -1,  # Linhagem 4
+     3, -3,  3, -3, -2,  2, -2,  2, -2,  2,  # Interação 1
+     1, -1, -1,  1,  0,  0,  0,  0,  0,  0,  # Interação 2
+     0,  0,  0,  0,  1, -1, -2,  2,  1, -1,  # Interação 3
+     0,  0,  0,  0,  1, -1,  0,  0, -1,  1), # Interação 4
+  nrow = 9, byrow = TRUE
+)
+rownames(matriz_contraste) <- c("Sexo", "Linhagem1", "Linhagem2", "Linhagem3", "Linhagem4", "Interacao1", "Interacao2", "Interacao3", "Interacao4")
+
+
+matriz_contraste
+```
+
+```{r}
+# Aplicar contrastes
+contrasts(dados1$Trat) <- matriz_contraste
+```
+
+```{r}
+# Análise de variância com contrastes
+car::Anova(modelo1, type = "III")
+```
+
+
+
+```{r}
+# Dados do modelo fatorial superparametrizado
+dados2 <- readxl::read_excel(
+  "15.3.1-dados.xlsx", sheet = "dados2",
+  col_types = c()
+  )
+dados2
+```
+
+```{r}
+# Ajustar o modelo
+modelo2 <- lm(Gordura ~ as.factor(Linhagem) * as.factor(Sexo), data = dados2)
+summary(modelo2)
+
+# Análise de variância
+anova(modelo2)
+
+# Cálculo das médias marginais (LSMeans)
+lsmeans::lsmeans(modelo2, pairwise ~ Sexo * Linhagem)
+```
+
+
+
+
+
+

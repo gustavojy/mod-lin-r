@@ -24,7 +24,7 @@ Como suposições do modelo, temos:
 
 -   $cov(\epsilon_i, \epsilon_j) = 0, \forall \space i \ne j$ e $cov(y_i, y_j) = 0$, portanto, não correlacionados entre si.
 
-O exemplo a seguir trata da seguinte situação: *Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame (*$y$) e das tarefas ($x$) para os 18 alunos da classe foram:
+O exemplo a seguir trata da seguinte situação: *Estudantes de Estatística alegam que as tarefas de casa não ajudam a prepará-los para o exame final. Os escores do exame ($y$) e das tarefas ($x$) para os 18 alunos da classe foram*:
 
 ::: panel-tabset
 
@@ -105,7 +105,7 @@ In <- diag(n)
 In
 ```
 
-A operação matricial para obter $\hat\beta_1$ e $\hat\beta_0$ é:
+As operações matriciais para obter $\hat\beta_1$ e $\hat\beta_0$ são:
 
 $$
 \begin{align}
@@ -284,9 +284,9 @@ print 'Variância dos dados originais:' var_y [format=10.4],,
 
 ## Teste de Hipóteses e Intervalo de Confiança para $\beta_1$
 
-Realizaremos um teste de hipótese para $H_0: \beta_1 = 0$, com a suposição que $y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)$ ou $\epsilon_i \sim N(0, \sigma^2)$.
+Realizaremos um teste de hipótese $H_0: \beta_1 = 0$, com a suposição que $y_i \sim N(\beta_0+ \beta_1x_i, \space \sigma^2)$ ou $\epsilon_i \sim N(0, \sigma^2)$.
 
-Das propriedades de $\hat\beta_1$ e $s^2$, temos:
+Das propriedades de $\hat\beta_1$ e $s^2$, a estatística t é dada por:
 
 $$
 t = \frac{\hat\beta_1}{\sqrt{\frac{s^2}{\sum^n_{i=1}(x_i-\bar{x})^2}}} =  \frac{\hat\beta_1}{\text{Erro padrão}}
@@ -493,12 +493,18 @@ Onde a função `pt()` retorna a função de distribuição da estatística t.
 
 Dado que o p-valor é menor que $\alpha = 0,05$, rejeitamos $H_0: \beta_1 = 0$.
 
-Por fim, podemos ter uma visão geral dos resultados da análise de regressão a partir do modelo criado com a função `lm()`.
+Por fim, podemos ter uma visão geral dos resultados da análise de regressão com a função `summary()`, a partir do modelo criado com a função `lm()`.
 
 ```{r}
 modelo <- lm(y ~ x1)
 
 summary(modelo)
+```
+
+```{r}
+#| layout-ncol: 2
+
+plot(modelo)
 ```
 
 ### SAS

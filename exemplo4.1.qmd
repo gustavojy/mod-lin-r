@@ -31,13 +31,13 @@ $$
 
 $$\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$$
 
-- $\mathbf{y}$: $n \times 1$;
+- $\mathbf{y}$: vetor dos valores observados $n \times 1$;
 
-- $\mathbf{X}$: $n \times (k + 1)$, com $n > (k+1)$ e posto $k + 1$;
+- $\mathbf{X}$: matriz das variáveis preditoras $n \times (k + 1)$, com $n > (k+1)$ e posto $k + 1$;
 
-- $\boldsymbol{\beta}$: $(k + 1) \times 1$;
+- $\boldsymbol{\beta}$: vetor de parâmetros $(k + 1) \times 1$;
 
-- $\boldsymbol{\epsilon}$: $n \times 1$.
+- $\boldsymbol{\epsilon}$: vetor de erros $n \times 1$.
 
 Como suposições do modelos, temos:
 
@@ -45,7 +45,7 @@ Como suposições do modelos, temos:
 
 - $cov(\boldsymbol{\epsilon}) = \sigma^2\mathbf{I}$ ou $cov(\mathbf{y}) = \sigma^2\mathbf{I}$.
 
-Os parâmetros $\beta$ são denominados **coeficientes parciais de regressão**, pois expressam o seu efeito coletivo em $E(\mathbf{y})$ na presença das demais variáveis no modelo. Por exemplo, $\beta_1$ mostra o efeito da variável $x_1$ sobre $E(\mathbf{y})$ na presença das demais variáveis $x$; caso seja retirado algum $x$ deste modelo, o efeito de $x_1$ pode ser diferente.
+Os parâmetros $\beta$ são denominados **coeficientes parciais de regressão**, pois expressam o seu efeito coletivo em $E(\mathbf{y})$ na presença das demais variáveis no modelo. Por exemplo, $\beta_1$ mostra o efeito da variável $x_1$ sobre $E(\mathbf{y})$ na presença das demais variáveis $x$. Caso seja retirado algum $x$ deste modelo, o efeito de $x_1$ pode ser diferente.
 
 Para representar esta diferença, utilizamos um asterisco nos parâmetros beta ($\beta^*$) do **modelo reduzido**.
 
@@ -56,9 +56,9 @@ y &= \beta_0^* + \beta^*_1x_1 + \epsilon \\
 \end{align}
 $$
 
-No caso anterior, a primeira equação é referente ao **modelo completo**, cujos valores de $\beta_0$ e $\beta_1$ serão diferentes de $\beta^*_0$ e $\beta^*_1$, respectivos ao **modelo reduzido**, caso retirarmos $x_2$ do modelo completo.
+A primeira equação é referente ao **modelo completo**, cujos valores de $\beta_0$ e $\beta_1$ serão diferentes de $\beta^*_0$ e $\beta^*_1$, respectivos ao **modelo reduzido**, caso retirarmos $x_2$ do modelo completo.
 
-O exemplo a seguir é baseado em Freund e Minton (1979, p. 36-39), cujo dados estão representados a seguir.
+O exemplo a seguir é baseado em Freund e Minton (1979, p. 36-39), cujos dados estão representados a seguir.
 
 ```{r}
 #| echo: false
@@ -175,7 +175,7 @@ $$
 
 é um estimador de $E(y_i)$.
 
-Assim, o valor de $\hat {\boldsymbol{\beta}} = [\hat \beta_0,\hat \beta_1,\dots,\hat \beta_k]'$ que minimiza a soma de quadrados dos desvios é:
+Assim, o vetor $\hat {\boldsymbol{\beta}} = [\hat \beta_0,\hat \beta_1,\dots,\hat \beta_k]'$ que minimiza a soma de quadrados dos desvios é dado por:
 
 $$
 \hat{\boldsymbol{\beta}} = (\mathbf{X'X})^{-1} \mathbf{X}' \mathbf{y}
@@ -272,7 +272,7 @@ s2
 
 ::: {.callout-note}
 
-A variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar, realizada para o caso da regressão linear simples:
+A variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar para o caso da regressão linear simples:
 
 ```{r}
 #| eval: false
@@ -293,7 +293,7 @@ s2 <- as.numeric(SQRes / (n - k - 1))
 
 Para verificar se $s^2$ é um estimador não viesado de $cov(\hat{\boldsymbol{\beta}})$:
 
-$$\widehat{cov}(\hat{\boldsymbol{\beta}}) = s^2(\mathbf{X'X})^{-1}$$
+$$\widehat{cov(\hat{\boldsymbol{\beta}})} = s^2(\mathbf{X'X})^{-1}$$
 
 ```{r}
 cov_Beta <- s2 * solve(t(X012) %*% X012)
@@ -313,8 +313,6 @@ s^2 &= 2,829 \\
 \end{bmatrix}
 \end{align}
 $$
-
-*qual a conclusão?????????????????*
 
 ### SAS
 
@@ -434,7 +432,7 @@ Betac
 Para calcular a estimativa de $\sigma^2$ no modelo centrado, utilizamos a mesma expressão do modelo original:
 
 $$
-s^2 = \frac{\mathbf{y'y} - \hat {\boldsymbol{\beta_c}'}' \mathbf{X_c'} \mathbf{y}}{n-k-1} = \frac{\text{SQResíduo}}{n-k-1}
+s^2 = \frac{\mathbf{y'y} - \hat {\boldsymbol{\beta_1}}' \mathbf{X_c'} \mathbf{y}}{n-k-1} = \frac{\text{SQResíduo}}{n-k-1}
 $$
 
 ```{r}
@@ -444,7 +442,7 @@ s2c
 
 ::: {.callout-note}
 
-Mais uma vez, a variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar, realizada para o caso da regressão linear simples:
+Mais uma vez, a variância estimada $s^2$ também poderia ser calculada da seguinte maneira, como realizado na @sec-estvar para o caso da regressão linear simples:
 
 ```{r}
 #| eval: false
@@ -463,7 +461,7 @@ s2c <- as.numeric(SQRes / (n - k - 1))
 
 Novamente, para verificar se $s^2$ é um estimador não viesado de $cov(\hat{\boldsymbol{\beta}})$:
 
-$$\widehat{cov}(\hat{\boldsymbol{\beta}}) = s^2(\mathbf{X'X})^{-1}$$
+$$\widehat{cov(\hat{\boldsymbol{\beta}})} = s^2(\mathbf{X'X})^{-1}$$
 
 ```{r}
 cov_Betac <- s2c * solve(t(X012) %*% X012)
@@ -483,8 +481,6 @@ s^2 &= 2,829 \\
 \end{bmatrix}
 \end{align}
 $$
-
-*qual a conclusão?????????????????*
 
 ### SAS
 

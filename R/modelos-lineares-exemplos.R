@@ -1222,3 +1222,668 @@ t_Bon
 
 t_Scheffe <- sqrt((k + 1) %*% qf(0.95, k + 1, n - k - 1)) |> as.numeric() # calcula t-tabelado para Método de Scheffé
 t_Scheffe
+
+
+
+
+# 8. Modelos de Análise de Variância (ANOVA) ------------------------------
+
+## 8.1 ANOVA balanceada com um fator - Estimação --------------------------
+
+y <- as.vector(c(14,16,15,18,19,17))
+y
+
+X <- matrix(c(
+  1, 1, 0, 
+  1, 1, 0,
+  1, 1, 0, 
+  1, 0, 1, 
+  1, 0, 1, 
+  1, 0, 1
+),
+ncol = 3, byrow = TRUE
+)
+X
+
+XLX <- t(X) %*% X
+XLX
+
+XLy <- t(X) %*% y
+XLy
+
+install.packages("MASS")
+library(MASS)     # função ginv()
+
+rank_X <- sum(diag(X %*% ginv(X)))
+rank_X
+
+rank_XLX <- sum(diag(XLX %*% ginv(XLX)))
+rank_XLX
+
+p <- ncol(X)         # Número de parâmetros
+p
+
+k <- rank_X          # Posto(X)
+k
+
+
+defRank <- p - k     # Deficiência de rank - mostra que é de posto incompleto
+defRank
+
+### Inversa generalizada
+
+Beta0 <- ginv(XLX) %*% t(X) %*% y
+Beta0
+
+### Solução com restrição $\tau_1 = 0$ (R)
+
+y_hat0 <- X %*% Beta0
+y_hat0
+
+TR <- c(0, 1, 0)
+TR
+
+W <- rbind(X, TR)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta1 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta1
+
+y_hat1 <- X %*% Beta1
+y_hat1
+
+### Solução com restrição $\tau_2 = 0$ (SAS)
+
+TS <- c(0, 0, 1)
+TS
+
+W <- rbind(X, TS)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta2 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta2
+
+y_hat2 <- X %*% Beta2
+y_hat2
+
+### Solução com restrição $\tau_1 + \tau_2 = 0$ (estatística experimental)
+
+TE <- c(0, 1, 1)
+TE
+
+W <- rbind(X, TE)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta3 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta3
+
+y_hat3 <- X %*% Beta3
+y_hat3
+
+### Funções estimáveis
+
+#### $\beta = \mu + \tau_1$
+
+L1 <- c(1, 1, 0)
+L1
+
+L1Beta0 <- L1 %*% Beta0
+L1Beta0
+
+L1Beta1 <- L1 %*% Beta1
+L1Beta1
+
+L1Beta2 <- L1 %*% Beta2
+L1Beta2
+
+L1Beta3 <- L1 %*% Beta3
+L1Beta3
+
+#### $\beta = \tau_1 + \tau_2$
+
+L2 <- c(0, 1, 1)
+L2
+
+L2Beta0 <- L2 %*% Beta0
+L2Beta0
+
+L2Beta1 <- L2 %*% Beta1
+L2Beta1
+
+L2Beta2 <- L2 %*% Beta2
+L2Beta2
+
+L2Beta3 <- L2 %*% Beta3
+L2Beta3
+
+
+## 8.2 ANOVA balanceada com um fator - Teste de Hipótese ------------------
+
+# install.packages("MASS")
+library(MASS)     # função ginv()
+
+y <- as.vector(
+  c(14.29, 19.10, 19.09, 16.25, 15.09, 16.61, 19.63,
+    20.06, 20.64, 18.00, 19.56, 19.47, 19.07, 18.38,
+    20.04, 26.23, 22.74, 24.04, 23.37, 25.02, 23.27)
+)
+y
+
+X <- matrix(c(
+  rep(1,21),
+  rep(1,7),rep(0,14),
+  rep(0,7),rep(1,7),rep(0,7),
+  rep(0,14),rep(1,7)
+),
+ncol = 4, byrow = FALSE)
+X
+
+kn <- length(y)
+kn
+
+p <- ncol(X)
+p
+
+k <- sum(diag(X %*% ginv(X)))
+k
+
+XLX <- t(X) %*% X
+XLX
+
+XLy <- t(X) %*% y
+XLy
+
+### Vetor com as estimativas a partir da inversa generalizada
+
+Beta <- ginv(XLX) %*% XLy
+Beta
+
+### Vetor com as estimativas a partir da inversa generalizada utilizando a submatriz diagonal
+
+igXLX <- (1/7) * matrix(
+  c(0, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1),
+  ncol = 4, byrow = TRUE
+)
+igXLX
+
+Beta2 <- igXLX %*% XLy
+Beta2
+
+## Funções estimáveis
+
+### $\beta = \alpha_1 - \alpha_2$ (estimável)
+
+L1 <- c(0, 1, -1, 0)
+L1
+
+L1Beta <- t(L1) %*% Beta
+L1Beta
+
+L1Beta2 <- t(L1) %*% Beta2
+L1Beta2
+
+### $\beta = \alpha_1 + \alpha_2 + \alpha_3$ (não estimável)
+
+L2 <- c(0, 1, 1, 1)
+L2
+
+L2Beta <- t(L2) %*% Beta
+L2Beta
+
+L2Beta2 <- t(L2) %*% Beta2
+L2Beta2
+
+## Teste de hipótese: $H_0: \mu_1 = \mu_2 = \mu_3$
+
+### Modelo Completo x Modelo Reduzido
+
+In <- diag(kn)
+Jn <- matrix(1, nrow = kn, ncol = kn)
+
+# Total
+Tot <- In - (1 / kn) * Jn
+
+SQTotal <- t(y) %*% Tot %*% y
+SQTotal
+
+gl_total <- round(sum(diag(Tot %*% ginv(Tot))))
+gl_total
+
+# Tratamentos
+A <- X %*% ginv(t(X) %*% X) %*% t(X) - (1 / kn) * Jn
+
+SQTrat <- t(y) %*% A %*% y
+SQTrat
+
+gl_trat <- round(sum(diag(A %*% ginv(A))))
+gl_trat
+
+QMTrat <- SQTrat / gl_trat
+QMTrat
+
+# Resíduo
+B <- In - X %*% ginv(t(X) %*% X) %*% t(X)
+
+SQRes <- t(y) %*% B %*% y
+SQRes
+
+gl_res <- round(sum(diag(B %*% ginv(B))))
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+Fcalc <- QMTrat / QMRes
+Fcalc
+
+ftab <- qf(0.95, gl_trat, gl_res)
+ftab
+
+p_valor <- 1 - pf(Fcalc, gl_trat, gl_res)
+p_valor
+
+### Contrastes
+
+#### Caso 1: As linhas são linearmente independentes (l.i.) e ortogonais
+
+C1 <- c(0, 2, -1, -1)
+C1Beta <- C1 %*% Beta
+C1Beta
+
+C2 <- c(0, 0, 1, -1)
+C2Beta <- C2 %*% Beta
+C2Beta
+
+# Partição da SQTrat
+SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
+SQC1Beta
+
+SQC2Beta <- t(C2Beta) %*% solve(t(C2) %*% ginv(t(X) %*% X) %*% C2) %*% (C2Beta)
+SQC2Beta
+
+SomaSQ <- SQC1Beta + SQC2Beta
+SomaSQ
+
+SQTrat
+
+# QM
+QMC1Beta <- SQC1Beta / 1
+QMC1Beta
+
+QMC2Beta <- SQC2Beta / 1
+QMC2Beta
+
+# F e p-valor
+FC1 <- QMC1Beta / QMRes
+FC1
+
+FC2 <- QMC2Beta / QMRes
+FC2
+
+ftab <- qf(0.95, 1, 18)
+ftab
+
+p_valorC1 <- 1 - pf(FC1, 1, gl_res)
+p_valorC1
+
+p_valorC2 <- 1 - pf(FC2, 1, gl_res)
+p_valorC2
+
+#### Caso 2: As linhas são l.i. e não ortogonais
+
+C1 <- c(0, 2, -1, -1)
+C1Beta <- C1 %*% Beta
+C1Beta
+
+C3 <- c(0, 1, 0, -1)
+C3Beta <- C3 %*% Beta
+C3Beta
+
+# Partição da SQTrat
+SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
+SQC1Beta
+
+SQC3Beta <- t(C3Beta) %*% solve(t(C3)%*% ginv(t(X) %*% X) %*% C3) %*% (C3Beta)
+SQC3Beta
+
+# QM
+QMC1Beta <- SQC1Beta / 1
+QMC1Beta
+
+QMC3Beta <- SQC3Beta / 1
+QMC3Beta
+
+# F e p-valor
+FC1 <- QMC1Beta / QMRes
+FC1
+
+FC3 <- QMC3Beta / QMRes
+FC3
+
+ftab <- qf(0.95, 1, 18)
+ftab
+
+p_valorC1 <- 1 - pf(FC1, 1, gl_res)
+p_valorC1
+
+p_valorC3 <- 1 - pf(FC3, 1, gl_res)
+p_valorC3
+
+#### A soma das somas de quadrados dos contrastes não ortogonais não resulta na soma de quadrados dos tratamentos:
+
+SomaSQ <- SQC1Beta + SQC3Beta
+SomaSQ
+
+SQTrat
+
+
+
+## 8.3 ANOVA balanceada com dois fatores ----------------------------------
+
+# install.packages("MASS")
+library(MASS)
+
+y <- c(39.02, 38.79, 35.74, 35.41, 37.02, 36.00, 38.96, 39.01, 35.58, 35.52, 35.70, 36.04)
+y
+
+X <- matrix(c(
+  1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+  1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+  1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+  1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+  1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+  1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+  1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+  1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+  1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+  1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+  1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+  1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1
+), 
+nrow = 12, byrow = TRUE)
+X
+
+rank_X <- sum(diag(ginv(X) %*% X))
+rank_X
+
+npar <- ncol(X)    # número de parâmetros
+npar
+
+a <- 2    # níveis do fator A
+b <- 3    # níveis do fator B
+n <- 2    # número de repeticões
+
+abn <- a * b * n    # número total de observacões
+abn
+
+X0 <- X[, 1]        # constante
+X0
+
+XA <- X[, 2:3]      # fator A
+XA
+
+XB <- X[, 4:6]      # fator B
+XB
+
+XAB <- X[, 7:12]    # combinacão dos níveis dos dois fatores
+XAB
+
+### Estimação dos parâmetros
+
+#### Estimação de beta usando inversa generalizada de Moore-Penrose
+
+Beta <- ginv(t(X) %*% X) %*% t(X) %*% y
+Beta
+
+#### Estimação de beta usando inversa generalizada (Searle) de X'X
+
+XLX <- t(X) %*% X
+XLX
+
+iXLX <- (1 / 2) * kronecker(
+  matrix(c(0,0,0,1), byrow = TRUE, ncol = 2), diag(6)
+)
+fractions(iXLX)
+
+Betag <- iXLX %*% t(X) %*% y
+Betag
+
+### Teste de hipótese
+
+In <- diag(abn)
+Jn <- matrix(1, nrow = abn, ncol = abn)
+
+# Total
+Tot <- In - (1 / abn) * Jn
+
+SQTotal <- t(y) %*% Tot %*% y
+SQTotal
+
+gl_total <- round(sum(diag(Tot %*% ginv(Tot))))
+gl_total
+
+# Resíduo
+PR <- diag(abn) - X %*% ginv(t(X) %*% X) %*% t(X)
+
+SQRes <- t(y) %*% PR %*% y
+SQRes
+
+gl_res <- round(sum(diag(PR %*% ginv(PR))))
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+# Cálculo SQAxB (interação) - forma quadrática
+X1 <- cbind(X0, XA, XB)
+X1
+
+PAB <- X %*% ginv(t(X) %*% X) %*% t(X) - X1 %*% ginv(t(X1) %*% X1) %*% t(X1)
+PAB
+
+SQAB <- t(y) %*% PAB %*% y
+SQAB
+
+glAB <- round(sum(diag(ginv(PAB) %*% PAB)))
+glAB
+
+QMAB <- SQAB / glAB
+QMAB
+
+FAB <- QMAB / QMRes
+FAB
+
+ftabAB <- qf(0.95, glAB, gl_res)
+ftabAB
+
+p_valorAB <- 1 - pf(FAB, glAB, gl_res)
+p_valorAB
+
+# fator A - SQ(A)
+PA <- XA %*% ginv(t(XA) %*% XA) %*% t(XA) - Jn/abn
+PA
+
+SQA <- t(y) %*% PA %*% y
+SQA
+
+glA <- round(sum(diag(ginv(PA) %*% PA)))
+glA
+
+QMA <- SQA / glA
+QMA
+
+FA <- QMA / QMRes
+FA
+
+ftabA <- qf(0.95, glA, gl_res)
+ftabA
+
+p_valorA <- 1 - pf(FA, glA, gl_res)
+p_valorA
+
+# fator B - SQ(A)
+PB <- XB %*% ginv(t(XB) %*% XB) %*% t(XB) - Jn/abn
+PB
+
+SQB <- t(y) %*% PB %*% y
+SQB
+
+glB <- round(sum(diag(ginv(PB) %*% PB)))
+glB
+
+QMB <- SQB / glB
+QMB
+
+FB <- QMB / QMRes
+FB
+
+ftabB <- qf(0.95, glB, gl_res)
+ftabB
+
+p_valorB <- 1 - pf(FB, glB, gl_res)
+p_valorB
+
+### Somas de quadrados usando Hipótese Linear Geral
+
+CA <- 
+  (1/3) * matrix(
+    c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1, byrow = TRUE
+  )
+CA
+
+CB <- 
+  (1/2) * matrix(
+    c(0, 0, 0, 2, -2, 0, 1, -1, 0, 1, -1, 0,
+      0, 0, 0, 2, 0, -2, 1, 0, -1, 1, 0, -1), nrow = 2, byrow = TRUE
+  )
+CB
+
+CAxB <- matrix(
+  c(0, 0, 0, 0, 0, 0, 1, -1, 0, -1, 1, 0,
+    0, 0, 0, 0, 0, 0, 1, 0, -1, -1, 0, 1), nrow = 2, byrow = TRUE
+)
+CAxB
+
+SQ_CA <- t(CA %*% Beta) %*% solve(CA %*% ginv(t(X) %*% X) %*% t(CA)) %*% (CA %*% Beta)
+SQ_CA
+
+SQ_CB <- t(CB %*% Beta) %*% solve(CB %*% ginv(t(X) %*% X) %*% t(CB)) %*% (CB %*% Beta)
+SQ_CB
+
+SQ_CAxB <- t(CAxB %*% Beta) %*% solve(CAxB %*% ginv(t(X) %*% X) %*% t(CAxB)) %*% (CAxB %*% Beta)
+SQ_CAxB
+
+### Estimabilidade no Modelo Superparametrizado Sem Restrições
+
+#Verifica se LBeta = a1-a2 e LBeta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) são estimáveis - não é estimável
+
+L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
+L1
+
+ver <- t(X) %*% X %*% ginv(t(X) %*% X)
+
+verL1 <- ver %*% L1 |> round(2)
+verL1
+
+L1Beta <- t(L1) %*% Beta
+L1Beta
+
+#Estimabilidade de L2*Beta = a1-a2 + (1/3(g11+g12+g13)-(1/3)(g21+g22+g23) é estimavel no modelo SEM restricao nos parametros - é estimavel!
+
+L2 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
+L2
+
+ver <- t(X) %*% X %*% ginv(t(X) %*% X)
+
+verL2 <- ver %*% L2 |> round(2)
+verL2
+
+L2Beta <- t(L2) %*% Beta
+L2Beta
+
+# Matriz T de condições marginais: T*Beta = 0
+
+t <- matrix(
+  c(0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1), 
+  nrow = 7, ncol = 12, byrow = TRUE)
+
+rank_T <- sum(diag(ginv(t) %*% t))
+rank_T
+
+W <- rbind(X, t)
+
+rank_W <- sum(diag(ginv(W) %*% W))
+rank_W
+
+yr <- c(y, rep(0, 7))
+yr
+
+Beta_R <- solve(t(W) %*% W) %*% t(W) %*% yr   # Beta sujeito às condições marginais
+Beta_R
+
+### Estimabilidade no Modelo Superparametrizado Com Restrições
+
+# LiBeta é estimável se Li = verLi. Verifica que L1Beta = a1-a2 é ESTIMÁVEL no modelo COM RESTRIÇÃO nos parâmetros
+
+L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
+L1
+
+ver <- t(W) %*% W %*% solve(t(W) %*% W)
+
+verL1 <- ver %*% L1 |> round()
+verL1
+
+L1Beta_r <- t(L1) %*% Beta_R
+L1Beta_r # Mostra que L1Beta = a1-a2 É estimável no modelo', 'COM restrição nos parâmetros
+
+# Verifica que L2Beta = a1-a2 a1-a2 + (1/3(g11+g12+g13) - (1/3)(g21+g22+g23) é ESTIMÁVEL no modelo', 'COM RESTRIÇÃO nos parâmetros
+
+L22 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
+L22 |> round(3)
+
+verL22 <- ver %*% L22 |> round(3)
+verL22
+
+L2Beta_R <- t(L22) %*% Beta_R
+L2Beta_R      # Mostra que L2Beta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) É estimável no modelo', 'COM restrição nos parâmetros
+
+### Hipótese linear geral
+
+# ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÃO
+CA <- (1 / 3) * c(0,  3, -3,  0,  0,  0,  1,  1,  1, -1, -1, -1)
+CA |> round(2)
+
+CABeta <- CA %*% Beta_R
+CABeta
+
+# No modelo COM restrição nos parâmetros:
+
+CA
+
+CABeta_R <- CA %*% Beta_R
+CABeta_R
+
+SQ_A <- t(CABeta) %*% solve(t(CA) %*% ginv(t(X) %*% X) %*% CA) %*% CABeta
+SQ_A
+
+SQ_A_R = t(CABeta_R) %*% solve(t(CA) %*% solve(t(W) %*% W) %*% CA) %*% CABeta_R
+SQ_A_R
+

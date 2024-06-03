@@ -1,0 +1,791 @@
+# ANOVA balanceada com dois fatores
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+options(scipen = 999999, knitr.kable.NA = '')
+
+library(MASS)
+```
+
+## Introdução
+
+Nesta seção, será apresentada a análise de variância de modelos **balanceados** com **dois fatores de tratamento** (*two-way* ANOVA) e **com interação**. Seu modelo pode ser representado como:
+
+$$
+\begin{align}
+y_{ijk} &= \mu + \alpha_i + \beta_j + \gamma_{ij} + \epsilon_{ijk} \\
+i = 1,2,\dots,a & \quad\quad j = 1,2,\dots,b \quad\quad k = 1,2,\dots,n
+\end{align}
+$$
+
+- $\alpha_i$ é o efeito do $i$-ésimo nível do fator $A$;
+
+- $\beta_j$ é o efeito do $j$-ésimo nível do fator $B$;
+
+- $\gamma_{ij}$ é o efeito da interação entre o $i$-ésimo nível do fator $A$ e o $j$-ésimo nível do fator $B$.
+
+Como suposições, assumiremos:
+
+- $E(\epsilon_{ijk}) = 0$ para todo $i,j,k$;
+
+- $var(\epsilon_{ijk}) = \sigma^2$ para todo $i,j,k$;
+
+- $cov(\epsilon_{ijk}, \epsilon_{i'j'k'}) = 0$ para todo $(i,j,k) \ne (i',j',k')$;
+
+- $\epsilon_{ijk} \sim N(0, \sigma^2)$ para todo $i,j,k$.
+
+Dessa maneira, podemos reescrever o modelo balanceado na **forma reparametrizada**:
+
+$$
+\begin{align}
+y_{ijk} &= \mu_{ij} + \epsilon_{ijk} \\
+i = 1,2,\dots,a \quad\quad j &= 1,2,\dots,b \quad\quad k = 1,2,\dots,n
+\end{align}
+$$
+
+Em que $\mu_{ij} = E(y_{ijk})$ é a média de uma observação $k$ na casela $(ij)$.
+
+Para ilustrar, considere o seguinte exemplo: *O conteúdo da mistura de três tipos de queijo produzidos por dois métodos foi anotado por Marcuse (1949) (formato alterado). Duas peças de queijo foram medidas para cada tipo e cada método. Designando Método como o fator A e Tipo como o fator B, então a = 2, b = 3 e n = 2.*
+
+| Método \\ Tipo |   1   |   2   |   3   |
+|:--------------:|:-----:|:-----:|:-----:|
+|       1        | 39,02 | 35,74 | 37,02 |
+|       1        | 38,79 | 35,41 | 36,00 |
+|       2        | 38,96 | 35,58 | 35,70 |
+|       2        | 39,01 | 35,52 | 36,04 |
+
+Novamente, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de uma matriz.
+
+```{r}
+#| eval: false
+
+install.packages("MASS")
+library(MASS)
+```
+
+## Estimação dos parâmetros
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(39.02, 38.79, 35.74, 35.41, 37.02, 36.00, 38.96, 39.01, 35.58, 35.52, 35.70, 36.04)
+y
+
+X <- matrix(c(
+  1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+  1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+  1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+  1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+  1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+  1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+  1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+  1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+  1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+  1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+  1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+  1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1
+), 
+nrow = 12, byrow = TRUE)
+X
+```
+
+O modelo matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ é dado por:
+
+$$
+\begin{cases}
+y_{111} = \mu + \alpha_1 + \beta_1 + \gamma_{11}\\ 
+y_{112} = \mu + \alpha_1 + \beta_1 + \gamma_{11}\\ 
+y_{121} = \mu + \alpha_1 + \beta_2 + \gamma_{12}\\ 
+y_{122} = \mu + \alpha_1 + \beta_2 + \gamma_{12}\\ 
+y_{131} = \mu + \alpha_1 + \beta_3 + \gamma_{21}\\ 
+y_{132} = \mu + \alpha_1 + \beta_3 + \gamma_{21}\\ 
+y_{211} = \mu + \alpha_2 + \beta_1 + \gamma_{22}\\ 
+y_{212} = \mu + \alpha_2 + \beta_1 + \gamma_{22}\\ 
+y_{221} = \mu + \alpha_2 + \beta_2 + \gamma_{31}\\ 
+y_{222} = \mu + \alpha_2 + \beta_2 + \gamma_{31}\\ 
+y_{231} = \mu + \alpha_2 + \beta_3 + \gamma_{32}\\ 
+y_{232} = \mu + \alpha_2 + \beta_3 + \gamma_{32}
+\end{cases}
+$$
+
+$$
+\begin{bmatrix}
+y_{111} \\ y_{112} \\ y_{121} \\ y_{122} \\ y_{131} \\ y_{132} \\ y_{211} \\ y_{212} \\ y_{221} \\ y_{222} \\ y_{231} \\ y_{232}
+\end{bmatrix}
+=
+\begin{bmatrix}
+39,02 \\ 38,79 \\ 35,74 \\ 35,41 \\ 37,02 \\ 36,00 \\ 38,96 \\ 39,01 \\ 35,58 \\ 35,52 \\ 35,70 \\ 36,04
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 \\
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 \\
+1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 1 \\
+1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+\mu \\ \alpha_1 \\ \alpha_2 \\ \beta_1 \\ \beta_2 \\ \beta_3 \\ \gamma_{11} \\ \gamma_{12} \\ \gamma_{21} \\ \gamma_{22} \\ \gamma_{31} \\ \gamma_{32}
+\end{bmatrix}
++
+\begin{bmatrix}
+\epsilon_{111} \\ \epsilon_{112} \\ \epsilon_{121} \\ \epsilon_{122} \\ \epsilon_{131} \\ \epsilon_{132} \\ \epsilon_{211} \\ \epsilon_{212} \\ \epsilon_{221} \\ \epsilon_{222} \\ \epsilon_{231} \\ \epsilon_{232}
+\end{bmatrix}
+$$
+
+Nota-se que o modelo apresenta 12 parâmetros e o posto($\mathbf{X}$) = 6, ou seja, a matriz $\mathbf{X}$ é de posto incompleto.
+
+```{r}
+rank_X <- sum(diag(ginv(X) %*% X))
+rank_X
+
+npar <- ncol(X)    # número de parâmetros
+npar
+```
+
+```{r}
+a <- 2    # níveis do fator A
+b <- 3    # níveis do fator B
+n <- 2    # número de repeticões
+
+abn <- a * b * n    # número total de observacões
+abn
+
+X0 <- X[, 1]        # constante
+X0
+
+XA <- X[, 2:3]      # fator A
+XA
+
+XB <- X[, 4:6]      # fator B
+XB
+
+XAB <- X[, 7:12]    # combinacão dos níveis dos dois fatores
+XAB
+```
+
+A seguir, estimaremos o vetor de parâmetros $\boldsymbol{\beta}$ usando a inversa generalizada de Moore-Penrose e usando a inversa generalizada de $X'X$.
+
+- Estimação de $\boldsymbol{\beta}$ usando inversa generalizada de Moore-Penrose:
+
+$$
+\hat{\boldsymbol{\beta}} = \mathbf{(X'X)^- X'y}
+$$
+
+```{r}
+Beta <- ginv(t(X) %*% X) %*% t(X) %*% y
+Beta
+```
+
+- Estimação de $\boldsymbol{\beta}$ usando inversa generalizada (Searle) de $\mathbf{X'X}$:
+
+Uma inversa generalizada de $\mathbf{X'X}$ é dada por:
+
+$$
+(\mathbf{X'X})^- = \frac{1}2
+\begin{bmatrix}
+\mathbf{0} & \mathbf{0} \\
+\mathbf{0} & \mathbf{I_6}
+\end{bmatrix}
+$$
+
+Utilizando esta inversa generalizada no sistema de equações normais $\hat{\boldsymbol{\beta}} = \mathbf{(X'X)^- X'y}$, obtemos a seguinte estimativa:
+
+```{r}
+XLX <- t(X) %*% X
+XLX
+
+iXLX <- (1 / 2) * kronecker(
+  matrix(c(0,0,0,1), byrow = TRUE, ncol = 2), diag(6)
+)
+fractions(iXLX)
+
+Betag <- iXLX %*% t(X) %*% y
+Betag
+```
+
+A tabela abaixo traz as duas estimativas de $\boldsymbol{\beta}$ calculadas anteriormente.
+
+```{r}
+#| echo: false
+
+data.frame(
+  beta_mp = Beta |> round(4),
+  beta_g = Betag |> round(4)
+) |> 
+  magrittr::set_rownames(c("$\\hat{\\mu}$", "$\\hat{\\alpha_1}$", "$\\hat{\\alpha_2}$", "$\\hat{\\beta_1}$", "$\\hat{\\beta_2}$", "$\\hat{\\beta_3}$", "$\\hat{\\gamma_{11}}$", "$\\hat{\\gamma_{12}}$", "$\\hat{\\gamma_{21}}$", "$\\hat{\\gamma_{22}}$", "$\\hat{\\gamma_{31}}$", "$\\hat{\\gamma_{32}}$")) |> 
+  kableExtra::kbl(align = "c", booktabs = TRUE, escape = FALSE, row.names = TRUE) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc iml;
+reset fuzz;
+y = {39.02,38.79,35.74,35.41,37.02,36.00,38.96,39.01,35.58,35.52,35.70,36.04};
+X = {1 1 0 1 0 0 1 0 0 0 0 0,
+	 1 1 0 1 0 0 1 0 0 0 0 0,
+	 1 1 0 0 1 0 0 1 0 0 0 0,
+	 1 1 0 0 1 0 0 1 0 0 0 0,
+	 1 1 0 0 0 1 0 0 1 0 0 0,
+	 1 1 0 0 0 1 0 0 1 0 0 0,
+	 1 0 1 1 0 0 0 0 0 1 0 0,
+	 1 0 1 1 0 0 0 0 0 1 0 0,
+	 1 0 1 0 1 0 0 0 0 0 1 0,
+	 1 0 1 0 1 0 0 0 0 0 1 0,
+	 1 0 1 0 0 1 0 0 0 0 0 1,
+	 1 0 1 0 0 1 0 0 0 0 0 1};
+print X[format=4.0] y[format=12.2];
+
+rank_X = round(trace(ginv(X)*X)); 	* Calcula o posto da matriz X;
+npar = ncol(X);
+a=2; 	* Número de níveis do fator A;
+b=3;	* Número de níveis do fator B;
+n=2;	* Número de repetições;
+abn = a*b*n;	* Número total de observações;
+X0 = X[,1];
+XA = X[,2:3];
+XB = X[,4:6];
+XAB = X[,7:12];
+print X[format=8.0],,XA[format=8.0],,XB[format=8.0],,XAB[format=8.0];
+* ----------------------------------------------------------------------------;
+
+* Estima Beta usando inversa de Moore-Penrose;
+BetaMP = ginv(t(X)*X)*t(X)*y;		* Beta usando invG (Moore Penrose));
+XLX = t(X)*X;
+iXLX = (1/2)*{0 0, 0 1}@I(6);		
+BetaG = iXLX*t(X)*y;				* Beta usando invG mais simples (Searle);
+
+print BetaMP BetaG;
+
+* ----------------------------------------------------------------------------;
+```
+
+:::
+
+## Teste de hipótese
+
+::: panel-tabset
+
+### R
+
+```{r}
+In <- diag(abn)
+Jn <- matrix(1, nrow = abn, ncol = abn)
+```
+
+```{r}
+# Total
+Tot <- In - (1 / abn) * Jn
+
+SQTotal <- t(y) %*% Tot %*% y
+SQTotal
+
+gl_total <- round(sum(diag(Tot %*% ginv(Tot))))
+gl_total
+```
+
+```{r}
+# Resíduo
+PR <- In - X %*% ginv(t(X) %*% X) %*% t(X)
+
+SQRes <- t(y) %*% PR %*% y
+SQRes
+
+gl_res <- round(sum(diag(PR %*% ginv(PR))))
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+```{r}
+# Interação AxB
+X1 <- cbind(X0, XA, XB)
+X1
+
+PAB <- X %*% ginv(t(X) %*% X) %*% t(X) - X1 %*% ginv(t(X1) %*% X1) %*% t(X1)
+PAB
+
+SQAB <- t(y) %*% PAB %*% y
+SQAB
+
+glAB <- round(sum(diag(ginv(PAB) %*% PAB)))
+glAB
+
+QMAB <- SQAB / glAB
+QMAB
+
+FAB <- QMAB / QMRes
+FAB
+
+ftabAB <- qf(0.95, glAB, gl_res)
+ftabAB
+
+p_valorAB <- 1 - pf(FAB, glAB, gl_res)
+p_valorAB
+```
+
+```{r}
+# Fator A
+PA <- XA %*% ginv(t(XA) %*% XA) %*% t(XA) - Jn/abn
+PA
+
+SQA <- t(y) %*% PA %*% y
+SQA
+
+glA <- round(sum(diag(ginv(PA) %*% PA)))
+glA
+
+QMA <- SQA / glA
+QMA
+
+FA <- QMA / QMRes
+FA
+
+ftabA <- qf(0.95, glA, gl_res)
+ftabA
+
+p_valorA <- 1 - pf(FA, glA, gl_res)
+p_valorA
+```
+
+```{r}
+# Fator B
+PB <- XB %*% ginv(t(XB) %*% XB) %*% t(XB) - Jn/abn
+PB
+
+SQB <- t(y) %*% PB %*% y
+SQB
+
+glB <- round(sum(diag(ginv(PB) %*% PB)))
+glB
+
+QMB <- SQB / glB
+QMB
+
+FB <- QMB / QMRes
+FB
+
+ftabB <- qf(0.95, glB, gl_res)
+ftabB
+
+p_valorB <- 1 - pf(FB, glB, gl_res)
+p_valorB
+```
+
+A seguir, os resultado estão descritos no quadro de ANOVA:
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Método", "Tipo", "Interação", "Resíduo", "Total"),
+  "gl" = c(glA, glB, glAB, gl_res, gl_total),
+  "SQ" = c(SQA, SQB, SQAB, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMA, QMB, QMAB, QMRes, NA) |> round(3),
+  "Fcal" = c(FA, FB, FAB, NA, NA) |> round(3),
+  "Ftab" = c(ftabA, ftabB, ftabAB, NA, NA) |> round(3),
+  "p.valor" = c(p_valorA, p_valorB, p_valorAB, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Fatorial 2x3 (caso balanceado) - Dados sobre queijos",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Pode-se notar que a interação Método x Tipo de queijo não foi significativa ao nível de 5% de significância. Apenas o Tipo de queijo apresentou significância estatística, com p-valor menor que 5%.
+
+### SAS
+
+```{r}
+#| eval: false
+
+* Cálculo da soma de quadrados total - SQTotal;
+P = I(abn) - J(abn,abn,1)/abn;
+SQTotal = t(y)*(P)*y;
+glTotal = round(trace(ginv(P)*P));
+
+* Cálculo da soma de quadrados de resíduos - SQRes;
+PR = I(abn) - X*ginv(t(X)*X)*t(X);
+SQRes = t(y)*(PR)*y;
+glRes = round(trace(ginv(PR)*PR));
+QMRes = SQRes/glRes;
+
+* Cálculo SQAxB - forma quadrática;
+X1 = X0||XA||XB;
+PAB = X*ginv(t(X)*X)*t(X) - X1*ginv(t(X1)*X1)*t(X1);
+SQAB = t(y)*PAB*y; 					* Calcula SQ(AB);
+glAB = round(trace(ginv(PAB)*PAB)); * Calcula gl da interação AxB;
+QMAB = SQAB/glAB;
+FAB = QMAB/QMRes;
+p_valorAB = 1-cdf('F',FAB,glAB,glRes);
+
+* Cálculo da soma de quadrados do fator A - SQ(A);
+PA = XA*ginv(t(XA)*XA)*t(XA) - J(abn,abn,1)/abn;
+SQA = t(y)*PA*y;
+glA = round(trace(ginv(PA)*PA));
+QMA = SQA/glA;
+FA = QMA/QMRes;
+p_valorA = 1-cdf('F',FA,glA,glRes);
+
+* Cálculo da soma de quadrados do fator B - SQ(B);
+PB = XB*ginv(t(XB)*XB)*t(XB) - J(abn,abn,1)/abn;
+SQB = t(y)*PB*y;
+glB = round(trace(ginv(PB)*PB));
+QMB = SQB/glB;
+FB = QMB/QMRes;
+p_valorB = 1-cdf('F',FB,glB,glRes);
+
+* Imprime o quadro de análise de variância – ANOVA (pág. 252);
+print 'QUADRO DE ANOVA: Exemplo 14.4.2: Fatorial 2x3 (caso balanceado)';
+print 'Método    ' glA[format=8.0]     SQA[format=12.4]   QMA[format=12.4]  FA[format=12.4]  p_valorA[format=12.4];
+print 'Tipo      ' glB[format=8.0]     SQB[format=12.4]   QMB[format=12.4]  FB[format=12.4]  p_valorB[format=12.4];
+print 'Interação ' glAB[format=8.0]    SQAB[format=12.4]  QMAB[format=12.4] FAB[format=12.4] p_valorAB[format=12.4];
+print 'Resíduo   ' glRes[format=8.0]   SQRes[format=12.4] QMRes[format=12.4];
+print 'Total     ' glTotal[format=8.0] SQTotal[format=12.4] ;
+```
+
+:::
+
+## Somas de quadrados usando Hipótese Linear Geral
+
+Também podemos calcular as somas de quadrados utilizando a abordagem da hipótese linear geral com as matrizes CA, CB e CAxB.
+
+$$
+\begin{align}
+CA &= (\alpha_1 - \alpha_2) + \frac{1}3 (\gamma_{11} + \gamma_{12} + \gamma_{13}) - \frac{1}3 (\gamma_{21} + \gamma_{22} +\gamma_{23}) \\
+CB &= \\
+CA \times B &= 
+\end{align}
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+CA <- 
+  (1/3) * matrix(
+    c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1, byrow = TRUE
+  )
+CA |> fractions()
+
+CB <- 
+  (1/2) * matrix(
+    c(0, 0, 0, 2, -2, 0, 1, -1, 0, 1, -1, 0,
+      0, 0, 0, 2, 0, -2, 1, 0, -1, 1, 0, -1), nrow = 2, byrow = TRUE
+  )
+CB |> fractions()
+
+CAxB <- matrix(
+  c(0, 0, 0, 0, 0, 0, 1, -1, 0, -1, 1, 0,
+    0, 0, 0, 0, 0, 0, 1, 0, -1, -1, 0, 1), nrow = 2, byrow = TRUE
+)
+CAxB
+
+SQ_CA <- t(CA %*% Beta) %*% solve(CA %*% ginv(t(X) %*% X) %*% t(CA)) %*% (CA %*% Beta)
+SQ_CA
+
+SQ_CB <- t(CB %*% Beta) %*% solve(CB %*% ginv(t(X) %*% X) %*% t(CB)) %*% (CB %*% Beta)
+SQ_CB
+
+SQ_CAxB <- t(CAxB %*% Beta) %*% solve(CAxB %*% ginv(t(X) %*% X) %*% t(CAxB)) %*% (CAxB %*% Beta)
+SQ_CAxB
+```
+
+```{r}
+#| echo: false
+
+
+```
+
+
+### SAS
+
+```{r}
+#| eval: false
+
+* ----------------------------------------------;
+* Cálculo das SQ usando Hipótese Linear Geral;
+* ----------------------------------------------;
+
+*            mi a1 a2 b1 b2 b3 g11 g12 g13 g21 g22 g23;      
+CA   = (1/3)*{0  3 -3  0  0  0   1   1   1  -1  -1  -1};
+
+CB   = (1/2)*{0  0  0  2 -2  0   1  -1   0   1  -1   0,
+              0  0  0  2  0 -2   1   0  -1   1   0  -1};
+
+CAxB =       {0  0  0  0  0  0   1  -1   0  -1   1   0,
+              0  0  0  0  0  0   1   0  -1  -1   0   1}; 
+
+SQ_CA = t(CA*Beta)*inv(CA*ginv(t(X)*X)*t(CA))*CA*Beta;
+SQ_CB = t(CB*Beta)*inv(CB*ginv(t(X)*X)*t(CB))*CB*Beta;
+SQ_CAxB = t(CAxB*Beta)*inv(CAxB*ginv(t(X)*X)*t(CAxB))*CAxB*Beta;
+
+print 'Somas de quadrados usando Hipótese Linear Geral:',,
+    SQ_CA[format=12.4] SQ_CB[format=12.4] SQ_CAxB[format=12.4];
+```
+
+:::
+
+## Estimabilidade no modelo superparametrizado SEM restrições
+
+Modelo SEM restrições nos parâmetros.
+
+Verificaremos se $\beta = \alpha_1 - \alpha_2$ e $\beta = \alpha_1 - \alpha_2 + (\frac{1}3(\gamma_{11} + \gamma_{12} + \gamma_{13}) - (\frac{1}3)(\gamma_{21} = \gamma_{22} + \gamma_{23})$ são estimáveis.
+
+::: panel-tabset
+
+### R
+
+- $\beta = \alpha_1 - \alpha_2$:
+
+```{r}
+L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
+L1
+
+ver <- t(X) %*% X %*% ginv(t(X) %*% X)
+
+verL1 <- ver %*% L1 |> round(2)
+verL1
+
+L1Beta <- t(L1) %*% Beta
+L1Beta
+```
+
+Verifica-se que $\beta = \alpha_1 - \alpha_2$ **não é estimável** no modelo sem restrição nos parâmetros.
+
+- $\beta = \alpha_1 - \alpha_2 + (\frac{1}3(\gamma_{11} + \gamma_{12} + \gamma_{13}) - (\frac{1}3)(\gamma_{21} = \gamma_{22} + \gamma_{23})$:
+
+```{r}
+L2 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
+L2
+
+ver <- t(X) %*% X %*% ginv(t(X) %*% X)
+
+verL2 <- ver %*% L2 |> round(2)
+verL2
+
+L2Beta <- t(L2) %*% Beta
+L2Beta
+```
+
+Verifica-se que $\beta = \alpha_1 - \alpha_2 + (\frac{1}3(\gamma_{11} + \gamma_{12} + \gamma_{13}) - (\frac{1}3)(\gamma_{21} = \gamma_{22} + \gamma_{23})$ **é estimavel** no modelo sem restrição nos parametros.
+
+Matriz T de condições marginais: T*Beta = 0
+
+```{r}
+t <- matrix(
+  c(0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1), 
+  nrow = 7, ncol = 12, byrow = TRUE)
+
+rank_T <- sum(diag(ginv(t) %*% t))
+rank_T
+
+W <- rbind(X, t)
+
+rank_W <- sum(diag(ginv(W) %*% W))
+rank_W
+
+yr <- c(y, rep(0, 7))
+yr
+
+Beta_R <- solve(t(W) %*% W) %*% t(W) %*% yr   # Beta sujeito às condições marginais
+Beta_R
+
+### Beta do modelo COM restrições nos parâmetros
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+L1 = t({0 1 -1 0 0 0 0 0 0 0 0 0});
+ver = t(X)*X*ginv(t(X)*X);
+verL1 = ver*L1;
+L1BetaMP = t(L1)*BetaMP;
+print 'Mostra que L1Beta = a1-a2 NÃO É estimável no modelo', 'SEM restrição nos parâmetros';
+print L1 verL1 L1BetaMP[format=12.4];
+
+print 'Mostra que L2Beta = a1-a2 + (1/3(g11+g12+g13)-(1/3)(g21+g22+g23) É estimável no modelo',
+      'SEM restrição nos parâmetros';
+L2 = (1/3)*t({0 3 -3 0 0 0 1 1 1 -1 -1 -1});
+verL2 = ver*L2;
+L2BetaMP = t(L2)*BetaMP;
+print L2 verL2 L2BetaMP[format=12.4];	
+
+* Matriz T de condições marginais: T*Beta = 0;
+T = {0 1 1 0 0 0 0 0 0 0 0 0,
+	 0 0 0 1 1 1 0 0 0 0 0 0,
+	 0 0 0 0 0 0 1 1 1 0 0 0,
+	 0 0 0 0 0 0 0 0 0 1 1 1,
+	 0 0 0 0 0 0 1 0 0 1 0 0,
+	 0 0 0 0 0 0 0 1 0 0 1 0,
+	 0 0 0 0 0 0 0 0 1 0 0 1};
+rank_T = round(trace(ginv(T)*T)); 	* Determina o posto da matriz T;
+W = X//T; 							* Junta as matrizes X e T;
+rank_W = round(trace(ginv(W)*W)); 	* Calcula o posto da matriz W = X//T;
+print npar rank_X rank_T rank_W;
+yr = y//j(7,1,0); 					* Completa o vetor y com 7 zeros;
+Beta_R = inv(t(W)*W)*t(W)*yr; 		* Beta sujeito às condições marginais;
+print BetaMP[format=12.4] Beta_R[format=12.4];
+```
+
+:::
+
+### Estimabilidade no modelo superparametrizado COM restrições
+
+Modelo COM restricoes nos parametros
+
+::: panel-tabset
+
+### R
+
+LiBeta é estimável se Li = verLi
+
+Verifica que L1Beta = a1-a2 é ESTIMÁVEL no modelo COM RESTRIÇÃO nos parâmetros
+
+```{r}
+L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
+L1
+
+ver <- t(W) %*% W %*% solve(t(W) %*% W)
+
+verL1 <- ver %*% L1 |> round()
+verL1
+
+L1Beta_r <- t(L1) %*% Beta_R
+L1Beta_r
+
+### Mostra que L1Beta = a1-a2 É estimável no modelo', 'COM restrição nos parâmetros
+```
+
+Verifica que L2Beta = a1-a2 a1-a2 + (1/3(g11+g12+g13) - (1/3)(g21+g22+g23) é ESTIMÁVEL no modelo', 'COM RESTRIÇÃO nos parâmetros
+
+```{r}
+L22 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
+L22 |> round(3)
+
+verL22 <- ver %*% L22 |> round(3)
+verL22
+
+L2Beta_R <- t(L22) %*% Beta_R
+L2Beta_R
+
+### Mostra que L2Beta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) É estimável no modelo', 'COM restrição nos parâmetros
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+print '------------------------------------------------------------',
+      ' ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO COM RESTRIÇÕES ',
+      '------------------------------------------------------------',;
+L1 = t({0 1 -1 0 0 0 0 0 0 0 0 0});
+ver = t(W)*W*inv(t(W)*W);
+verL1 = ver*L1;
+L1Beta_r = t(L1)*Beta_R;
+print 'Mostra que L1Beta = a1-a2 É estimável no modelo', 'COM restrição nos parâmetros';
+print L1 verL1 L1Beta_R[format=12.4];
+
+print 'Mostra que L2Beta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) É estimável no modelo',
+      'COM restrição nos parâmetros';
+L2 = (1/3)*t({0 3 -3 0  0  0  1  1  1 -1 -1 -1});
+verL2 = ver*L2;
+L2Beta_R = t(L2)*Beta_R;
+print L2 verL2 L2Beta_R[format=12.4];	
+```
+
+:::
+
+## 6. Hipótese linear geral
+
+::: panel-tabset
+
+### R
+
+```{r}
+### ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÃO
+
+CA <- (1 / 3) * c(0,  3, -3,  0,  0,  0,  1,  1,  1, -1, -1, -1)
+CA |> fractions()
+
+CABeta <- CA %*% Beta_R
+CABeta
+```
+
+```{r}
+# No modelo COM restrição nos parâmetros:
+
+CA
+
+CABeta_R <- CA %*% Beta_R
+CABeta_R
+```
+
+```{r}
+SQ_A <- t(CABeta) %*% solve(t(CA) %*% ginv(t(X) %*% X) %*% CA) %*% CABeta
+SQ_A
+
+SQ_A_R = t(CABeta_R) %*% solve(t(CA) %*% solve(t(W) %*% W) %*% CA) %*% CABeta_R
+SQ_A_R
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+* Cálculo de SQA usando hipótese linear geral;
+
+* (1) No modelo SEM restrição;
+* CA = {0  1 -1  0  0  0  0  0  0  0  0  0};
+CA = (1/3)*{0  3 -3  0  0  0  1  1  1 -1 -1 -1};
+CABeta = CA*Beta_R;
+print '-----------------------------------------------------------',
+      ' ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÃO ',
+      '-----------------------------------------------------------',
+      CA[format=6.2],,CABeta[format=12.4],,;
+
+SQ_A = t(CABeta)*inv(CA*ginv(t(X)*X)*t(CA))*CABeta;
+
+* (1) No modelo COM restrição;
+CABeta_R = CA*Beta_R;
+print 'No modelo COM restrição nos parâmetros:',,CA[format=6.2],,CABeta_R[format=12.4],,;
+
+SQ_A_R = t(CABeta_r)*inv(CA*inv(t(W)*W)*t(CA))*CABeta_r;
+print SQ_A[format=12.4] SQ_A_R[format=12.4];
+
+quit;
+```
+
+:::

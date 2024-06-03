@@ -63,7 +63,7 @@ z <- outer(y1, y2, function(y1,y2) {
 })
 ```
 
-Com isso, podemos criar o gráfico de densidade bivariada.
+Com isso, podemos criar o gráfico de densidade da normal bivariada.
 
 ```{r}
 plot_ly(x = y1, y = y2, z = z, type = "surface") |> 

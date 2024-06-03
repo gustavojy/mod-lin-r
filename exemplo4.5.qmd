@@ -16,9 +16,9 @@ Quando testamos diversas hipóteses como as apresentadas anteriormente, temos do
 
 - Nível de significância **por comparação** (*Comparison-wise*) ($\alpha_c$).
 
-Quando realizamos um único teste de hipótese (como os apresentados nos exemplos anteriores do material), utilizamos um nível de significância **geral** $\alpha_f$.
+Quando realizamos um único teste de hipótese (como os apresentados nos capítulos anteriores), utilizamos um nível de significância **geral** $\alpha_f$.
 
-Contudo, ao realizar mais de um teste de hipótese para um mesmo caso, utilizamos um nível de significância **por comparação** $\alpha_c$. Isso acarreta em um **aumento** do nível de significância geral ($\alpha_f$). Probabilisticamente tem-se:
+Contudo, ao realizar mais de um teste de hipótese para um mesmo caso, utilizamos um nível de significância **por comparação** $\alpha_c$. Isso acarreta em um **aumento** do nível de significância geral ($\alpha_f$). Probabilisticamente, tem-se:
 
 $$\alpha_f = 1 - (1 - \alpha_c)^k$$
 
@@ -178,16 +178,19 @@ t_tab_Scheffe
 options(knitr.kable.NA = '')
 
 data.frame(
-  "Metodo" = c("t", "Bonferroni", "Scheffé"),
-  "t" = c("(0,025; 9 gl)", "(0,0125; 9 gl)", "(0,025; 9 gl)"),
-  "t_tab" = c(t_tab, t_tab_Bon, t_tab_Scheffe)
+  "Parâmetros" = c("Beta1", "Beta2"),
+  "t_calc" = c(t1, t2),
+  "t_tab" = c(t_tab, t_tab),
+  "t_Bonferroni" = c(t_tab_Bon, t_tab_Bon),
+  "t_Scheffé" = c(t_tab_Scheffe, t_tab_Scheffe)
 ) |> 
-  kableExtra::kbl(
-    align = "c",
-    col.names = c("Método", "t", "t_tab")
-  ) |> 
+  kableExtra::kbl(align = "c") |> 
   kableExtra::kable_styling(position = "center")
 ```
+
+Nota-se que o valor do $t$ calculado (`t_calc`) para o estimador de $\beta_1$ é maior do que as estatísticas de $t$ tabelado, de $t$ de Bonferroni e de $t$ de Scheffé, assim, rejeita-se a hipótese $H_0: \beta_1 = 0$, com um nível de significância geral $\alpha_f = 0, 05$.
+
+Por outro lado, para o estimador de $\beta_2$, obteve-se um valor absoluto de $t$ maior que o $t$ tabelado, porém inferior a do $t$ de Bonferroni e do $t$ de Scheffé. Assim, utilizando os dois métodos de nível de significância por comparação, não temos evidências para rejeitar a hipótese  $H_0: \beta_2 = 0$.
 
 ### SAS
 

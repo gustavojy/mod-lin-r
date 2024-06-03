@@ -1,6 +1,4 @@
----
-title: "Correlação Parcial"
----
+# Correlação Parcial
 
 Considere um vetor $\mathbf{v}$, formado por um subconjunto de $y's$ que inclui $y_1$ e $y_2$, sendo denotado por $\mathbf{y}$. O outro subconjunto de $y's$ que inclui $y_3$ e $y_4$ é denotado por $\mathbf{x}$.
 
@@ -37,7 +35,7 @@ $$
 \text{.}
 $$
 
-Primeiramente, calcularemos a correlação linear entre as variáveis $y_1$ e $y_2$, ou seja, $\rho_{12}$.
+Primeiramente, calcularemos a correlação linear entre as variáveis $y_1$ e $y_2$, ou seja, $\rho_{12}$ (vide @sec-corr).
 
 ::: {.panel-tabset}
 
@@ -87,7 +85,7 @@ print Sigma '     ' Ro[format=6.2];
 
 :::
 
-Para calcular o coeficiente de correlação parcial entre $y_1$ e $y_2$ dada a condicional $y_3$ e $y_4$ ($\rho_{12.34}$), particionaremos $\Sigma$ da seguinte maneira:
+Para calcular o coeficiente de correlação parcial entre $y_1$ e $y_2$ dada a ocorrência de $y_3$ e $y_4$ ($\rho_{12.34}$), particionaremos $\Sigma$ da seguinte maneira:
 
 $$
 \mathbf{\Sigma}_{yy} =
@@ -112,7 +110,7 @@ $$
 
 ### R
 
-Para particionar $\mathbf{\Sigma}$, utilizaremos o [Teorema 2 (4.4B.) -@sec-T2].
+Para particionar $\mathbf{\Sigma}$, utilizaremos o [Teorema 2 -@sec-T2].
 
 A primeira partição ($\mathbf{\Sigma}_{yy}$) fica:
 
@@ -151,7 +149,7 @@ Sigma_yx <- Ay %*% Sigma %*% t(Ax)
 Sigma_yx
 ```
 
-Usando o [Teorema 4 (4.4D) -@sec-T4], obtemos a matriz de covariâncias condicionais de $y_1$ e $y_2$ dado $y_3$ e $y_4$:
+Usando o [Teorema 4 -@sec-T4], obtemos a matriz de covariâncias condicionais de $y_1$ e $y_2$ dado $y_3$ e $y_4$:
 
 $$cov(y \mid x) = \mathbf{\Sigma}_{yy} - \mathbf{\Sigma}_{yx} \mathbf{\Sigma}_{xx}^{-1} \mathbf{\Sigma}_{xy}$$
 

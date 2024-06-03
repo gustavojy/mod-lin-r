@@ -233,6 +233,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Modelos de Análise de Variância (ANOVA)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Estimação</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Teste de Hipótese</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">ANOVA balanceada com dois fatores</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
     </ul>
 </div>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
@@ -267,9 +296,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
-</header><p>Desenvolveremos testes de hipóteses para os parâmetros do vetor <span class="math inline">\(\boldsymbol{\beta} = [\beta_1, \beta_2,\dots, \beta_k]'\)</span> no modelo</p>
+</header><p>Desenvolveremos testes de hipóteses para os parâmetros do vetor <span class="math inline">\(\boldsymbol{\beta} = [\beta_1, \beta_2,\dots, \beta_k]'\)</span> no modelo de regressão múltipla</p>
 <p><span class="math display">\[\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\]</span></p>
-<p>Faremos a mesma suposição realizada no <a href="exemplo4.1.html"><span>Capítulo&nbsp;6</span></a>, em que <span class="math inline">\(\boldsymbol{\epsilon} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})\)</span> ou <span class="math inline">\(\mathbf{y} \sim N_n(\mathbf{X}\boldsymbol{\beta},\sigma^2\mathbf{I})\)</span>, onde <span class="math inline">\(\mathbf{X}\)</span> é uma matriz <span class="math inline">\(n \times(k+1)\)</span>, de posto <span class="math inline">\(k+1 &lt; n\)</span>, sendo <span class="math inline">\(n\)</span> o número de observações e <span class="math inline">\(k\)</span>, o número de variáveis <span class="math inline">\(x\)</span>.</p>
+<p>Faremos as mesmas suposições do <a href="exemplo4.1.html"><span>Capítulo&nbsp;6</span></a>, em que <span class="math inline">\(\boldsymbol{\epsilon} \sim N_n(\mathbf{0}, \sigma^2\mathbf{I})\)</span> ou <span class="math inline">\(\mathbf{y} \sim N_n(\mathbf{X}\boldsymbol{\beta},\sigma^2\mathbf{I})\)</span>, onde <span class="math inline">\(\mathbf{X}\)</span> é uma matriz <span class="math inline">\(n \times(k+1)\)</span>, de posto <span class="math inline">\(k+1 &lt; n\)</span>, sendo <span class="math inline">\(n\)</span> o número de observações e <span class="math inline">\(k\)</span>, o número de variáveis <span class="math inline">\(x\)</span>.</p>
 <p>Isso garante que as somas de quadrados da regressão e dos resíduos são formas quadráticas independentes, sendo pressuposições importantes para a realização da análise de variância.</p>
 <p>Do <a href="exemplo4.1.html"><span>Capítulo&nbsp;6</span></a>, sabemos que:</p>
 <ul>
@@ -528,7 +557,7 @@ H_0&amp;: \text{Nenhum dos x's prediz y} \\
 H_a&amp;: \text{Pelo menos uma das variáveis x's é importante na predição de y}
 \end{align}
 \]</span></p>
-<p>O quadro da ANOVA para o teste F de <span class="math inline">\(H_0: \boldsymbol{\beta_1} = 0\)</span> fica:</p>
+<p>O quadro da ANOVA para o teste F de <span class="math inline">\(H_0: \boldsymbol{\beta_1} = 0\)</span> é:</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
@@ -542,19 +571,19 @@ H_a&amp;: \text{Pelo menos uma das variáveis x's é importante na predição de
 <tr class="odd">
 <td style="text-align: center;">Devida a Beta1</td>
 <td style="text-align: center;">k</td>
-<td style="text-align: center;">SQReg/k</td>
-<td style="text-align: center;">QMReg/QMRes</td>
+<td style="text-align: center;">SQReg / k</td>
+<td style="text-align: center;">QMReg / QMRes</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">Resíduo</td>
-<td style="text-align: center;">n-k-1</td>
-<td style="text-align: center;">SQRes/(n-k-1)</td>
+<td style="text-align: center;">n - k - 1</td>
+<td style="text-align: center;">SQRes / (n - k - 1)</td>
 <td style="text-align: center;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">Total</td>
-<td style="text-align: center;">n-1</td>
-<td style="text-align: center;">SQTot/(n-1)</td>
+<td style="text-align: center;">n - 1</td>
+<td style="text-align: center;">SQTot / (n - 1)</td>
 <td style="text-align: center;"></td>
 </tr>
 </tbody>
@@ -722,7 +751,7 @@ x2 -1.285489</code></pre>
 <section id="teste-para-um-subconjunto-de-betas" class="level3" data-number="7.1.1"><h3 data-number="7.1.1" class="anchored" data-anchor-id="teste-para-um-subconjunto-de-betas">
 <span class="header-section-number">7.1.1</span> Teste para um subconjunto de <span class="math inline">\(\beta's\)</span>
 </h3>
-<p>Neste caso, estamos interessados em testar a hipótese de que um subconjunto das variáveis regressoras <span class="math inline">\(x's\)</span> não é importante em predizer <span class="math inline">\(y\)</span>.</p>
+<p>Neste caso, estamos interessados em testar a hipótese de que um subconjunto das variáveis regressoras <span class="math inline">\(x's\)</span> não é importante para predizer <span class="math inline">\(y\)</span>.</p>
 <p>Como hipóteses do teste de regressão, assumiremos:</p>
 <p><span class="math display">\[
 \begin{align}

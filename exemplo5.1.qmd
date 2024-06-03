@@ -1,0 +1,410 @@
+# ANOVA balanceada com um fator - Estimação
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+options(scipen = 999999, knitr.kable.NA = '')
+
+library(MASS)
+```
+
+## Introdução
+
+O modelo de análise de variância (ANOVA) consiste em comparar as médias de tratamentos para alguma variável resposta. O modelo matemático pode ser representado da seguinte maneira:
+
+$$
+y_{ij} = \mu + \tau_i + \epsilon_{ij} \space \text{ , para } i = 1,\dots,a \space \text{ e } \space j = 1,\dots,n
+$$
+
+em que:
+
+- $y_{ij}$ é o valor observado na $j$−ésima repetição do $i$−ésimo tratamento;
+
+- $\mu$ é uma constante comum a todas as observações, geralmente a média geral;
+
+- $\tau_i$ é o efeito do $i$−ésimo tratamento;
+
+- $\epsilon_{ij}$ é o erro experimental observado na $j$−ésima repetição do $i$−ésimo tratamento.
+
+Quando o modelo é representado na forma matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$, a matriz de delineamento $\mathbf{X}$ não é de posto completo (**posto incompleto**), sendo assim um modelo dito **superparametrizado**. Dessa forma, é necessário adequar a metodologia aplicada nos modelos de regressão.
+
+Neste primeiro momento, trataremos dos modelos ANOVA **balanceados**, ou seja, todos os tratamentos apresentam número igual de observações, com **um fator de tratamento** (*one-way model*).
+
+Como exemplo, temos o seguinte caso: *Um pesquisador deseja comparar dois aditivos usados para melhorar o desempenho da gasolina. Suponhamos que:*
+
+- Sem aditivos: carro percorre $\mu$ quilômetros por litro;
+
+- Com aditivo 1: acréscimo de $tau_1$ quilômetros por litro;
+
+- Com aditivo 2: acréscimo de $tau_2$ quilômetros por litro.
+
+Considerando seis carros idênticos e escolhendo, aleatoriamente, três carros para adicionar o aditivo 1 e três carros para adicionar o aditivo 2, ou seja, três repetições para cada tipo de aditivo, o modelo matemático fica:
+
+$$
+y_{ij} = \mu + \tau_i + \epsilon_{ij}, \space i = 1,2 \space j = 1,2,3
+$$
+
+em que $y_{ij}$ é a quilometragem por litro observada no $j$-ésimo carro que recebeu o $i$-ésimo aditivo.
+
+Matricialmente, $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$, temos:
+
+$$
+\begin{cases}
+\mu + \tau_1 + \epsilon_{11} \\
+\mu + \tau_1 + \epsilon_{12} \\
+\mu + \tau_1 + \epsilon_{13} \\
+\mu + \tau_2 + \epsilon_{21} \\
+\mu + \tau_2 + \epsilon_{22} \\
+\mu + \tau_2 + \epsilon_{23} \\
+\end{cases}
+=
+\begin{bmatrix}
+y_{11} \\ y_{12} \\ y_{13} \\ y_{21} \\ y_{22} \\ y_{23}
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 1 & 0 \\
+1 & 1 & 0 \\
+1 & 1 & 0 \\
+1 & 0 & 1 \\
+1 & 0 & 1 \\
+1 & 0 & 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+\mu \\ \tau_1 \\ \tau_2
+\end{bmatrix}
++
+\begin{bmatrix}
+\epsilon_{11} \\ \epsilon_{12} \\ \epsilon_{13} \\ \epsilon_{21} \\ \epsilon_{22} \\ \epsilon_{23}
+\end{bmatrix}
+$$
+
+Note que a matriz $\mathbf{X}$, de dimensão $6 \times 3$, é de posto incompleto (posto($\mathbf{X}$) = 2), assim, não é possível estimar diretamente os parâmetros do vetor $\boldsymbol{\beta} = [\mu,\tau_1,\tau_2]'$, pois apresentam infinitas soluções (**não apresenta solução única**).
+
+A seguir, serão apresentados métodos para estimar os parâmetros do vetor $\boldsymbol{\beta}$, considerando os seguintes valores de $y_{ij}$:
+
+```{r}
+#| echo: false
+
+data.frame(
+  ad1 = c(14, 16, 15),
+  ad2 = c(18, 19, 17)
+) |> 
+  kableExtra::kbl(align = "c", col.names = c("Aditivo 1 (y1)", "Aditivo 2 (y2)")) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+## Estimação dos parâmetros
+
+Os dados descritos anteriormente são os seguintes:
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- as.vector(c(14,16,15,18,19,17))
+y
+
+X <- matrix(c(
+  1, 1, 0, 
+  1, 1, 0,
+  1, 1, 0, 
+  1, 0, 1, 
+  1, 0, 1, 
+  1, 0, 1
+),
+ncol = 3, byrow = TRUE
+)
+X
+```
+
+A matriz $\mathbf{X'X}$ (`XLX`) e o vetor $\mathbf{X'y}$ (`XLy`) são calculados a seguir:
+
+```{r}
+XLX <- t(X) %*% X
+XLX
+
+XLy <- t(X) %*% y
+XLy
+```
+
+Com a matriz $\mathbf{X'X}$, obtemos o número de observações totais (6) e o número de observações dos tratamentos (3 para cada aditivo). O vetor $\mathbf{X'y}$ nos retorna o total dos valores observados por tratamento (45 km/L para o aditivo 1 e 54 km/L para o aditivo 2), além do total global (99 km/L).
+
+Para calcular o posto das matrizes $\mathbf{X}$ e $\mathbf{X'X}$, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de uma matriz.
+
+```{r}
+#| eval: false
+
+install.packages("MASS")
+library(MASS)
+```
+
+O posto de uma matriz idempotente é o traço do produto de uma matriz pela sua inversa generalizada, ou seja, é a soma dos elementos da diagonal.
+
+```{r}
+rank_X <- sum(diag(X %*% ginv(X)))
+rank_X
+
+rank_XLX <- sum(diag(XLX %*% ginv(XLX)))
+rank_XLX
+```
+
+Fazendo a diferença entre o número de parâmetros do modelo (`p`) com o posto da matriz de delineamento $\mathbf{X}$ (`k`), confirmamos que se trata de uma matriz de posto incompleto (`defRank`).
+
+```{r}
+# Número de parâmetros
+p <- ncol(X)
+p
+
+# Posto(X)
+k <- rank_X
+k
+
+# Deficiência de rank - mostra que é de posto incompleto
+defRank <- p - k
+defRank
+```
+
+Para estimar o vetor de parâmetros $\boldsymbol{\beta} = [\mu,\tau_1,\tau_2]'$, utilizamos o Método dos Mínimos Quadrados Ordinários (MQO) que busca o $\boldsymbol{\hat\beta}$ que minimize a soma de quadrados dos desvios. O sistema de equações normais é dado por:
+
+$$
+\mathbf(X'X) \boldsymbol{\hat\beta} = \mathbf{X' y}
+$$
+
+Aqui, considera-se que o modelo matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ tem $E(\mathbf{y}) = \mathbf{X} \boldsymbol{\beta}$, $cov(\mathbf{y}) = \sigma^2 \mathbf{I}$ e que $\mathbf{X}$ é $n \times p$ de posto $k < p \le n$.
+
+Para obter uma possível solução de $\boldsymbol{\hat\beta}$, podemos utilizar qualquer **inversa generalizada** de $\mathbf{(X'X)^-}$, a partir da seguinte operação:
+
+$$\boldsymbol{\hat\beta} = \mathbf{(X'X)^- X' y}$$
+
+```{r}
+Beta0 <- ginv(XLX) %*% t(X) %*% y
+Beta0
+
+y_hat0 <- X %*% Beta0
+y_hat0
+```
+
+Outro método de estimação de $\boldsymbol{\hat\beta}$ é impondo retrições nos parâmetros (**condições marginais**). Abordaremos três tipos:
+
+- Solução com restrição $\tau_1 = 0$: é a retrição imposta pelo software R.
+
+```{r}
+TR <- c(0, 1, 0)
+TR
+
+W <- rbind(X, TR)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta1 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta1
+
+y_hat1 <- X %*% Beta1
+y_hat1
+```
+
+- Solução com restrição $\tau_2 = 0$: é a retrição imposta pelo software SAS.
+
+```{r}
+TS <- c(0, 0, 1)
+TS
+
+W <- rbind(X, TS)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta2 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta2
+
+y_hat2 <- X %*% Beta2
+y_hat2
+```
+
+- Solução com restrição $\tau_1 + \tau_2 = 0$: é a retrição comumente utilizada na estatística experimental.
+
+```{r}
+TE <- c(0, 1, 1)
+TE
+
+W <- rbind(X, TE)
+W
+
+z <- matrix(c(y, 0), ncol = 1)
+z
+
+Beta3 <- round(solve(t(W) %*% W) %*% t(W) %*% z, 2)
+Beta3
+
+y_hat3 <- X %*% Beta3
+y_hat3
+```
+
+O resumo dos resultados estão descritos a seguir:
+
+```{r}
+#| echo: false
+
+data.frame(ig = Beta0, t1 = Beta1, t2 = Beta2, t3 = Beta3) |> 
+  kableExtra::kbl(
+    align = "c", caption = "Estimação de beta de acordo com a restrição",
+    col.names = c("Inv. Generaliz.", "tau1 = 0", "tau2 = 0", "tau1 + tau2 = 0")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+
+data.frame(y = y, ig = y_hat0, t1 = y_hat1, t2 = y_hat2, t3 = y_hat3) |> 
+  kableExtra::kbl(
+    align = "c", caption = "Estimação de y (y_hat) de acordo com a restrição",
+    col.names = c("y", "Inv. Generaliz.", "tau1 = 0", "tau2 = 0", "tau1 + tau2 = 0")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc iml;
+reset fuzz;
+y = {14,16,15,18,19,17}; * vetor coluna y;
+X = {1 1 0, 
+     1 1 0,
+     1 1 0, 
+     1 0 1, 
+     1 0 1, 
+     1 0 1};
+XLX = t(X)*X;
+XLy = t(X)*y;
+print XLX XLy;
+
+rank_X = trace(X*ginv(X));
+rank_XLX = trace(XLX*ginv(XLX));
+print rank_X rank_XLX;
+
+p = ncol(X);
+k = round(trace(Ginv(XLX)*XLX));  * Cálculo do rank da matriz X;
+defRank = p-k;
+print 'Número de parâmetros =' p,,
+      'Posto(X) =' k,,    
+      'Deficiência de rank =' defRank;
+
+Beta0 = Ginv(XLX)*t(X)*y; * Solução usando inversa-G;
+y_hat0 = X*Beta0;
+print 'Solução com inversa-G:       ' Beta0 y y_hat0;
+
+TR = {0 1 0}; * Restrição do R: t1=0;
+z = y//{0};
+W = X//TR;
+Beta1 = inv(t(W)*W)*t(W)*z;
+y_hat1 = X*Beta1;
+print 'Solução com restrição: t1=0 (R)        ' Beta1 y_hat1;
+
+TS = {0 0 1}; * Restrição do SAS: t2=0;
+z = y//{0};
+W = X//TS;
+Beta2 = inv(t(W)*W)*t(W)*z;
+y_hat2 = X*Beta2;
+print 'Solução com restrição: t2=0 (SAS)      ' Beta2 y_hat2;
+
+T = {0 1 1}; * Restrição Estatística Experimental: t1+t2=0;
+z = y//{0};
+W = X//T;
+Beta3 = inv(t(W)*W)*t(W)*z;
+y_hat3 = X*Beta3;
+print 'Solução com restrição: t1+t2=0 (EstExp)' Beta3 y_hat3;
+```
+
+:::
+
+## Funções estimáveis
+
+Uma função $\boldsymbol{\lambda'\beta}$ é estimável no modelo  $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ se existe um vetor $\mathbf{a}$ tal que $E(\mathbf{a'y}) = \boldsymbol{\lambda'\beta}$.
+
+A seguir, verificaremos se algumas combinações lineares são estimáveis de forma única.
+
+::: panel-tabset
+
+### R
+
+- $\beta = \mu + \tau_1$:
+
+```{r}
+L1 <- c(1, 1, 0)
+L1
+
+L1Beta0 <- L1 %*% Beta0
+L1Beta0
+
+L1Beta1 <- L1 %*% Beta1
+L1Beta1
+
+L1Beta2 <- L1 %*% Beta2
+L1Beta2
+
+L1Beta3 <- L1 %*% Beta3
+L1Beta3
+```
+
+Dado que o produto da combinação linear pelos vetores estimados de $\boldsymbol{\beta}$ são iguais (**invariantes**), dizemos que $\beta = \mu + \tau_1$ é estimável. Portanto, independentemente da estimativa do vetor de parâmetros $\boldsymbol{\beta}$, as estimativas são iguais.
+
+- $\beta = \tau_1 + \tau_2$:
+
+```{r}
+L2 <- c(0, 1, 1)
+L2
+
+L2Beta0 <- L2 %*% Beta0
+L2Beta0
+
+L2Beta1 <- L2 %*% Beta1
+L2Beta1
+
+L2Beta2 <- L2 %*% Beta2
+L2Beta2
+
+L2Beta3 <- L2 %*% Beta3
+L2Beta3
+```
+
+Dado que o produto da combinação linear pelos vetores estimados de $\boldsymbol{\beta}$ são diferentes, dizemos que $\beta = \tau_1 + \tau_2$ não é estimável. Portanto, funções não estimáveis não são invariantes e resultam em estimativas diferentes.
+
+### SAS
+
+```{r}
+#| eval: false
+
+L1 = t({1,1,0}); * mi+t1 é estimável!;
+L1Beta0 = L1*Beta0;
+L1Beta1 = L1*Beta1;
+L1Beta2 = L1*Beta2;
+L1Beta3 = L1*Beta3;
+print '-------------------------------',
+      'Função estimável: LBeta = mi+t1',
+      '-------------------------------',;
+print '  Estimativa R:     ' L1Beta1,, 
+      '  Estimativa SAS:   ' L1Beta2,,
+      '  Estimativa EstExp:' L1Beta3;
+
+L2 = {0 1 1}; * t1+t2 NÃO é estimável!;
+L2Beta0 = L2*Beta0;
+L2Beta1 = L2*Beta1;
+L2Beta2 = L2*Beta2;
+L2Beta3 = L2*Beta3;
+print '-----------------------------------------',
+      'Função NÃO estimável: L2Beta = T1 + T2   ',
+      '-----------------------------------------',;
+print '  Estimativa R:     ' L2Beta1,, 
+      '  Estimativa SAS:   ' L2Beta2,, 
+      '  Estimativa EstExp:' L2Beta3;
+quit;
+```
+
+:::

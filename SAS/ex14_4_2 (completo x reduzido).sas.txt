@@ -1,0 +1,220 @@
+options nodate nocenter ps=1000 ls=120;
+/*
+Exemplo 14.4.2 O conteúdo da mistura de três tipos de queijo produzidos
+por dois métodos foi anotado por Marcuse (1949) (formato alterado). 
+Duas peças de queijo foram medidas para cada tipo e cada método. 
+Designando Método como o fator A e Tipo como o fator B, então 
+a = 2, b = 3 e n = 2. 
+Os dados são apresentados na Tabela 14.2 e os totais são mostrados na Tabela 14.3.
+-----------------------------
+               Tipo
+        ---------------------
+Método    1	  	  2		  3
+-----------------------------
+   1	39.02	35.74	37.02
+	    38.79	35.41	36.00
+-----------------------------
+   2	38.96	35.58	35.70
+		39.01	35.52	36.04
+-----------------------------
+*/
+
+proc iml;
+reset fuzz;
+y = {39.02,38.79,35.74,35.41,37.02,36.00,38.96,39.01,35.58,35.52,35.70,36.04};
+X = {1 1 0 1 0 0 1 0 0 0 0 0,
+	 1 1 0 1 0 0 1 0 0 0 0 0,
+	 1 1 0 0 1 0 0 1 0 0 0 0,
+	 1 1 0 0 1 0 0 1 0 0 0 0,
+	 1 1 0 0 0 1 0 0 1 0 0 0,
+	 1 1 0 0 0 1 0 0 1 0 0 0,
+	 1 0 1 1 0 0 0 0 0 1 0 0,
+	 1 0 1 1 0 0 0 0 0 1 0 0,
+	 1 0 1 0 1 0 0 0 0 0 1 0,
+	 1 0 1 0 1 0 0 0 0 0 1 0,
+	 1 0 1 0 0 1 0 0 0 0 0 1,
+	 1 0 1 0 0 1 0 0 0 0 0 1};
+print X[format=4.0] y[format=12.2];
+
+rank_X = round(trace(ginv(X)*X)); 	* Calcula o posto da matriz X;
+npar = ncol(X);
+a=2; 	* Número de níveis do fator A;
+b=3;	* Número de níveis do fator B;
+n=2;	* Número de repetições;
+abn = a*b*n;	* Número total de observações;
+X0 = X[,1];
+XA = X[,2:3];
+XB = X[,4:6];
+XAB = X[,7:12];
+print X[format=8.0],,XA[format=8.0],,XB[format=8.0],,XAB[format=8.0];
+
+* Cálculo da soma de quadrados total - SQTotal;
+P = I(abn) - J(abn,abn,1)/abn;
+SQTotal = t(y)*(P)*y;
+glTotal = round(trace(ginv(P)*P));
+
+* Cálculo da soma de quadrados de resíduos - SQRes;
+PR = I(abn) - X*ginv(t(X)*X)*t(X);
+SQRes = t(y)*(PR)*y;
+glRes = round(trace(ginv(PR)*PR));
+QMRes = SQRes/glRes;
+
+* Cálculo SQAxB - forma quadrática;
+X1 = X0||XA||XB;
+PAB = X*ginv(t(X)*X)*t(X) - X1*ginv(t(X1)*X1)*t(X1);
+SQAB = t(y)*PAB*y; 					* Calcula SQ(AB);
+glAB = round(trace(ginv(PAB)*PAB)); * Calcula gl da interação AxB;
+QMAB = SQAB/glAB;
+FAB = QMAB/QMRes;
+p_valorAB = 1-cdf('F',FAB,glAB,glRes);
+
+* Cálculo da soma de quadrados do fator A - SQ(A);
+PA = XA*ginv(t(XA)*XA)*t(XA) - J(abn,abn,1)/abn;
+SQA = t(y)*PA*y;
+glA = round(trace(ginv(PA)*PA));
+QMA = SQA/glA;
+FA = QMA/QMRes;
+p_valorA = 1-cdf('F',FA,glA,glRes);
+
+* Cálculo da soma de quadrados do fator B - SQ(B);
+PB = XB*ginv(t(XB)*XB)*t(XB) - J(abn,abn,1)/abn;
+SQB = t(y)*PB*y;
+glB = round(trace(ginv(PB)*PB));
+QMB = SQB/glB;
+FB = QMB/QMRes;
+p_valorB = 1-cdf('F',FB,glB,glRes);
+
+* Imprime o quadro de análise de variância – ANOVA (pág. 252);
+print 'QUADRO DE ANOVA: Exemplo 14.4.2: Fatorial 2x3 (caso balanceado)';
+print 'Método    ' glA[format=8.0]     SQA[format=12.4]   QMA[format=12.4]  FA[format=12.4]  p_valorA[format=12.4];
+print 'Tipo      ' glB[format=8.0]     SQB[format=12.4]   QMB[format=12.4]  FB[format=12.4]  p_valorB[format=12.4];
+print 'Interação ' glAB[format=8.0]    SQAB[format=12.4]  QMAB[format=12.4] FAB[format=12.4] p_valorAB[format=12.4];
+print 'Resíduo   ' glRes[format=8.0]   SQRes[format=12.4] QMRes[format=12.4];
+print 'Total     ' glTotal[format=8.0] SQTotal[format=12.4] ;
+
+* ----------------------------------------------------------------------------;
+
+* Estima Beta usando inversa de Moore-Penrose;
+BetaMP = ginv(t(X)*X)*t(X)*y;		* Beta usando invG (Moore Penrose));
+XLX = t(X)*X;
+iXLX = (1/2)*{0 0, 0 1}@I(6);		
+BetaG = iXLX*t(X)*y;				* Beta usando invG mais simples (Searle);
+
+print BetaMP BetaG;
+
+* ----------------------------------------------------------------------------;
+
+* ------------------------------------------------------------------------;
+* Cálculo das SQs de forma mais simples (não provado no livro do Rencher!);
+* Resultados justificados pela ortogonalidade dos blocos d colunas de X   ;
+* e porque o experimento é balanceado!;
+* ------------------------------------------------------------------------;
+X0A = X0||XA;
+BetaA = ginv(t(X0A)*X0A)*t(X0A)*y;
+ SQA1 = t(BetaA)*t(X0A)*y - t(y)*(J(abn,abn,1)/abn)*y;
+
+X0B = X0||XB;
+BetaB = ginv(t(X0B)*X0B)*t(X0B)*y;
+ SQB1 = t(BetaB)*t(X0B)*y - t(y)*(J(abn,abn,1)/abn)*y;
+
+X0AB = X0||XAB;
+BetaAB = ginv(t(X0AB)*X0AB)*t(X0AB)*y;
+ SQAB1 = t(BetaAB)*t(X0AB)*y - t(y)*(J(abn,abn,1)/abn)*y - SQA1 - SQB1;
+print 'Outra forma de calcular as Somas de Quadrados:',;
+print SQA1[format=12.4] SQB1[format=12.4] SQAB1[format=12.4];
+
+*-------------------------------------------------------------------------;
+* ----------------------------------------------;
+* Cálculo das SQ's usando Hipótese Linear Geral;
+* ----------------------------------------------;
+
+*            mi a1 a2 b1 b2 b3 g11 g12 g13 g21 g22 g23;      
+CA   = (1/3)*{0  3 -3  0  0  0   1   1   1  -1  -1  -1};
+
+CB   = (1/2)*{0  0  0  2 -2  0   1  -1   0   1  -1   0,
+              0  0  0  2  0 -2   1   0  -1   1   0  -1};
+
+CAxB =       {0  0  0  0  0  0   1  -1   0  -1   1   0,
+              0  0  0  0  0  0   1   0  -1  -1   0   1}; 
+
+SQ_CA = t(CA*Beta)*inv(CA*ginv(t(X)*X)*t(CA))*CA*Beta;
+SQ_CB = t(CB*Beta)*inv(CB*ginv(t(X)*X)*t(CB))*CB*Beta;
+SQ_CAxB = t(CAxB*Beta)*inv(CAxB*ginv(t(X)*X)*t(CAxB))*CAxB*Beta;
+
+print 'Somas de quadrados usando Hipótese Linear Geral:',,
+    SQ_CA[format=12.4] SQ_CB[format=12.4] SQ_CAxB[format=12.4];
+
+*-------------------------------------------------------------------------;
+
+* Verifica se LBeta = a1-a2 é estimável;
+print '------------------------------------------------------------',
+      ' ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÕES ',
+      '------------------------------------------------------------',;
+L1 = t({0 1 -1 0 0 0 0 0 0 0 0 0});
+ver = t(X)*X*ginv(t(X)*X);
+verL1 = ver*L1;
+L1BetaMP = t(L1)*BetaMP;
+print 'Mostra que L1Beta = a1-a2 NÃO É estimável no modelo', 'SEM restrição nos parâmetros';
+print L1 verL1 L1BetaMP[format=12.4];
+
+print 'Mostra que L2Beta = a1-a2 + (1/3(g11+g12+g13)-(1/3)(g21+g22+g23) É estimável no modelo',
+      'SEM restrição nos parâmetros';
+L2 = (1/3)*t({0 3 -3 0 0 0 1 1 1 -1 -1 -1});
+verL2 = ver*L2;
+L2BetaMP = t(L2)*BetaMP;
+print L2 verL2 L2BetaMP[format=12.4];	
+
+* Matriz T de condições marginais: T*Beta = 0;
+T = {0 1 1 0 0 0 0 0 0 0 0 0,
+	 0 0 0 1 1 1 0 0 0 0 0 0,
+	 0 0 0 0 0 0 1 1 1 0 0 0,
+	 0 0 0 0 0 0 0 0 0 1 1 1,
+	 0 0 0 0 0 0 1 0 0 1 0 0,
+	 0 0 0 0 0 0 0 1 0 0 1 0,
+	 0 0 0 0 0 0 0 0 1 0 0 1};
+rank_T = round(trace(ginv(T)*T)); 	* Determina o posto da matriz T;
+W = X//T; 							* Junta as matrizes X e T;
+rank_W = round(trace(ginv(W)*W)); 	* Calcula o posto da matriz W = X//T;
+print npar rank_X rank_T rank_W;
+yr = y//j(7,1,0); 					* Completa o vetor y com 7 zeros;
+Beta_R = inv(t(W)*W)*t(W)*yr; 		* Beta sujeito às condições marginais;
+print BetaMP[format=12.4] Beta_R[format=12.4];
+
+print '------------------------------------------------------------',
+      ' ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO COM RESTRIÇÕES ',
+      '------------------------------------------------------------',;
+L1 = t({0 1 -1 0 0 0 0 0 0 0 0 0});
+ver = t(W)*W*inv(t(W)*W);
+verL1 = ver*L1;
+L1Beta_r = t(L1)*Beta_R;
+print 'Mostra que L1Beta = a1-a2 É estimável no modelo', 'COM restrição nos parâmetros';
+print L1 verL1 L1Beta_R[format=12.4];
+
+print 'Mostra que L2Beta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) É estimável no modelo',
+      'COM restrição nos parâmetros';
+L2 = (1/3)*t({0 3 -3 0  0  0  1  1  1 -1 -1 -1});
+verL2 = ver*L2;
+L2Beta_R = t(L2)*Beta_R;
+print L2 verL2 L2Beta_R[format=12.4];	
+
+* Cálculo de SQA usando hipótese linear geral;
+
+* (1) No modelo SEM restrição;
+* CA = {0  1 -1  0  0  0  0  0  0  0  0  0};
+CA = (1/3)*{0  3 -3  0  0  0  1  1  1 -1 -1 -1};
+CABeta = CA*Beta_R;
+print '-----------------------------------------------------------',
+      ' ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÃO ',
+      '-----------------------------------------------------------',
+      CA[format=6.2],,CABeta[format=12.4],,;
+
+SQ_A = t(CABeta)*inv(CA*ginv(t(X)*X)*t(CA))*CABeta;
+
+* (1) No modelo COM restrição;
+CABeta_R = CA*Beta_R;
+print 'No modelo COM restrição nos parâmetros:',,CA[format=6.2],,CABeta_R[format=12.4],,;
+
+SQ_A_R = t(CABeta_r)*inv(CA*inv(t(W)*W)*t(CA))*CABeta_r;
+print SQ_A[format=12.4] SQ_A_R[format=12.4];
+
+quit;

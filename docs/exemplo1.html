@@ -232,6 +232,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Modelos de Análise de Variância (ANOVA)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Estimação</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">ANOVA balanceada com um fator - Teste de Hipótese</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">ANOVA balanceada com dois fatores</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
     </ul>
 </div>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
@@ -351,7 +380,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section><section id="matriz-de-variâncias-e-covariâncias" class="level2" data-number="1.2"><h2 data-number="1.2" class="anchored" data-anchor-id="matriz-de-variâncias-e-covariâncias">
 <span class="header-section-number">1.2</span> Matriz de Variâncias e Covariâncias</h2>
-<p>Para obtermos a matriz de variâncias e covariâncias, precisamos dos seguintes escalares, vetores e matrizes:</p>
+<p>Para obtermos a matriz de variâncias e covariâncias, precisamos dos seguintes objetos:</p>
 <ul>
 <li><p><code>n</code>: número de observações <span class="math inline">\(n\)</span>;</p></li>
 <li><p><code>In</code>: matriz identidade <span class="math inline">\(\mathbf{I}\)</span>;</p></li>
@@ -378,7 +407,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 4</code></pre>
 </div>
 </div>
-<p>No caso da matriz <code>Y</code>, ela apresenta dimensão <span class="math inline">\(28 \times 4\)</span>.</p>
+<p>No caso da matriz <code>Y</code>, apresenta dimensão <span class="math inline">\(28 \times 4\)</span>.</p>
 <p>A função <code><a href="https://rdrr.io/r/base/diag.html">diag()</a></code> cria uma <strong>matriz identidade</strong>. Basta inserir dentro da função a dimensão da matriz.</p>
 <div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">In</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span>
@@ -474,7 +503,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p><span class="math display">\[
-\mathbf{I}_{(n)} =
+\mathbf{I}_{(28)} =
   \begin{bmatrix}
    1 &amp; 0 &amp; 0 &amp; \dots &amp; 0 \\
    0 &amp; 1 &amp; 0 &amp; \dots &amp; 0 \\
@@ -775,7 +804,8 @@ West  226.2712 171.3743 259.5410 226.0040</code></pre>
    \sigma_{p1} &amp; \sigma_{p2} &amp; \sigma_{p3} &amp; \dots &amp; \sigma^2_p
    \end{bmatrix}
 \]</span></p>
-<section id="matriz-de-correlações" class="level2" data-number="1.3"><h2 data-number="1.3" class="anchored" data-anchor-id="matriz-de-correlações">
+<p>Os elementos da diagonal principal são as variâncias e os demais elementos, as covariâncias. Note que a matriz de variâncias e covariâncias é simétrica.</p>
+<section id="sec-corr" class="level2" data-number="1.3"><h2 data-number="1.3" class="anchored" data-anchor-id="sec-corr">
 <span class="header-section-number">1.3</span> Matriz de Correlações</h2>
 <p>Para calcular a matriz de correlação (<span class="math inline">\(\mathbf{\rho}_{ij}\)</span>), utilizamos a seguinte expressão:</p>
 <p><span class="math display">\[\mathbf{\rho}_{ij} = \mathbf{D}_{\sigma}^{-1} \mathbf{\Sigma}  \mathbf{D}_{\sigma}^{-1}\]</span></p>
@@ -942,6 +972,7 @@ DM = (\mathbf{y} - \mathbf{\mu})' \mathbf{\Sigma} (\mathbf{y} - \mathbf{\mu})
 28    48   54    57   43  3.806908   17</code></pre>
 </div>
 </div>
+<p>A observação 13 apresenta a menor distância, enquanto a 16, a maior distância de Mahalanobis.</p>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell">

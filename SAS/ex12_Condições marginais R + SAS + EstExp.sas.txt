@@ -1,0 +1,154 @@
+options nodate nocenter ps=1000;
+
+proc iml;
+reset fuzz;
+y = {14,16,15,18,19,17}; * vetor coluna y;
+X = {1 1 0, 
+     1 1 0,
+     1 1 0, 
+     1 0 1, 
+     1 0 1, 
+     1 0 1};
+XLX = t(X)*X;
+XLy = t(X)*y;
+print XLX XLy;
+
+rank_X = trace(X*ginv(X));
+rank_XLX = trace(XLX*ginv(XLX));
+print rank_X rank_XLX;
+
+p = ncol(X);
+k = round(trace(Ginv(XLX)*XLX));  * Cálculo do rank da matriz X;
+defRank = p-k;
+print 'Número de parâmetros =' p,,
+      'Posto(X) =' k,,    
+      'Deficiência de rank =' defRank;
+
+Beta0 = Ginv(XLX)*t(X)*y; * Solução usando inversa-G;
+y_hat0 = X*Beta0;
+print 'Solução com inversa-G:       ' Beta0 y y_hat0;
+
+TR = {0 1 0}; * Restrição do R: t1=0;
+z = y//{0};
+W = X//TR;
+Beta1 = inv(t(W)*W)*t(W)*z;
+y_hat1 = X*Beta1;
+print 'Solução com restrição: t1=0 (R)        ' Beta1 y_hat1;
+
+TS = {0 0 1}; * Restrição do SAS: t2=0';
+z = y//{0};
+W = X//TS;
+Beta2 = inv(t(W)*W)*t(W)*z;
+y_hat2 = X*Beta2;
+print 'Solução com restrição: t2=0 (SAS)      ' Beta2 y_hat2;
+
+T = {0 1 1}; * Restrição Estatística Experimental: t1+t2=0;
+z = y//{0};
+W = X//T;
+Beta3 = inv(t(W)*W)*t(W)*z;
+y_hat3 = X*Beta3;
+print 'Solução com restrição: t1+t2=0 (EstExp)' Beta3 y_hat3;
+
+L1 = t({1,1,0}); * mi+t1 é estimável!;
+L1Beta0 = L1*Beta0;
+L1Beta1 = L1*Beta1;
+L1Beta2 = L1*Beta2;
+L1Beta3 = L1*Beta3;
+print '-------------------------------',
+      'Função estimável: LBeta = mi+t1',
+      '-------------------------------',;
+print '  Estimativa R:     ' L1Beta1,, 
+      '  Estimativa SAS:   ' L1Beta2,,
+      '  Estimativa EstExp:' L1Beta3;
+
+L2 = {0 1 1}; * t1+t2 NÃO é estimável!;
+L2Beta0 = L2*Beta0;
+L2Beta1 = L2*Beta1;
+L2Beta2 = L2*Beta2;
+L2Beta3 = L2*Beta3;
+print '-----------------------------------------',
+      'Função NÃO estimável: L2Beta = T1 + T2   ',
+      '-----------------------------------------',;
+print '  Estimativa R:     ' L2Beta1,, 
+      '  Estimativa SAS:   ' L2Beta2,, 
+      '  Estimativa EstExp:' L2Beta3;
+
+quit;
+*14,16,15,18,19,17;
+data Ex;
+input Aditivo y;
+cards;
+1 14
+1 16 
+1 15 
+2 18 
+2 19 
+2 17
+;
+proc glm;
+class Aditivo;
+model y = Aditivo / solution;
+estimate 't1+t2' aditivo 1  1; * Veja nota na janela LOG;
+estimate 't1-t2' aditivo 1 -1;
+run;
+
+
+proc iml;
+* Exemplo da seção 12.7.3 Ortogonalidade das colunas de X;
+reset fuzz;
+X = {1 1 0 0 1 0, 
+	 1 1 0 0 0 1, 
+	 1 0 1 0 1 0, 
+	 1 0 1 0 0 1, 
+	 1 0 0 1 1 0, 
+	 1 0 0 1 0 1};
+y = {12,14,10,12,14,13};
+Um = X[,1];
+X1 = X[,2:6];
+n = nrow(X);
+Xc = (I(n)-(1/n)*J(n,n,1))*X1;
+Xc_a = Xc[,1:3];
+Xc_b = Xc[,4:5];
+print Xc[format=12.4],, Xc_a[format=12.4],, Xc_b[format=12.4]; 
+OrtoXc_aXc_b = t(Xc_a)*Xc_b;
+print 'Ortogonalidade das colunas de Xa e Xb' OrtoXc_aXc_b;
+
+* Estimação de mi, alfa_i, beta_j;
+X1c_ab = um||Xc_a||Xc_b;
+Beta1c_ab = ginv(t(X1c_ab)*X1c_ab)*t(X1c_ab)*y;
+
+* Estimação de mi, alfa_i;
+X1c_a = um||Xc_a;
+Beta1c_a = ginv(t(X1c_a)*X1c_a)*t(X1c_a)*y;
+
+* Estimação de mi, beta_j;
+X1c_b = um||Xc_b;
+Beta1c_b = ginv(t(X1c_b)*X1c_b)*t(X1c_b)*y;
+print 'COLUNAS DE X CENTRADAS NA MÉDIA',,
+      'Estimativa de mi,a1,a2,a3,b1,b2:' Beta1c_ab[format=12.2],,
+      'Estimativa de mi,a1,a2,a3:' Beta1c_a[format=12.2],,
+	  'Estimativa de mi,b1,b2:' Beta1c_b[format=12.2],,
+      '------------------------------------------------';
+
+Xa = X[,2:4];
+Xb = X[,5:6];
+
+X1ab = um||Xa||Xb;
+Beta1ab = ginv(t(X1ab)*X1ab)*t(X1ab)*y;
+
+X1a = um||Xa;
+Beta1a = ginv(t(X1a)*X1a)*t(X1a)*y;
+
+X1b = um||Xb;
+Beta1b = ginv(t(X1b)*X1b)*t(X1b)*y;
+
+print 'COLUNAS DE X NÃO CENTRADAS NA MÉDIA',,
+'Estimativa de mi,a1,a2,a3,b1,b2:' Beta1ab[format=8.2],,
+'Estimativa de mi,a1,a2,a3:' Beta1a[format=8.2],,
+'Estimativa de mi,b1,b2:' Beta1b[format=8.2];
+
+* Note que as estimativas de mi,a1,a2,a3,b1,b2 são diferentes;
+* nas três situações;
+* Mas as estimativas de funções estimáveis são iguais!!
+* Tente por exemplo: 2a1-a2-a3 e b1-b2;
+quit;

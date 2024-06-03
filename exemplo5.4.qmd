@@ -1,0 +1,317 @@
+# Dados Desbalanceados - Contrastes
+
+Os pesos líquidos de latas enchidas por cinco máquinas de enchimento são apresentados:
+
+|   A   |   B   |   C   |   D   |   E   |
+|:-----:|:-----:|:-----:|:-----:|:-----:|
+| 11,95 | 12,18 | 12,16 | 12,25 | 12,10 |
+| 12,00 | 12,11 | 12,15 | 12,30 | 12,04 |
+| 12,25 |  \-   | 12,08 | 12,10 | 12,02 |
+| 12,10 |  \-   |  \-   |  \-   | 12,02 |
+
+## 1. 
+
+::: panel-tabset
+
+### R
+
+```{r}
+y <- c(11.95,12.00,12.25,12.10,12.18,12.11,12.16,12.15,12.08,12.25,12.30,12.10,12.10,12.04,12.02,12.02)
+y
+
+W <- matrix(
+  c(rep(1, 4), rep(0, 12),
+  rep(0, 4), rep(1, 2), rep(0, 10),
+  rep(0, 6), rep(1, 3), rep(0, 7),
+  rep(0, 9), rep(1, 3), rep(0, 4),
+  rep(0, 12), rep(1, 4)),
+  ncol = 5, byrow = FALSE
+)
+W              # W do modelo de médias de caselas
+
+k <- ncol(W)   # Número de tratamentos
+k
+
+N <- nrow(W)   # Número total de repetições
+N
+```
+
+```{r}
+# Contrastes ortogonais não ponderados
+Jnn <- matrix(1, nrow = N, ncol = N)
+
+In <- diag(1, nrow = N)
+```
+
+```{r}
+SQTotal <- t(y) %*% (In - Jnn / N) %*% y
+SQTotal
+
+gl_total <- N - 1
+gl_total
+```
+
+```{r}
+# SQ do modelo completo: yij = mi(i) + eij
+mi <- solve(t(W) %*% W) %*% t(W) %*% y
+mi
+
+SQcompleto <- t(mi) %*% t(W) %*% y
+SQcompleto
+```
+
+```{r}
+# SQ do modelo reduzido: yij = mi + eij
+jn <- matrix(1, ncol = 1, nrow = N)
+
+mir <- solve(t(jn) %*% jn) %*% t(jn) %*% y
+mir
+
+SQreduzido <- t(mir) %*% t(jn) %*% y
+SQreduzido
+```
+
+```{r}
+SQEntre <- SQcompleto - SQreduzido
+SQEntre
+
+gl_entre <- k - 1
+gl_entre
+
+QMEntre <- SQEntre / gl_entre
+QMEntre
+```
+
+```{r}
+SQRes <- t(y) %*% y - t(mi) %*% t(W) %*% y
+SQRes
+
+gl_res <- N - k
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+```{r}
+Fcalc <- QMEntre / QMRes
+Fcalc
+
+Ftab <- qf(0.95, gl_entre, gl_res)
+Ftab
+
+p_valor <- 1 - pf(Fcalc, gl_entre, gl_res)
+p_valor
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Hipótese", "Resíduo", "Total"),
+  "gl" = c(gl_entre, gl_res, gl_total),
+  "SQ" = c(SQEntre, SQRes, SQTotal) |> round(4),
+  "QM" = c(QMEntre, QMRes, NA) |> round(4),
+  "Fcal" = c(Fcalc, NA, NA) |> round(4),
+  "Ftab" = c(Ftab, NA, NA) |> round(4),
+  "p.valor" = c(p_valor, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Ho: m1=m2=m3=m4=m5 (caso desbalanceado)",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+```{r}
+# Contrastes ortogonais do tipo t(ai)*mi
+a1 <- c(3,-2,-2, 3,-2)
+a2 <- c(0, 1,-2, 0, 1)
+a3 <- c(1, 0, 0,-1, 0)
+a4 <- c(0, 1, 0, 0,-1)
+```
+
+```{r}
+SQa1 <- t(t(a1) %*% mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% t(a1) %*% mi
+F_a1 <- SQa1 / QMRes
+p_valor_a1 <- 1 - pf(F_a1, 1, gl_res)
+
+SQa2 <- t(t(a2) %*% mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% t(a2) %*% mi
+F_a2 <- SQa2 / QMRes
+p_valor_a2 <- 1 - pf(F_a2, 1, gl_res)
+
+SQa3 <- t(t(a3) %*% mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% t(a3) %*% mi
+F_a3 <- SQa3 / QMRes
+p_valor_a3 <- 1 - pf(F_a3, 1, gl_res)
+
+SQa4 <- t(t(a4) %*% mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% t(a4) %*% mi
+F_a4 <- SQa4 / QMRes
+p_valor_a4 <- 1 - pf(F_a4, 1, gl_res)
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+Ftab_c <- qf(0.95, 1, gl_res)
+
+data.frame(
+  "Contrastes" = c("A,D vs. B,C,E", "B,E vs. C", "A vs. D", "B vs. E"),
+  "SQ" = c(SQa1, SQa2, SQa3, SQa4) |> round(4), 
+  "Fcal" = c(F_a1, F_a2, F_a3, F_a4) |> round(4),
+  "Ftab" = c(Ftab_c, NA, NA, NA) |> round(4),
+  "p.valor" = c(p_valor_a1, p_valor_a2, p_valor_a3, p_valor_a4) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Contrastes ortogonais não ponderados",
+    col.names = c("Contrastes", "SQ", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+```{r}
+# SQContrastes = SQA1 + SQA2 + SQA3 + SQA4 não é igual a SQEntre porque os contrastes NÃO SÃO ORTOGONAIS!
+SQContrastes <- SQa1 + SQa2 + SQa3 + SQa4
+SQContrastes
+
+SQEntre
+```
+
+```{r}
+# Contrastes ortogonais ponderados
+a2p <- c(0, 2, -6, 0, 4)
+
+SQa2p <- t(t(a2p) %*% mi) %*% solve(t(a2p) %*% solve(t(W) %*% W) %*% a2p) %*% t(a2p) %*% mi
+
+F_a2p <- SQa2p / QMRes
+
+p_valor_a2p <- 1 - pf(F_a2p, 1, gl_res)
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+Ftab_c <- qf(0.95, 1, gl_res)
+
+data.frame(
+  "Contrastes" = c("A,D vs. B,C,E", "2B + 4E vs. 6C"),
+  "SQ" = c(SQa1, SQa2p) |> round(4), 
+  "Fcal" = c(F_a1, F_a2p) |> round(4),
+  "Ftab" = c(Ftab_c, NA) |> round(4),
+  "p.valor" = c(p_valor_a1, p_valor_a2p) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Contrastes ortogonais ponderados",
+    col.names = c("Contrastes", "SQ", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+options nodate nocenter ps=1000;
+proc iml;
+reset fuzz;
+* Exemplo 15.2.1 Os pesos líquidos de latas enchidas por cinco máquinas; 
+* de enchimento (filling machines) são apresentados na Tabela 14.2;
+
+y = {11.95,12.00,12.25,12.10,12.18,12.11,12.16,12.15,
+     12.08,12.25,12.30,12.10,12.10,12.04,12.02,12.02};
+
+Trat = {1,1,1,1,2,2,3,3,3,4,4,4,5,5,5,5};
+W = design(Trat); 	* W do modelo de médias de caselas;
+k = ncol(W);		* Número de tratamentos;
+N = nrow(W);		* Número total de repetições;
+print W y[format=10.2];
+
+Jnn = J(N,N,1);
+In = I(N);
+SQTotal = t(y)*(In-Jnn/N)*y;
+gl_total = N-1;
+
+mi = inv(t(W)*W)*t(W)*y;
+SQcompleto = t(mi)*t(W)*y; 		* SQ do modelo completo: yij = mi(i) + eij;
+
+jn = J(N,1,1);
+mir = inv(t(jn)*jn)*t(jn)*y;
+SQreduzido = t(mir)*t(jn)*y; 	* SQ do modelo reduzido: yij = mi + eij;
+
+SQEntre = SQCompleto - SQreduzido;
+gl_entre = k-1;
+QMEntre = SQEntre/gl_entre;
+
+SQRes = t(y)*y - t(mi)*t(W)*y;
+gl_res = N-K;
+QMRes = SQRes/gl_res;
+
+Fcalc = QMEntre/QMRes;
+p_valor = 1 - cdf('F', Fcalc,gl_entre, gl_res);
+
+print '------------------------------',
+      'Exemplo 15.2.1 Quadro de ANOVA',
+      '------------------------------';
+print 'Ho: m1=m2=m3=m4=m5'  gl_entre SQEntre[format=10.5] QMEntre[format=10.5] Fcalc[format=8.4] p_valor[format=8.3],,
+      'Resíduo           '  gl_res   SQRes[format=10.5]   QMRes[format=10.5],,
+      'Total             '  gl_total SQTotal[format=10.5]; 
+
+* Contrastes ortogonais do tipo t(ai)*mi;
+a1 = {3,-2,-2, 3,-2};
+a2 = {0, 1,-2, 0, 1};
+a3 = {1, 0, 0,-1, 0};
+a4 = {0, 1, 0, 0,-1};
+
+SQA1 = t(t(a1)*mi)*inv(t(a1)*inv(t(W)*W)*a1)*t(a1)*mi;
+F_A1 = SQA1/QMRes;
+p_valor_A1 = 1 - cdf('F', F_A1,1, gl_res);
+
+SQa2 = t(t(a2)*mi)*inv(t(a2)*inv(t(W)*W)*a2)*t(a2)*mi;
+F_a2 = SQa2/QMRes;
+p_valor_a2 = 1 - cdf('F', F_a2,1, gl_res);
+
+SQa3 = t(t(a3)*mi)*inv(t(a3)*inv(t(W)*W)*a3)*t(a3)*mi;
+F_a3 = SQa3/QMRes;
+p_valor_a3 = 1 - cdf('F', F_a3,1, gl_res);
+
+SQa4 = t(t(A4)*mi)*inv(t(A4)*inv(t(W)*W)*A4)*t(A4)*mi;
+F_A4 = SQA4/QMRes;
+p_valor_A4 = 1 - cdf('F', F_A4,1, gl_res);
+
+print '-------------------------------------',
+      'Contrastes ortogonais não ponderados:',
+	  '-------------------------------------',
+      'A,D vs. B,C,E' SQA1[format=10.5] F_A1[format=12.4] p_valor_A1[format=12.3],,
+      'B,E vs. C    ' SQA2[format=10.5] F_A2[format=12.4] p_valor_A2[format=12.3],,
+	  'A vs. D      ' SQA3[format=10.5] F_A3[format=12.4] p_valor_A3[format=12.3],,
+	  'B vs. E      ' SQA4[format=10.5] F_A4[format=12.4] p_valor_A4[format=12.3],,;
+
+SQContrastes = SQA1 + SQA2 + SQA3 + SQA4;
+print '----------------------------------------------------------------',
+      'SQContrastes = SQA1 + SQA2 + SQA3 + SQA4 não é igual a SQEntre: ',,
+       SQContrastes[format=10.5] SQEntre[format=10.5],,
+      'porque os contrastes NÃO SÃO ORTOGONAIS!',
+      '----------------------------------------------------------------',,,;
+A2p = {0, 2, -6, 0, 4};
+SQA2p = t(t(a2p)*mi)*inv(t(a2p)*inv(t(W)*W)*a2p)*t(a2p)*mi;
+F_a2p = SQa2p/QMRes;
+p_valor_a2p = 1 - cdf('F', F_a2p,1, gl_res);
+
+print '---------------------------------',
+      'Contrastes ortogonais ponderados:',
+	  '---------------------------------',,
+      'A,D vs. B,C,E' SQA1[format=8.6]  F_A1[format=12.4]  p_valor_A1[format=8.3],,
+	  '2B+4E vs. 6C ' SQA2p[format=8.6] F_A2p[format=12.4] p_valor_A2p[format=8.3],,,,;
+quit;
+```
+
+:::

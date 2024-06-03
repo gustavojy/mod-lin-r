@@ -1,0 +1,112 @@
+options nodate nocenter ps=1000;
+proc iml;
+reset fuzz;
+* Exemplo 15.2.1 Os pesos líquidos de latas enchidas por cinco máquinas; 
+* de enchimento (filling machines) são apresentados na Tabela 14.2;
+
+y = {11.95,12.00,12.25,12.10,12.18,12.11,12.16,12.15,
+     12.08,12.25,12.30,12.10,12.10,12.04,12.02,12.02};
+
+Trat = {1,1,1,1,2,2,3,3,3,4,4,4,5,5,5,5};
+W = design(Trat); 	* W do modelo de médias de caselas;
+k = ncol(W);		* Número de tratamentos;
+N = nrow(W);		* Número total de repetições;
+print W y[format=10.2];
+
+Jnn = J(N,N,1);
+In = I(N);
+SQTotal = t(y)*(In-Jnn/N)*y;
+gl_total = N-1;
+
+mi = inv(t(W)*W)*t(W)*y;
+SQcompleto = t(mi)*t(W)*y; 		* SQ do modelo completo: yij = mi(i) + eij;
+
+jn = J(N,1,1);
+mir = inv(t(jn)*jn)*t(jn)*y;
+SQreduzido = t(mir)*t(jn)*y; 	* SQ do modelo reduzido: yij = mi + eij;
+
+SQEntre = SQCompleto - SQreduzido;
+gl_entre = k-1;
+QMEntre = SQEntre/gl_entre;
+
+SQRes = t(y)*y - t(mi)*t(W)*y;
+gl_res = N-K;
+QMRes = SQRes/gl_res;
+
+Fcalc = QMEntre/QMRes;
+p_valor = 1 - cdf('F', Fcalc,gl_entre, gl_res);
+
+print '------------------------------',
+      'Exemplo 15.2.1 Quadro de ANOVA',
+      '------------------------------';
+print 'Ho: m1=m2=m3=m4=m5'  gl_entre SQEntre[format=10.5] QMEntre[format=10.5] Fcalc[format=8.4] p_valor[format=8.3],,
+      'Resíduo           '  gl_res   SQRes[format=10.5]   QMRes[format=10.5],,
+      'Total             '  gl_total SQTotal[format=10.5]; 
+
+* Contrastes ortogonais do tipo t(ai)*mi;
+a1 = {3,-2,-2, 3,-2};
+a2 = {0, 1,-2, 0, 1};
+a3 = {1, 0, 0,-1, 0};
+a4 = {0, 1, 0, 0,-1};
+
+SQA1 = t(t(a1)*mi)*inv(t(a1)*inv(t(W)*W)*a1)*t(a1)*mi;
+F_A1 = SQA1/QMRes;
+p_valor_A1 = 1 - cdf('F', F_A1,1, gl_res);
+
+SQa2 = t(t(a2)*mi)*inv(t(a2)*inv(t(W)*W)*a2)*t(a2)*mi;
+F_a2 = SQa2/QMRes;
+p_valor_a2 = 1 - cdf('F', F_a2,1, gl_res);
+
+SQa3 = t(t(a3)*mi)*inv(t(a3)*inv(t(W)*W)*a3)*t(a3)*mi;
+F_a3 = SQa3/QMRes;
+p_valor_a3 = 1 - cdf('F', F_a3,1, gl_res);
+
+SQa4 = t(t(A4)*mi)*inv(t(A4)*inv(t(W)*W)*A4)*t(A4)*mi;
+F_A4 = SQA4/QMRes;
+p_valor_A4 = 1 - cdf('F', F_A4,1, gl_res);
+
+print '-------------------------------------',
+      'Contrastes ortogonais não ponderados:',
+	  '-------------------------------------',,
+      'A,D vs. B,C,E' SQA1[format=10.5] F_A1[format=12.4] p_valor_A1[format=12.3],,
+      'B,E vs. C    ' SQA2[format=10.5] F_A2[format=12.4] p_valor_A2[format=12.3],,
+	  'A vs. D      ' SQA3[format=10.5] F_A3[format=12.4] p_valor_A3[format=12.3],,
+	  'B vs. E      ' SQA4[format=10.5] F_A4[format=12.4] p_valor_A4[format=12.3],,;
+
+SQContrastes = SQA1 + SQA2 + SQA3 + SQA4;
+print '----------------------------------------------------------------',
+      'SQContrastes = SQA1 + SQA2 + SQA3 + SQA4 não é igual a SQEntre: ',,
+       SQContrastes[format=10.5] SQEntre[format=10.5],,
+      'porque os contrastes NÃO SÃO ORTOGONAIS!',
+      '----------------------------------------------------------------',,,;
+A2p = {0, 2, -6, 0, 4};
+SQA2p = t(t(a2p)*mi)*inv(t(a2p)*inv(t(W)*W)*a2p)*t(a2p)*mi;
+F_a2p = SQa2p/QMRes;
+p_valor_a2p = 1 - cdf('F', F_a2p,1, gl_res);
+
+print '---------------------------------',
+      'Contrastes ortogonais ponderados:',
+	  '---------------------------------',,
+      'A,D vs. B,C,E' SQA1[format=8.6]  F_A1[format=12.4]  p_valor_A1[format=8.3],,
+	  '2B+4E vs. 6C ' SQA2p[format=8.6] F_A2p[format=12.4] p_valor_A2p[format=8.3],,,,;
+quit;
+
+/*
+ data Ex15_2_1;
+  input Maquina$ y @@;
+  cards;
+ A 11.95   A 12.00   A 12.25   A 12.10 
+ B 12.18   B 12.11   C 12.16   C 12.15
+ C 12.08   D 12.25   D 12.30   D 12.10
+ E 12.10   E 12.04   E 12.02   E 12.02
+;
+proc glm;
+ class Maquina;
+ model y = Maquina / ss1 ss2 ss3 ss4;
+ contrast 'A,D vs. B,C,E' Maquina 3 -2 -2  3 -2;
+ contrast 'B, E vs. C   ' Maquina 0  1 -2  0  1;
+ contrast 'A vs. D      ' Maquina 1  0  0 -1  0;
+ contrast 'B vs. E      ' Maquina 0  1  0  0 -1;
+* contrast '2B+4E vs. 6C ' Maquina 0  2 -6  0  4;
+run;
+*/
