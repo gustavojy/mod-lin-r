@@ -1485,43 +1485,382 @@ H_0: \mu_{i1} = \mu_{i2} = \mu_{i3} = \mu_{i4} = \mu_{i5}, \quad \text{para } i 
 </div>
 </div>
 <p>Enquanto isso, para os machos, o comportamento do ganho de peso em função do aumento da porcentagem de substituição do farelo de soja por farelo de girassol pode ser bem explicado por um polinômio de 2º grau.</p>
-<p>A seguir, ajustaremos as curvas de regressão de ambos os modelos.</p>
+<p>A seguir, ajustaremos as curvas de regressão de ambos os modelos. Para isso, utilizaremos a função <code><a href="https://rdrr.io/pkg/ExpDes.pt/man/fat2.dic.html">fat2.dic()</a></code> do pacote <code>ExpDes.pt</code>, a fim de obter os coeficientes de regressão estimados.</p>
+<div class="cell">
+<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"ExpDes.pt"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ExpDes.pt</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dados</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  Sexo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  Girassol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">25</span>, <span class="fl">25</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">75</span>, <span class="fl">75</span>, <span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">25</span>, <span class="fl">25</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">75</span>, <span class="fl">75</span>, <span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  Trat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">7</span>, <span class="fl">7</span>, <span class="fl">7</span>, <span class="fl">8</span>, <span class="fl">8</span>, <span class="fl">9</span>, <span class="fl">9</span>, <span class="fl">9</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>  Rep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  GP <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">77.9</span>, <span class="fl">83.2</span>, <span class="fl">83.5</span>, <span class="fl">71.5</span>, <span class="fl">73.5</span>, <span class="fl">70.5</span>, <span class="fl">67.5</span>, <span class="fl">65.0</span>, <span class="fl">71.5</span>, <span class="fl">70.8</span>, <span class="fl">72.5</span>, <span class="fl">89.5</span>, <span class="fl">91.8</span>, <span class="fl">92.9</span>, <span class="fl">86.0</span>, <span class="fl">84.0</span>, <span class="fl">94.5</span>, <span class="fl">96.0</span>, <span class="fl">95.8</span>, <span class="fl">99.5</span>, <span class="fl">98.0</span>, <span class="fl">93.0</span>, <span class="fl">96.0</span>, <span class="fl">90.5</span>, <span class="fl">83.0</span>, <span class="fl">80.0</span>, <span class="fl">78.5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span></span>
+<span>  <span class="va">dados</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ExpDes.pt/man/fat2.dic.html">fat2.dic</a></span><span class="op">(</span><span class="va">Sexo</span>, <span class="va">Girassol</span>, resp <span class="op">=</span> <span class="va">GP</span>, quali <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>------------------------------------------------------------------------
+Legenda:
+FATOR 1:  F1 
+FATOR 2:  F2 
+------------------------------------------------------------------------
+
+
+Quadro da analise de variancia
+------------------------------------------------------------------------
+        GL      SQ QM      Fc    Pr&gt;Fc
+F1       1 1158.91  3 302.001 0.000000
+F2       4   47.63  2   3.103 0.043427
+F1*F2    4 1624.61  5 105.839 0.000000
+Residuo 17   65.24  4                 
+Total   26 2896.40  1                 
+------------------------------------------------------------------------
+CV = 2.34 %
+
+------------------------------------------------------------------------
+Teste de normalidade dos residuos (Shapiro-Wilk)
+valor-p:  0.9783552 
+De acordo com o teste de Shapiro-Wilk a 5% de significancia, os residuos podem ser considerados normais.
+------------------------------------------------------------------------
+
+
+
+Interacao significativa: desdobrando a interacao
+------------------------------------------------------------------------
+
+Desdobrando  F1  dentro de cada nivel de  F2 
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Quadro da analise de variancia
+------------------------------------------------------------------------
+          GL         SQ         QM       Fc  Pr.Fc
+F2         4   47.63486   11.90872   3.1033 0.0434
+F1:F2 0    1   14.42133   14.42133   3.7581 0.0693
+F1:F2 25   1  835.44000  835.44000  217.707      0
+F1:F2 50   1 1056.25000 1056.25000 275.2478      0
+F1:F2 75   1  697.68167  697.68167 181.8086      0
+F1:F2 100  1  178.21500  178.21500   46.441      0
+Residuo   17   65.23667    3.83745                
+Total     26 2896.39630  111.39986                
+------------------------------------------------------------------------
+
+
+
+ F1  dentro do nivel  0  de  F2 
+
+De acordo com o teste F, as medias desse fator sao estatisticamente iguais.
+------------------------------------------------------------------------
+  Niveis   Medias
+1      1 81.53333
+2      2 85.00000
+------------------------------------------------------------------------
+
+
+ F1  dentro do nivel  25  de  F2 
+------------------------------------------------------------------------
+Teste de Tukey
+------------------------------------------------------------------------
+Grupos Tratamentos Medias
+a    2   95.43333 
+ b   1   71.83333 
+------------------------------------------------------------------------
+
+
+ F1  dentro do nivel  50  de  F2 
+------------------------------------------------------------------------
+Teste de Tukey
+------------------------------------------------------------------------
+Grupos Tratamentos Medias
+a    2   98.75 
+ b   1   66.25 
+------------------------------------------------------------------------
+
+
+ F1  dentro do nivel  75  de  F2 
+------------------------------------------------------------------------
+Teste de Tukey
+------------------------------------------------------------------------
+Grupos Tratamentos Medias
+a    2   93.16667 
+ b   1   71.6 
+------------------------------------------------------------------------
+
+
+ F1  dentro do nivel  100  de  F2 
+------------------------------------------------------------------------
+Teste de Tukey
+------------------------------------------------------------------------
+Grupos Tratamentos Medias
+a    1   91.4 
+ b   2   80.5 
+------------------------------------------------------------------------
+
+
+
+Desdobrando  F2  dentro de cada nivel de  F1 
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Quadro da analise de variancia
+------------------------------------------------------------------------
+        GL         SQ         QM       Fc Pr.Fc
+F1       1 1158.91432 1158.91432 302.0011     0
+F2:F1 1  4 1081.49595  270.37399  70.4567     0
+F2:F1 2  4  590.74936  147.68734  38.4858     0
+Residuo 17   65.23667    3.83745               
+Total   26 2896.39630  111.39986               
+------------------------------------------------------------------------
+
+
+
+ F2  dentro do nivel  1  de  F1 
+------------------------------------------------------------------------
+Ajuste de modelos polinomiais de regressao
+------------------------------------------------------------------------
+
+Modelo Linear
+=========================================
+   Estimativa Erro.padrao   tc    valor.p
+-----------------------------------------
+b0  73.3571     0.8864    82.7554    0   
+b1   0.0780     0.0143    5.4522  0.00004
+-----------------------------------------
+
+R2 do modelo linear
+--------
+   1    
+--------
+0.105479
+--------
+
+Analise de variancia do modelo linear
+=======================================================
+                     GL    SQ       QM     Fc   valor.p
+-------------------------------------------------------
+Efeito linear        1  114.0750 114.0750 29.73 0.00004
+Desvios de Regressao 3  967.4209 322.4737 84.03    0   
+Residuos             17 65.2367   3.8374               
+-------------------------------------------------------
+------------------------------------------------------------------------
+
+Modelo quadratico
+==========================================
+   Estimativa Erro.padrao    tc    valor.p
+------------------------------------------
+b0  82.6042     1.0662    77.4781     0   
+b1  -0.7187     0.0530    -13.5586    0   
+b2   0.0080     0.0005    15.6095     0   
+------------------------------------------
+
+R2 do modelo quadratico
+--------
+   1    
+--------
+0.970037
+--------
+
+Analise de variancia do modelo quadratico
+========================================================
+                     GL    SQ       QM      Fc   valor.p
+--------------------------------------------------------
+Efeito linear        1  114.0750 114.0750 29.73  0.00004
+Efeito quadratico    1  935.0164 935.0164 243.66    0   
+Desvios de Regressao 2  32.4046  16.2023   4.22  0.03246
+Residuos             17 65.2367   3.8374                
+--------------------------------------------------------
+------------------------------------------------------------------------
+
+Modelo cubico
+=========================================
+   Estimativa Erro.padrao   tc    valor.p
+-----------------------------------------
+b0  81.5708     1.1245    72.5364    0   
+b1  -0.4224     0.1154    -3.6601 0.0019 
+b2  -0.0003     0.0029    -0.1032 0.9190 
+b3   0.0001     0.00002   2.8892  0.0102 
+-----------------------------------------
+
+R2 do modelo cubico
+--------
+   1    
+--------
+0.999657
+--------
+
+Analise de variancia do modelo cubico
+========================================================
+                     GL    SQ       QM      Fc   valor.p
+--------------------------------------------------------
+Efeito linear        1  114.0750 114.0750 29.73  0.00004
+Efeito quadratico    1  935.0164 935.0164 243.66    0   
+Efeito cubico        1  32.0333  32.0333   8.35  0.01019
+Desvios de Regressao 1   0.3713   0.3713   0.1   0.75955
+Residuos             17 65.2367   3.8374                
+--------------------------------------------------------
+------------------------------------------------------------------------
+
+
+ F2  dentro do nivel  2  de  F1 
+------------------------------------------------------------------------
+Ajuste de modelos polinomiais de regressao
+------------------------------------------------------------------------
+
+Modelo Linear
+=========================================
+   Estimativa Erro.padrao   tc    valor.p
+-----------------------------------------
+b0  94.1030     0.9940    94.6686    0   
+b1  -0.0693     0.0155    -4.4855 0.0003 
+-----------------------------------------
+
+R2 do modelo linear
+--------
+   2    
+--------
+0.130697
+--------
+
+Analise de variancia do modelo linear
+=======================================================
+                     GL    SQ       QM     Fc   valor.p
+-------------------------------------------------------
+Efeito linear        1  77.2089  77.2089  20.12 0.00033
+Desvios de Regressao 3  513.5405 171.1802 44.61    0   
+Residuos             17 65.2367   3.8374               
+-------------------------------------------------------
+------------------------------------------------------------------------
+
+Modelo quadratico
+==========================================
+   Estimativa Erro.padrao    tc    valor.p
+------------------------------------------
+b0  84.9466     1.2709    66.8412     0   
+b1   0.5824     0.0584     9.9650     0   
+b2  -0.0063     0.0005    -11.5632    0   
+------------------------------------------
+
+R2 do modelo quadratico
+--------
+   2    
+--------
+0.999255
+--------
+
+Analise de variancia do modelo quadratico
+========================================================
+                     GL    SQ       QM      Fc   valor.p
+--------------------------------------------------------
+Efeito linear        1  77.2089  77.2089  20.12  0.00033
+Efeito quadratico    1  513.1003 513.1003 133.71    0   
+Desvios de Regressao 2   0.4402   0.2201   0.06  0.94445
+Residuos             17 65.2367   3.8374                
+--------------------------------------------------------
+------------------------------------------------------------------------
+
+Modelo cubico
+=========================================
+   Estimativa Erro.padrao   tc    valor.p
+-----------------------------------------
+b0  84.9390     1.3734    61.8462    0   
+b1   0.5840     0.1250    4.6709  0.0002 
+b2  -0.0063     0.0030    -2.0906 0.0519 
+b3  0.000000    0.00002   0.0146  0.9885 
+-----------------------------------------
+
+R2 do modelo cubico
+--------
+   2    
+--------
+0.999256
+--------
+
+Analise de variancia do modelo cubico
+========================================================
+                     GL    SQ       QM      Fc   valor.p
+--------------------------------------------------------
+Efeito linear        1  77.2089  77.2089  20.12  0.00033
+Efeito quadratico    1  513.1003 513.1003 133.71    0   
+Efeito cubico        1   0.0008   0.0008    0    0.98848
+Desvios de Regressao 1   0.4393   0.4393   0.11  0.73924
+Residuos             17 65.2367   3.8374                
+--------------------------------------------------------
+------------------------------------------------------------------------</code></pre>
+</div>
+</div>
+<p>A seguir, contruiremos os gráficos dos modelos ajustados.</p>
+<div class="cell">
+<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dados</span> <span class="op">&lt;-</span> <span class="va">dados</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Sexo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">Sexo</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Fêmeas</span></span>
+<span><span class="va">dados_f</span> <span class="op">&lt;-</span> <span class="va">dados</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Sexo</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Machos</span></span>
+<span><span class="va">dados_m</span> <span class="op">&lt;-</span> <span class="va">dados</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Sexo</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Gráfico</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dados</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Girassol</span>, y <span class="op">=</span> <span class="va">GP</span>, color <span class="op">=</span> <span class="va">Sexo</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_function.html">stat_function</a></span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">dados_f</span>, </span>
+<span>    fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">Girassol</span><span class="op">)</span> <span class="op">{</span><span class="fl">81.577</span> <span class="op">-</span> <span class="fl">0.425</span><span class="op">*</span><span class="va">Girassol</span> <span class="op">-</span> <span class="fl">0.0003</span><span class="op">*</span><span class="va">Girassol</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">0.00006</span> <span class="op">*</span> <span class="va">Girassol</span><span class="op">^</span><span class="fl">3</span><span class="op">}</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"#F77D7D"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_function.html">stat_function</a></span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">dados_m</span>,</span>
+<span>    fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">Girassol</span><span class="op">)</span> <span class="op">{</span><span class="fl">84.951</span> <span class="op">+</span> <span class="fl">0.5847</span><span class="op">*</span><span class="va">Girassol</span> <span class="op">-</span> <span class="fl">0.0063</span><span class="op">*</span><span class="va">Girassol</span><span class="op">^</span><span class="fl">2</span><span class="op">}</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"#52A7E8"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Ganho de peso"</span>, color <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_discrete.html">scale_color_discrete</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Fêmea"</span>, <span class="st">"Macho"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exemplo5.6_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>proc glm;</span>
-<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a>class trat;</span>
-<span id="cb106-3"><a href="#cb106-3" aria-hidden="true" tabindex="-1"></a>model GP <span class="ot">=</span> trat <span class="sc">/</span> ss3;</span>
-<span id="cb106-4"><a href="#cb106-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb106-5"><a href="#cb106-5" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Sexo'</span> trat <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>;</span>
-<span id="cb106-6"><a href="#cb106-6" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol'</span>  trat <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>,</span>
-<span id="cb106-7"><a href="#cb106-7" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>,</span>
-<span id="cb106-8"><a href="#cb106-8" aria-hidden="true" tabindex="-1"></a>                     trat <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>,</span>
-<span id="cb106-9"><a href="#cb106-9" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>;</span>
-<span id="cb106-10"><a href="#cb106-10" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Interação'</span> trat <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">4</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
-<span id="cb106-11"><a href="#cb106-11" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span> <span class="sc">-</span><span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">3</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
-<span id="cb106-12"><a href="#cb106-12" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
-<span id="cb106-13"><a href="#cb106-13" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>;</span>
-<span id="cb106-14"><a href="#cb106-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb106-15"><a href="#cb106-15" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol=  0: F = M'</span> trat <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-16"><a href="#cb106-16" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 25: F = M'</span> trat <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-17"><a href="#cb106-17" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 50: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-18"><a href="#cb106-18" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 75: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>;</span>
-<span id="cb106-19"><a href="#cb106-19" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol=100: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>;</span>
-<span id="cb106-20"><a href="#cb106-20" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 1'</span> trat <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-21"><a href="#cb106-21" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 2'</span> trat  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-22"><a href="#cb106-22" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 3'</span> trat <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-23"><a href="#cb106-23" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 4'</span> trat  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
-<span id="cb106-24"><a href="#cb106-24" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 1'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>;</span>
-<span id="cb106-25"><a href="#cb106-25" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 2'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>;</span>
-<span id="cb106-26"><a href="#cb106-26" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 3'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>;</span>
-<span id="cb106-27"><a href="#cb106-27" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 4'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>;</span>
-<span id="cb106-28"><a href="#cb106-28" aria-hidden="true" tabindex="-1"></a>run;</span>
-<span id="cb106-29"><a href="#cb106-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb106-30"><a href="#cb106-30" aria-hidden="true" tabindex="-1"></a>proc glm;</span>
-<span id="cb106-31"><a href="#cb106-31" aria-hidden="true" tabindex="-1"></a>class Sexo Girassol;</span>
-<span id="cb106-32"><a href="#cb106-32" aria-hidden="true" tabindex="-1"></a>model GP <span class="ot">=</span> Sexo Girassol  <span class="sc">/</span> ss1 ss2 ss3;</span>
-<span id="cb106-33"><a href="#cb106-33" aria-hidden="true" tabindex="-1"></a>run;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>proc glm;</span>
+<span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a>class trat;</span>
+<span id="cb110-3"><a href="#cb110-3" aria-hidden="true" tabindex="-1"></a>model GP <span class="ot">=</span> trat <span class="sc">/</span> ss3;</span>
+<span id="cb110-4"><a href="#cb110-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb110-5"><a href="#cb110-5" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Sexo'</span> trat <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>;</span>
+<span id="cb110-6"><a href="#cb110-6" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol'</span>  trat <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>,</span>
+<span id="cb110-7"><a href="#cb110-7" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>,</span>
+<span id="cb110-8"><a href="#cb110-8" aria-hidden="true" tabindex="-1"></a>                     trat <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>,</span>
+<span id="cb110-9"><a href="#cb110-9" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>;</span>
+<span id="cb110-10"><a href="#cb110-10" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Interação'</span> trat <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">4</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb110-11"><a href="#cb110-11" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span> <span class="sc">-</span><span class="dv">3</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">3</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb110-12"><a href="#cb110-12" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb110-13"><a href="#cb110-13" aria-hidden="true" tabindex="-1"></a>                     trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>;</span>
+<span id="cb110-14"><a href="#cb110-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb110-15"><a href="#cb110-15" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol=  0: F = M'</span> trat <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-16"><a href="#cb110-16" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 25: F = M'</span> trat <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-17"><a href="#cb110-17" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 50: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-18"><a href="#cb110-18" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol= 75: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>;</span>
+<span id="cb110-19"><a href="#cb110-19" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Girassol=100: F = M'</span> trat <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>;</span>
+<span id="cb110-20"><a href="#cb110-20" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 1'</span> trat <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-21"><a href="#cb110-21" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 2'</span> trat  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-22"><a href="#cb110-22" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 3'</span> trat <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-23"><a href="#cb110-23" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Machos: Girassol grau 4'</span> trat  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>;</span>
+<span id="cb110-24"><a href="#cb110-24" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 1'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>;</span>
+<span id="cb110-25"><a href="#cb110-25" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 2'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>;</span>
+<span id="cb110-26"><a href="#cb110-26" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 3'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">2</span>  <span class="dv">1</span>;</span>
+<span id="cb110-27"><a href="#cb110-27" aria-hidden="true" tabindex="-1"></a>contrast <span class="st">'Fêmeas: Girassol grau 4'</span> trat  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">6</span> <span class="sc">-</span><span class="dv">4</span>  <span class="dv">1</span>;</span>
+<span id="cb110-28"><a href="#cb110-28" aria-hidden="true" tabindex="-1"></a>run;</span>
+<span id="cb110-29"><a href="#cb110-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb110-30"><a href="#cb110-30" aria-hidden="true" tabindex="-1"></a>proc glm;</span>
+<span id="cb110-31"><a href="#cb110-31" aria-hidden="true" tabindex="-1"></a>class Sexo Girassol;</span>
+<span id="cb110-32"><a href="#cb110-32" aria-hidden="true" tabindex="-1"></a>model GP <span class="ot">=</span> Sexo Girassol  <span class="sc">/</span> ss1 ss2 ss3;</span>
+<span id="cb110-33"><a href="#cb110-33" aria-hidden="true" tabindex="-1"></a>run;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>

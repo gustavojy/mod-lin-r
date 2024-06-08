@@ -8,6 +8,7 @@
 options(scipen = 999999, knitr.kable.NA = '')
 
 library(MASS)
+library(ExpDes.pt)
 ```
 
 Agora, trataremos da ANOVA com **dois fatores** em conjuntos de dados **desbalanceados**. O modelo desbalanceado com dois fatores é dado por:
@@ -859,7 +860,7 @@ data.frame(
 
 Enquanto isso, para os machos, o comportamento do ganho de peso em função do aumento da porcentagem de substituição do farelo de soja por farelo de girassol pode ser bem explicado por um polinômio de 2º grau.
 
-A seguir, ajustaremos as curvas de regressão de ambos os modelos.
+A seguir, ajustaremos as curvas de regressão de ambos os modelos. Para isso, utilizaremos a função `fat2.dic()` do pacote `ExpDes.pt`, a fim de obter os coeficientes de regressão estimados.
 
 ```{r}
 #| eval: false
@@ -869,36 +870,54 @@ library(ExpDes.pt)
 ```
 
 ```{r}
-dados_girassol <- readr::read_delim("C:/Users/Gustavo Jun/Desktop/dados_girassol.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+#| message: false
+
+dados <- data.frame(
+  Sexo = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+  Girassol = c(0, 0, 0, 25, 25, 25, 50, 50, 75, 75, 75, 100, 100, 100, 0, 0, 25, 25, 25, 50, 50, 75, 75, 75, 100, 100, 100),
+  Trat = c(1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9, 10, 10, 10),
+  Rep = c(1, 2, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3),
+  GP = c(77.9, 83.2, 83.5, 71.5, 73.5, 70.5, 67.5, 65.0, 71.5, 70.8, 72.5, 89.5, 91.8, 92.9, 86.0, 84.0, 94.5, 96.0, 95.8, 99.5, 98.0, 93.0, 96.0, 90.5, 83.0, 80.0, 78.5)
+)
 
 with(
-  dados_girassol,
+  dados,
   fat2.dic(Sexo, Girassol, resp = GP, quali = c(TRUE, FALSE))
   )
 ```
 
+A seguir, contruiremos os gráficos dos modelos ajustados.
+
 ```{r}
+dados <- dados |> dplyr::mutate(Sexo = as.factor(Sexo))
+
+## Fêmeas
+dados_f <- dados |> dplyr::filter(Sexo == 1)
+
+## Machos
+dados_m <- dados |> dplyr::filter(Sexo == 2)
+
+## Gráfico
 library(ggplot2)
 
-f <- dados_girassol |> 
-  dplyr::filter(Sexo == 1) |> 
-  ggplot(aes(x = Girassol, y = GP)) + 
-  geom_point() +
-  stat_function(fun = function(Girassol) {81.577 - 0.425*Girassol - 0.0003*Girassol^2 + 0.00006 * Girassol^3})
-
-m <- dados_girassol |> 
-  dplyr::filter(Sexo == 2) |> 
-  ggplot(aes(x = Girassol, y = GP)) + 
-  geom_point() +
-  stat_function(fun = function(Girassol) {84.951 + 0.5847*Girassol - 0.0063*Girassol^2})
-
-library(patchwork)
-
-f + m
+dados |> 
+  ggplot() + 
+  geom_point(aes(x = Girassol, y = GP, color = Sexo)) +
+  stat_function(
+    data = dados_f, 
+    fun = function(Girassol) {81.577 - 0.425*Girassol - 0.0003*Girassol^2 + 0.00006 * Girassol^3},
+    color = "#F77D7D", linewidth = 1, linetype = 2
+  ) +
+  stat_function(
+    data = dados_m,
+    fun = function(Girassol) {84.951 + 0.5847*Girassol - 0.0063*Girassol^2},
+    color = "#52A7E8", linewidth = 1, linetype = 2
+  ) +
+  theme_minimal() +
+  labs(x = NULL, y = "Ganho de peso", color = NULL) +
+  scale_color_discrete(labels = c("Fêmea", "Macho")) +
+  theme(legend.position = "bottom")
 ```
-
-
 
 ### SAS
 

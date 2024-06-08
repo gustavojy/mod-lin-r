@@ -2321,10 +2321,48 @@ p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
 
 # Regressões:
 
+install.packages("ExpDes.pt")
+library(ExpDes.pt)
 
+dados <- data.frame(
+  Sexo = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+  Girassol = c(0, 0, 0, 25, 25, 25, 50, 50, 75, 75, 75, 100, 100, 100, 0, 0, 25, 25, 25, 50, 50, 75, 75, 75, 100, 100, 100),
+  Trat = c(1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9, 10, 10, 10),
+  Rep = c(1, 2, 3, 1, 2, 3, 1, 3, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3),
+  GP = c(77.9, 83.2, 83.5, 71.5, 73.5, 70.5, 67.5, 65.0, 71.5, 70.8, 72.5, 89.5, 91.8, 92.9, 86.0, 84.0, 94.5, 96.0, 95.8, 99.5, 98.0, 93.0, 96.0, 90.5, 83.0, 80.0, 78.5)
+)
 
+with(
+  dados,
+  fat2.dic(Sexo, Girassol, resp = GP, quali = c(TRUE, FALSE))
+)
 
+dados <- dados |> dplyr::mutate(Sexo = as.factor(Sexo))
 
+## Fêmeas
+dados_f <- dados |> dplyr::filter(Sexo == 1)
 
+## Machos
+dados_m <- dados |> dplyr::filter(Sexo == 2)
 
+## Gráfico
+install.packages("ggplot2")
+library(ggplot2)
 
+dados |> 
+  ggplot() + 
+  geom_point(aes(x = Girassol, y = GP, color = Sexo)) +
+  stat_function(
+    data = dados_f, 
+    fun = function(Girassol) {81.577 - 0.425*Girassol - 0.0003*Girassol^2 + 0.00006 * Girassol^3},
+    color = "#F77D7D", linewidth = 1, linetype = 2
+  ) +
+  stat_function(
+    data = dados_m,
+    fun = function(Girassol) {84.951 + 0.5847*Girassol - 0.0063*Girassol^2},
+    color = "#52A7E8", linewidth = 1, linetype = 2
+  ) +
+  theme_minimal() +
+  labs(x = NULL, y = "Ganho de peso", color = NULL) +
+  scale_color_discrete(labels = c("Fêmea", "Macho")) +
+  theme(legend.position = "bottom")
