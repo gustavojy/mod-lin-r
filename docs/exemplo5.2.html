@@ -260,6 +260,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">ANOVA balanceada com dois fatores</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA desbalanceada com um fator</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exemplo5.6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">ANOVA desbalanceada com dois fatores</span></span></a>
+  </div>
+</li>
       </ul>
 </li>
     </ul>
@@ -353,7 +365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p><span class="math inline">\(cov(\mathbf{\boldsymbol{\epsilon}}) = 0\)</span>;</p></li>
 <li><p><span class="math inline">\(\boldsymbol{\epsilon} \sim N(\mathbf{0}, \sigma^2 \mathbf{I})\)</span>.</p></li>
 </ul>
-<p>Novamente, utilizaremos a função <code><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv()</a></code> do pacote <code>MASS</code>, que calcula a inversa generalizada de uma matriz.</p>
+<p>Novamente, utilizaremos a função <code><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv()</a></code> do pacote <code>MASS</code>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"MASS"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/">MASS</a></span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -414,7 +426,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [21,]    1    0    0    1</code></pre>
 </div>
 </div>
-<p>No objeto <code>kn</code>, guardaremos o número de vlaores observados; no <code>p</code>, o número de variáveis; e no <code>k</code>, o posto de <span class="math inline">\(\mathbf{X}\)</span>.</p>
+<p>No objeto <code>kn</code>, guardaremos o número de valores observados; no <code>p</code>, o número de variáveis; e no <code>k</code>, o posto de <span class="math inline">\(\mathbf{X}\)</span>.</p>
 <div class="cell">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">kn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="va">kn</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -431,10 +443,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3</code></pre>
 </div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">-</span> <span class="va">k</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
 </div>
+</div>
+<p>Note que a diferença entre <code>p - k</code> resulta no déficit de rank. Como o resultado é 1, <span class="math inline">\(\mathbf{X}\)</span> é uma matriz de posto incompleto.</p>
 <p>Calculando <span class="math inline">\(\mathbf{X'X}\)</span> e <span class="math inline">\(\mathbf{X'y}\)</span>, temos:</p>
 <div class="cell">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">XLX</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">XLX</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span></span>
 <span><span class="va">XLX</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
@@ -443,7 +460,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [3,]    7    0    7    0
 [4,]    7    0    0    7</code></pre>
 </div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">XLy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">XLy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
 <span><span class="va">XLy</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       [,1]
@@ -453,12 +470,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [4,] 164.71</code></pre>
 </div>
 </div>
-<p>Com os resultados anteriores, calcularemos duas estimativas de <span class="math inline">\(\boldsymbol{\beta}\)</span>:</p>
+<p>Com os resultados anteriores, calcularemos duas estimativas de <span class="math inline">\(\boldsymbol{\beta}\)</span> utilizando duas inversas generalizadas distintas:</p>
+<p><span class="math display">\[\boldsymbol{\hat\beta} = \mathbf{(X'X)^- X' y}\]</span></p>
 <ul>
-<li>Vetor com as estimativas a partir da inversa generalizada:</li>
+<li>Inversa generalizada de Moore-Penrose:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">XLX</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">XLy</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">XLX</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">XLy</span></span>
 <span><span class="va">Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
@@ -469,10 +487,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <ul>
-<li>Vetor com as estimativas a partir da inversa generalizada utilizando a submatriz diagonal:</li>
+<li>Inversa generalizada simples (Searle):</li>
 </ul>
 <div class="cell">
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">igXLX</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">7</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">XLX</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]   21    7    7    7
+[2,]    7    7    0    0
+[3,]    7    0    7    0
+[4,]    7    0    0    7</code></pre>
+</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">igXLX</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">7</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span>
 <span>    <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span>
 <span>    <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>,</span>
@@ -487,7 +513,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [3,]   0    0  1/7    0 
 [4,]   0    0    0  1/7 </code></pre>
 </div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta2</span> <span class="op">&lt;-</span> <span class="va">igXLX</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">XLy</span></span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Beta2</span> <span class="op">&lt;-</span> <span class="va">igXLX</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">XLy</span></span>
 <span><span class="va">Beta2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -503,18 +529,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="math inline">\(\beta = \alpha_1 - \alpha_2\)</span>:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">L1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  0  1 -1  0</code></pre>
 </div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">L1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      [,1]
 [1,] -2.16</code></pre>
 </div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1Beta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta2</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L1Beta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta2</span></span>
 <span><span class="va">L1Beta2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      [,1]
@@ -526,18 +552,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="math inline">\(\beta = \alpha_1 + \alpha_2 + \alpha_3\)</span>:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">L2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0 1 1 1</code></pre>
 </div>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">L2Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 14.99821</code></pre>
 </div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2Beta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta2</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">L2Beta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">L2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta2</span></span>
 <span><span class="va">L2Beta2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -548,51 +574,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>options nodate nocenter ps<span class="ot">=</span><span class="dv">1000</span>;</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>proc iml;</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>reset print;</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>reset fuzz;</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> {<span class="fl">14.29</span>,<span class="fl">19.10</span>,<span class="fl">19.09</span>,<span class="fl">16.25</span>,<span class="fl">15.09</span>,<span class="fl">16.61</span>,<span class="fl">19.63</span>,</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>     <span class="fl">20.06</span>,<span class="fl">20.64</span>,<span class="fl">18.00</span>,<span class="fl">19.56</span>,<span class="fl">19.47</span>,<span class="fl">19.07</span>,<span class="fl">18.38</span>,</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>     <span class="fl">20.04</span>,<span class="fl">26.23</span>,<span class="fl">22.74</span>,<span class="fl">24.04</span>,<span class="fl">23.37</span>,<span class="fl">25.02</span>,<span class="fl">23.27</span>};</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> {<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>};</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>print X[format<span class="ot">=</span><span class="fl">5.0</span>] y[format<span class="ot">=</span><span class="fl">8.2</span>];</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>kn <span class="ot">=</span> <span class="fu">nrow</span>(y); </span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">ncol</span>(X); </span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(X<span class="sc">*</span><span class="fu">ginv</span>(X))); <span class="sc">*</span> Calcula o posto de XlinhaX;</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>print <span class="st">'rank(X) ='</span> k;</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>XLX <span class="ot">=</span> <span class="fu">t</span>(X)<span class="sc">*</span>X;</span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>XLy <span class="ot">=</span> <span class="fu">t</span>(X)<span class="sc">*</span>y;</span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Sistema de equações normais:'</span> XLX XLy;</span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>Beta <span class="ot">=</span> <span class="fu">ginv</span>(XLX)<span class="sc">*</span>XLy;   <span class="sc">*</span> Usando inversa generalizada de Moore<span class="sc">-</span>Penrose;</span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>igXLX <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span><span class="dv">7</span>)<span class="sc">*</span>{<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>,</span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>, </span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>, </span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>}; </span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>Beta2 <span class="ot">=</span> igXLX<span class="sc">*</span>XLy;</span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Duas soluções:'</span> Beta[format<span class="ot">=</span><span class="fl">12.4</span>] Beta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>L <span class="ot">=</span> {<span class="dv">0</span>, <span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>}; <span class="sc">*</span> Lambda da função alfa1<span class="sc">-</span><span class="fu">alfa2</span> (estimável<span class="sc">!</span>);</span>
-<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>LBeta <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta;</span>
-<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>LBeta2 <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta2;</span>
-<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Função estimável: alfa1-alfa2:'</span>,,LBeta[format<span class="ot">=</span><span class="fl">12.4</span>] LBeta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span>
-<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>L <span class="ot">=</span> {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>}; <span class="sc">*</span> Lambda da função alfa1<span class="sc">+</span>alfa2<span class="sc">+</span><span class="fu">alfa3</span> (NÃO estimável<span class="sc">!</span>);</span>
-<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a>LBeta <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta;</span>
-<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a>LBeta2 <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta2;</span>
-<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Função NÃO estimável: alfa1+alfa2+alfa3:'</span>,,LBeta[format<span class="ot">=</span><span class="fl">12.4</span>] LBeta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>options nodate nocenter ps<span class="ot">=</span><span class="dv">1000</span>;</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>proc iml;</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="sc">*</span>reset print;</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>reset fuzz;</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> {<span class="fl">14.29</span>,<span class="fl">19.10</span>,<span class="fl">19.09</span>,<span class="fl">16.25</span>,<span class="fl">15.09</span>,<span class="fl">16.61</span>,<span class="fl">19.63</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>     <span class="fl">20.06</span>,<span class="fl">20.64</span>,<span class="fl">18.00</span>,<span class="fl">19.56</span>,<span class="fl">19.47</span>,<span class="fl">19.07</span>,<span class="fl">18.38</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>     <span class="fl">20.04</span>,<span class="fl">26.23</span>,<span class="fl">22.74</span>,<span class="fl">24.04</span>,<span class="fl">23.37</span>,<span class="fl">25.02</span>,<span class="fl">23.27</span>};</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> {<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>,</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>,<span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>};</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>print X[format<span class="ot">=</span><span class="fl">5.0</span>] y[format<span class="ot">=</span><span class="fl">8.2</span>];</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>kn <span class="ot">=</span> <span class="fu">nrow</span>(y); </span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">ncol</span>(X); </span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(X<span class="sc">*</span><span class="fu">ginv</span>(X))); <span class="sc">*</span> Calcula o posto de XlinhaX;</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>print <span class="st">'rank(X) ='</span> k;</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>XLX <span class="ot">=</span> <span class="fu">t</span>(X)<span class="sc">*</span>X;</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>XLy <span class="ot">=</span> <span class="fu">t</span>(X)<span class="sc">*</span>y;</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Sistema de equações normais:'</span> XLX XLy;</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>Beta <span class="ot">=</span> <span class="fu">ginv</span>(XLX)<span class="sc">*</span>XLy;   <span class="sc">*</span> Usando inversa generalizada de Moore<span class="sc">-</span>Penrose;</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>igXLX <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span><span class="dv">7</span>)<span class="sc">*</span>{<span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span>,</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span>, </span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span>, </span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>               <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span>}; </span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>Beta2 <span class="ot">=</span> igXLX<span class="sc">*</span>XLy;</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Duas soluções:'</span> Beta[format<span class="ot">=</span><span class="fl">12.4</span>] Beta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>L <span class="ot">=</span> {<span class="dv">0</span>, <span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>}; <span class="sc">*</span> Lambda da função alfa1<span class="sc">-</span><span class="fu">alfa2</span> (estimável<span class="sc">!</span>);</span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>LBeta <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta;</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>LBeta2 <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta2;</span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Função estimável: alfa1-alfa2:'</span>,,LBeta[format<span class="ot">=</span><span class="fl">12.4</span>] LBeta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>L <span class="ot">=</span> {<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>}; <span class="sc">*</span> Lambda da função alfa1<span class="sc">+</span>alfa2<span class="sc">+</span><span class="fu">alfa3</span> (NÃO estimável<span class="sc">!</span>);</span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a>LBeta <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta;</span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a>LBeta2 <span class="ot">=</span> <span class="fu">t</span>(L)<span class="sc">*</span>Beta2;</span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Função NÃO estimável: alfa1+alfa2+alfa3:'</span>,,LBeta[format<span class="ot">=</span><span class="fl">12.4</span>] LBeta2[format<span class="ot">=</span><span class="fl">12.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
 </div>
 </section><section id="teste-de-hipótese" class="level2" data-number="12.2"><h2 data-number="12.2" class="anchored" data-anchor-id="teste-de-hipótese">
 <span class="header-section-number">12.2</span> Teste de hipótese</h2>
-<p>A seguir, testaremos a seguinte hipótese:</p>
+<p>A seguir, testaremos a seguinte hipótese, seguindo o <strong>modelo reparametrizado de médias de caselas</strong>, <span class="math inline">\(y_{ij} = \mu_{i} + \epsilon_{ij}\)</span>, em que <span class="math inline">\(\mu_i = \mu + \alpha_i\)</span>:</p>
 <p><span class="math display">\[
 \begin{align}
 H_0&amp;: \mu_1 = \mu_2 = \mu_3 \\
@@ -617,7 +643,7 @@ H_a&amp;: \text{Pelo menos dois tratamentos diferem entre si}
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">In</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">kn</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">In</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">kn</span><span class="op">)</span></span>
 <span><span class="va">Jn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="va">kn</span>, ncol <span class="op">=</span> <span class="va">kn</span><span class="op">)</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>A soma de quadrados total (<code>SQTotal</code>) é dada por:</p>
@@ -626,7 +652,7 @@ SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
 \]</span></p>
 <p>E seus graus de liberdade, pelo traço do produto de sua matriz núcleo pela inversa generalizada.</p>
 <div class="cell">
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Total</span></span>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Total</span></span>
 <span><span class="va">Tot</span> <span class="op">&lt;-</span> <span class="va">In</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">kn</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jn</span></span>
 <span></span>
 <span><span class="va">SQTotal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Tot</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
@@ -635,7 +661,7 @@ SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
 <pre><code>         [,1]
 [1,] 202.3126</code></pre>
 </div>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_total</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">Tot</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">Tot</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_total</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">Tot</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">Tot</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gl_total</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 20</code></pre>
@@ -646,7 +672,7 @@ SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
 SQ(\alpha \mid \mu) = \mathbf{y'} \left[\mathbf{X(X'X)^-X'} - \frac{1}n \mathbf{J}\right] \mathbf{y}
 \]</span></p>
 <div class="cell">
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tratamentos</span></span>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Tratamentos</span></span>
 <span><span class="va">A</span> <span class="op">&lt;-</span> <span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="va">kn</span><span class="op">)</span> <span class="op">*</span> <span class="va">Jn</span></span>
 <span></span>
 <span><span class="va">SQTrat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">A</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
@@ -655,12 +681,12 @@ SQ(\alpha \mid \mu) = \mathbf{y'} \left[\mathbf{X(X'X)^-X'} - \frac{1}n \mathbf{
 <pre><code>         [,1]
 [1,] 147.3456</code></pre>
 </div>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_trat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">A</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_trat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">A</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gl_trat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2</code></pre>
 </div>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMTrat</span> <span class="op">&lt;-</span> <span class="va">SQTrat</span> <span class="op">/</span> <span class="va">gl_trat</span></span>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMTrat</span> <span class="op">&lt;-</span> <span class="va">SQTrat</span> <span class="op">/</span> <span class="va">gl_trat</span></span>
 <span><span class="va">QMTrat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        [,1]
@@ -672,7 +698,7 @@ SQ(\alpha \mid \mu) = \mathbf{y'} \left[\mathbf{X(X'X)^-X'} - \frac{1}n \mathbf{
 SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 \]</span></p>
 <div class="cell">
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resíduo</span></span>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Resíduo</span></span>
 <span><span class="va">B</span> <span class="op">&lt;-</span> <span class="va">In</span> <span class="op">-</span> <span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">SQRes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">B</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">y</span></span>
@@ -681,12 +707,12 @@ SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 <pre><code>         [,1]
 [1,] 54.96697</code></pre>
 </div>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">B</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">B</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gl_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">B</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="va">B</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gl_res</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 18</code></pre>
 </div>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMRes</span> <span class="op">&lt;-</span> <span class="va">SQRes</span> <span class="op">/</span> <span class="va">gl_res</span></span>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMRes</span> <span class="op">&lt;-</span> <span class="va">SQRes</span> <span class="op">/</span> <span class="va">gl_res</span></span>
 <span><span class="va">QMRes</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
@@ -695,18 +721,18 @@ SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 </div>
 <p>Com os quadrados médios de tratamento (<code>QMTrat</code>) e dos resíduos (<code>QMRes</code>), calculamos a estatística F, bem como o p-valor.</p>
 <div class="cell">
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Fcalc</span> <span class="op">&lt;-</span> <span class="va">QMTrat</span> <span class="op">/</span> <span class="va">QMRes</span></span>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">Fcalc</span> <span class="op">&lt;-</span> <span class="va">QMTrat</span> <span class="op">/</span> <span class="va">QMRes</span></span>
 <span><span class="va">Fcalc</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 24.12559</code></pre>
 </div>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ftab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">qf</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="va">gl_trat</span>, <span class="va">gl_res</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ftab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">qf</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="va">gl_trat</span>, <span class="va">gl_res</span><span class="op">)</span></span>
 <span><span class="va">ftab</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3.554557</code></pre>
 </div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valor</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">Fcalc</span>, <span class="va">gl_trat</span>, <span class="va">gl_res</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valor</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">Fcalc</span>, <span class="va">gl_trat</span>, <span class="va">gl_res</span><span class="op">)</span></span>
 <span><span class="va">p_valor</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               [,1]
@@ -717,7 +743,7 @@ SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<caption>ANOVA para os dados de ácido ascórbico</caption>
+<caption>ANOVA para os dados de ácido ascórbico. H0: mi1 = mi2 = mi3</caption>
 <thead><tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">FV</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">gl</th>
@@ -763,27 +789,27 @@ SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">=</span> <span class="fu">I</span>(kn)<span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>kn)<span class="sc">*</span><span class="fu">J</span>(kn,kn,<span class="dv">1</span>);    <span class="sc">*</span> Matriz núcleo;</span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>SQTotal <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>T<span class="sc">*</span>y;             <span class="sc">*</span> Calcula SQTotal corrigida pela média;</span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>gl_total <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(T<span class="sc">*</span><span class="fu">ginv</span>(T))); </span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>A <span class="ot">=</span> X<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(X) <span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>kn)<span class="sc">*</span><span class="fu">J</span>(kn,kn,<span class="dv">1</span>);     <span class="sc">*</span> Matriz núcleo;</span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>SQTrat <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>A<span class="sc">*</span>y;                              <span class="sc">*</span> Calcula SQTrat;</span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>gl_trat <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(A<span class="sc">*</span><span class="fu">ginv</span>(A)));</span>
-<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>QMTrat <span class="ot">=</span> SQTrat<span class="sc">/</span>gl_trat;</span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>B <span class="ot">=</span> <span class="fu">I</span>(kn) <span class="sc">-</span> X<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(X);    <span class="sc">*</span> Matriz núcleo;</span>
-<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>SQRes <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>B<span class="sc">*</span>y;                   <span class="sc">*</span> Calcula SQResiduo;</span>
-<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>gl_res <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(B<span class="sc">*</span><span class="fu">ginv</span>(B)));</span>
-<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>QMRes <span class="ot">=</span> SQRes<span class="sc">/</span>gl_res;</span>
-<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>Fcalc <span class="ot">=</span> QMTrat<span class="sc">/</span>QMRes;</span>
-<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>p_valor <span class="ot">=</span> <span class="dv">1</span><span class="sc">-</span><span class="fu">cdf</span>(<span class="st">'F'</span>,Fcalc,gl_trat,gl_Res);</span>
-<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>print <span class="st">'TABELA 12.3 - ANOVA para os dados de ácido ascórbico da Tabela 13.2'</span>,; </span>
-<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Método '</span> gl_trat  SQTrat[format<span class="ot">=</span><span class="fl">12.4</span>] QMTrat[format<span class="ot">=</span><span class="fl">12.4</span>] Fcalc[format<span class="ot">=</span><span class="fl">10.4</span>] p_valor[format<span class="ot">=</span><span class="fl">12.4</span>],,</span>
-<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Resíduo'</span> gl_res   SQRes[format<span class="ot">=</span><span class="fl">12.4</span>]  QMRes[format<span class="ot">=</span><span class="fl">12.4</span>],,</span>
-<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Total  '</span> gl_total SQTotal[format<span class="ot">=</span><span class="fl">12.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">=</span> <span class="fu">I</span>(kn)<span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>kn)<span class="sc">*</span><span class="fu">J</span>(kn,kn,<span class="dv">1</span>);    <span class="sc">*</span> Matriz núcleo;</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>SQTotal <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>T<span class="sc">*</span>y;             <span class="sc">*</span> Calcula SQTotal corrigida pela média;</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>gl_total <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(T<span class="sc">*</span><span class="fu">ginv</span>(T))); </span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>A <span class="ot">=</span> X<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(X) <span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span>kn)<span class="sc">*</span><span class="fu">J</span>(kn,kn,<span class="dv">1</span>);     <span class="sc">*</span> Matriz núcleo;</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>SQTrat <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>A<span class="sc">*</span>y;                              <span class="sc">*</span> Calcula SQTrat;</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>gl_trat <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(A<span class="sc">*</span><span class="fu">ginv</span>(A)));</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>QMTrat <span class="ot">=</span> SQTrat<span class="sc">/</span>gl_trat;</span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>B <span class="ot">=</span> <span class="fu">I</span>(kn) <span class="sc">-</span> X<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(X);    <span class="sc">*</span> Matriz núcleo;</span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>SQRes <span class="ot">=</span> <span class="fu">t</span>(y)<span class="sc">*</span>B<span class="sc">*</span>y;                   <span class="sc">*</span> Calcula SQResiduo;</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>gl_res <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">trace</span>(B<span class="sc">*</span><span class="fu">ginv</span>(B)));</span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>QMRes <span class="ot">=</span> SQRes<span class="sc">/</span>gl_res;</span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a>Fcalc <span class="ot">=</span> QMTrat<span class="sc">/</span>QMRes;</span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>p_valor <span class="ot">=</span> <span class="dv">1</span><span class="sc">-</span><span class="fu">cdf</span>(<span class="st">'F'</span>,Fcalc,gl_trat,gl_Res);</span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>print <span class="st">'TABELA 12.3 - ANOVA para os dados de ácido ascórbico da Tabela 13.2'</span>,; </span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Método '</span> gl_trat  SQTrat[format<span class="ot">=</span><span class="fl">12.4</span>] QMTrat[format<span class="ot">=</span><span class="fl">12.4</span>] Fcalc[format<span class="ot">=</span><span class="fl">10.4</span>] p_valor[format<span class="ot">=</span><span class="fl">12.4</span>],,</span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Resíduo'</span> gl_res   SQRes[format<span class="ot">=</span><span class="fl">12.4</span>]  QMRes[format<span class="ot">=</span><span class="fl">12.4</span>],,</span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Total  '</span> gl_total SQTotal[format<span class="ot">=</span><span class="fl">12.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -794,8 +820,8 @@ SQRes = \mathbf{y'} \left[\mathbf{I} - \mathbf{X(X'X)^-X'}\right] \mathbf{y}
 <p>Considerando os <strong>constrastes ortogonais</strong> <span class="math inline">\(2\mu_1 - \mu_2 - \mu_3\)</span> e <span class="math inline">\(\mu_2 - \mu_3\)</span>, podemos representá-los da seguinte maneira:</p>
 <p><span class="math display">\[
 \begin{align}
-2\mu_1 - \mu_2 - \mu_3 &amp;= 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
-\mu_2 - \mu_3 &amp;= \alpha_2 - \alpha_3 = [0,0,1,-1]\boldsymbol{\beta} = \mathbf{c'_2}\boldsymbol{\beta}
+H_{01} &amp;:2\mu_1 - \mu_2 - \mu_3 = 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
+H_{02} &amp;:\mu_2 - \mu_3 = \alpha_2 - \alpha_3 = [0,0,1,-1]\boldsymbol{\beta} = \mathbf{c'_2}\boldsymbol{\beta}
 \end{align}
 \]</span></p>
 <p>As hipóteses <span class="math inline">\(H_{01}: \mathbf{c'_1}\boldsymbol{\beta} = 0\)</span> e <span class="math inline">\(H_{02}: \mathbf{c'_2}\boldsymbol{\beta} = 0\)</span> comparam a média do primeiro tratamento com a dos outros dois e a média do segundo tratamento com a do terceiro, respectivamente.</p>
@@ -813,82 +839,93 @@ H_{02} &amp;: \mathbf{c'_2}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_2 = \mu_3
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell">
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">C1Beta</span> <span class="op">&lt;-</span> <span class="va">C1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">C1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] -8.538571</code></pre>
 </div>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">C2Beta</span> <span class="op">&lt;-</span> <span class="va">C2</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">C2Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] -4.218571</code></pre>
 </div>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Partição da SQTrat</span></span>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Partição da SQTrat</span></span>
 <span><span class="va">SQC1Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C1Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C1Beta</span><span class="op">)</span></span>
 <span><span class="va">SQC1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        [,1]
 [1,] 85.0584</code></pre>
 </div>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQC2Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C2Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C2Beta</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQC2Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C2Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C2Beta</span><span class="op">)</span></span>
 <span><span class="va">SQC2Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 62.28721</code></pre>
 </div>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SomaSQ</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">+</span> <span class="va">SQC2Beta</span></span>
-<span><span class="va">SomaSQ</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SomaSQ</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">+</span> <span class="va">SQC2Beta</span></span>
+<span></span>
+<span><span class="va">SQTrat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 147.3456</code></pre>
 </div>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTrat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         [,1]
-[1,] 147.3456</code></pre>
 </div>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># QM</span></span>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Soma das SQ de contrastes ortogonais = 147.3456 
+ SQTrat = 147.3456</code></pre>
+</div>
+</div>
+<p>Aqui, note que a soma das somas de quadrados dos contrastes (<code>SomaSQ</code>) são iguais a soma de quadrados de tratamentos (<code>SQTrat</code>).</p>
+<div class="cell">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># QM</span></span>
 <span><span class="va">QMC1Beta</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">/</span> <span class="fl">1</span></span>
 <span><span class="va">QMC1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        [,1]
 [1,] 85.0584</code></pre>
 </div>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMC2Beta</span> <span class="op">&lt;-</span> <span class="va">SQC2Beta</span> <span class="op">/</span> <span class="fl">1</span></span>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMC2Beta</span> <span class="op">&lt;-</span> <span class="va">SQC2Beta</span> <span class="op">/</span> <span class="fl">1</span></span>
 <span><span class="va">QMC2Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 62.28721</code></pre>
 </div>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># F e p-valor</span></span>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># F e p-valor</span></span>
 <span><span class="va">FC1</span> <span class="op">&lt;-</span> <span class="va">QMC1Beta</span> <span class="op">/</span> <span class="va">QMRes</span></span>
 <span><span class="va">FC1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 27.85402</code></pre>
 </div>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">FC2</span> <span class="op">&lt;-</span> <span class="va">QMC2Beta</span> <span class="op">/</span> <span class="va">QMRes</span></span>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">FC2</span> <span class="op">&lt;-</span> <span class="va">QMC2Beta</span> <span class="op">/</span> <span class="va">QMRes</span></span>
 <span><span class="va">FC2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 20.39715</code></pre>
 </div>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ftab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">qf</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">18</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ftab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">qf</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">18</span><span class="op">)</span></span>
 <span><span class="va">ftab</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 4.413873</code></pre>
 </div>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC1</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC1</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC1</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC1</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
 <span><span class="va">p_valorC1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              [,1]
 [1,] 0.00005110228</code></pre>
 </div>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC2</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC2</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC2</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC2</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
 <span><span class="va">p_valorC2</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            [,1]
@@ -949,23 +986,23 @@ H_{02} &amp;: \mathbf{c'_2}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_2 = \mu_3
 </table>
 </div>
 </div>
-<p>Ambos os <span class="math inline">\(F_{cal}\)</span> são superiores ao valor tabelado <span class="math inline">\(F_{(0,05;1,18)}\)</span>. Assim, Ambas as hipóteses <span class="math inline">\(H_{01}\)</span> e <span class="math inline">\(H_{02}\)</span> são rejeitadas e se conclui que:</p>
+<p>Ambos os <span class="math inline">\(F_{cal}\)</span> são superiores ao valor tabelado <span class="math inline">\(F_{(0,05;1,18)}\)</span>. Assim, ambas as hipóteses <span class="math inline">\(H_{01}\)</span> e <span class="math inline">\(H_{02}\)</span> são rejeitadas e se conclui que:</p>
 <p><span class="math display">\[
 \mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_2 \ne \mu_3
 \]</span></p>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>C1 <span class="ot">=</span>{<span class="dv">0</span> <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
-<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>C2 <span class="ot">=</span>{<span class="dv">0</span> <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
-<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>C1Beta <span class="ot">=</span> C1<span class="sc">*</span>Beta;</span>
-<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>C2Beta <span class="ot">=</span> C2<span class="sc">*</span>Beta;</span>
-<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>SQC1Beta <span class="ot">=</span> <span class="fu">t</span>(C1<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C1<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C1))<span class="sc">*</span>C1<span class="sc">*</span>Beta;</span>
-<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>SQC2Beta <span class="ot">=</span> <span class="fu">t</span>(C2<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C2<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C2))<span class="sc">*</span>C2<span class="sc">*</span>Beta;</span>
-<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>Soma <span class="ot">=</span> SQC1Beta <span class="sc">+</span> SQC2Beta;</span>
-<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Partição da SQTrat usando k=2 contrastes l.i. e ortogonais'</span>,,</span>
-<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">'SQcontraste1 = '</span> SQC1Beta[format<span class="ot">=</span><span class="fl">8.4</span>],, <span class="st">'SQcontraste2 = '</span> SQC2Beta[format<span class="ot">=</span><span class="fl">8.4</span>],,</span>
-<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Soma SQs     = '</span> Soma[format<span class="ot">=</span><span class="fl">8.4</span>] <span class="st">'    SQTrat = '</span> SQTrat[format<span class="ot">=</span><span class="fl">8.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>C1 <span class="ot">=</span>{<span class="dv">0</span> <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>C2 <span class="ot">=</span>{<span class="dv">0</span> <span class="dv">0</span>  <span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>C1Beta <span class="ot">=</span> C1<span class="sc">*</span>Beta;</span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>C2Beta <span class="ot">=</span> C2<span class="sc">*</span>Beta;</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>SQC1Beta <span class="ot">=</span> <span class="fu">t</span>(C1<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C1<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C1))<span class="sc">*</span>C1<span class="sc">*</span>Beta;</span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>SQC2Beta <span class="ot">=</span> <span class="fu">t</span>(C2<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C2<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C2))<span class="sc">*</span>C2<span class="sc">*</span>Beta;</span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a>Soma <span class="ot">=</span> SQC1Beta <span class="sc">+</span> SQC2Beta;</span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Partição da SQTrat usando k=2 contrastes l.i. e ortogonais'</span>,,</span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">'SQcontraste1 = '</span> SQC1Beta[format<span class="ot">=</span><span class="fl">8.4</span>],, <span class="st">'SQcontraste2 = '</span> SQC2Beta[format<span class="ot">=</span><span class="fl">8.4</span>],,</span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Soma SQs     = '</span> Soma[format<span class="ot">=</span><span class="fl">8.4</span>] <span class="st">'    SQTrat = '</span> SQTrat[format<span class="ot">=</span><span class="fl">8.4</span>];</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -993,144 +1030,40 @@ H_{03} &amp;: \mathbf{c'_3}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_1 = \mu_3
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <div class="cell">
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">C1Beta</span> <span class="op">&lt;-</span> <span class="va">C1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">C1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] -8.538571</code></pre>
 </div>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">C3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">C3Beta</span> <span class="op">&lt;-</span> <span class="va">C3</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">Beta</span></span>
 <span><span class="va">C3Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]
 [1,] -6.378571</code></pre>
 </div>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Partição da SQTrat</span></span>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Partição da SQTrat</span></span>
 <span><span class="va">SQC1Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C1Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C1Beta</span><span class="op">)</span></span>
 <span><span class="va">SQC1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        [,1]
 [1,] 85.0584</code></pre>
 </div>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQC3Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C3Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C3</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C3</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C3Beta</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQC3Beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C3Beta</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">C3</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/ginv.html">ginv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">C3</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="op">(</span><span class="va">C3Beta</span><span class="op">)</span></span>
 <span><span class="va">SQC3Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 142.4016</code></pre>
 </div>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># QM</span></span>
-<span><span class="va">QMC1Beta</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">/</span> <span class="fl">1</span></span>
-<span><span class="va">QMC1Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        [,1]
-[1,] 85.0584</code></pre>
-</div>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">QMC3Beta</span> <span class="op">&lt;-</span> <span class="va">SQC3Beta</span> <span class="op">/</span> <span class="fl">1</span></span>
-<span><span class="va">QMC3Beta</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         [,1]
-[1,] 142.4016</code></pre>
-</div>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># F e p-valor</span></span>
-<span><span class="va">FC1</span> <span class="op">&lt;-</span> <span class="va">QMC1Beta</span> <span class="op">/</span> <span class="va">QMRes</span></span>
-<span><span class="va">FC1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         [,1]
-[1,] 27.85402</code></pre>
-</div>
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">FC3</span> <span class="op">&lt;-</span> <span class="va">QMC3Beta</span> <span class="op">/</span> <span class="va">QMRes</span></span>
-<span><span class="va">FC3</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         [,1]
-[1,] 46.63217</code></pre>
-</div>
-<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ftab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">qf</a></span><span class="op">(</span><span class="fl">0.95</span>, <span class="fl">1</span>, <span class="fl">18</span><span class="op">)</span></span>
-<span><span class="va">ftab</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.413873</code></pre>
-</div>
-<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC1</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC1</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
-<span><span class="va">p_valorC1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>              [,1]
-[1,] 0.00005110228</code></pre>
-</div>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_valorC3</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html">pf</a></span><span class="op">(</span><span class="va">FC3</span>, <span class="fl">1</span>, <span class="va">gl_res</span><span class="op">)</span></span>
-<span><span class="va">p_valorC3</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>               [,1]
-[1,] 0.000002160348</code></pre>
-</div>
 </div>
 <div class="cell">
-<div class="cell-output-display">
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<caption>ANOVA para contrastes não ortogonais dos dados de ácido ascórbico</caption>
-<thead><tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">FV</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">gl</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">SQ</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">QM</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">Fcal</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">Ftab</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">p-valor (5%)</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">Contraste c'1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">85.058</td>
-<td style="text-align: center;">85.058</td>
-<td style="text-align: center;">27.854</td>
-<td style="text-align: center;">4.414</td>
-<td style="text-align: center;">0.00005</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Contraste c'2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">142.402</td>
-<td style="text-align: center;">142.402</td>
-<td style="text-align: center;">46.632</td>
-<td style="text-align: center;">4.414</td>
-<td style="text-align: center;">0.00000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Resíduo</td>
-<td style="text-align: center;">18</td>
-<td style="text-align: center;">54.967</td>
-<td style="text-align: center;">3.054</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Total</td>
-<td style="text-align: center;">20</td>
-<td style="text-align: center;">202.313</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>Ambos os <span class="math inline">\(F_{cal}\)</span> são superiores ao valor tabelado <span class="math inline">\(F_{(0,05;1,18)}\)</span>. Assim, Ambas as hipóteses <span class="math inline">\(H_{01}\)</span> e <span class="math inline">\(H_{03}\)</span> são rejeitadas e se conclui que:</p>
-<p><span class="math display">\[
-\mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_1 \ne \mu_3
-\]</span></p>
-<p>Contudo, nota-se que a soma das somas de quadrados dos contrastes não ortogonais não resulta na soma de quadrados dos tratamentos:</p>
-<div class="cell">
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SomaSQ</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">+</span> <span class="va">SQC3Beta</span></span>
-<span><span class="va">SomaSQ</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       [,1]
-[1,] 227.46</code></pre>
-</div>
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SQTrat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">SomaSQ</span> <span class="op">&lt;-</span> <span class="va">SQC1Beta</span> <span class="op">+</span> <span class="va">SQC3Beta</span></span>
+<span></span>
+<span><span class="va">SQTrat</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         [,1]
 [1,] 147.3456</code></pre>
@@ -1142,20 +1075,21 @@ H_{03} &amp;: \mathbf{c'_3}\boldsymbol{\beta} = 0 \Leftrightarrow \mu_1 = \mu_3
  SQTrat = 147.3456</code></pre>
 </div>
 </div>
+<p>Ao contrário do caso dos constrastes ortogonais, a soma das somas de quadrados dos <strong>contrastes não ortogonais</strong> (<code>SomaSQ</code>) não resulta na soma de quadrados dos tratamentos (<code>SQTrat</code>), o que prejudica a interpretação da análise de variância, dada a não independência entre os contrastes.</p>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>C1 <span class="ot">=</span>{<span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
-<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>C2 <span class="ot">=</span>{<span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>};</span>
-<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>C1Beta <span class="ot">=</span> C1<span class="sc">*</span>Beta;</span>
-<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>C2Beta <span class="ot">=</span> C2<span class="sc">*</span>Beta;</span>
-<span id="cb113-5"><a href="#cb113-5" aria-hidden="true" tabindex="-1"></a>SQC1Beta <span class="ot">=</span> <span class="fu">t</span>(C1<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C1<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C1))<span class="sc">*</span>C1<span class="sc">*</span>Beta;</span>
-<span id="cb113-6"><a href="#cb113-6" aria-hidden="true" tabindex="-1"></a>SQC2Beta <span class="ot">=</span> <span class="fu">t</span>(C2<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C2<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C2))<span class="sc">*</span>C2<span class="sc">*</span>Beta;</span>
-<span id="cb113-7"><a href="#cb113-7" aria-hidden="true" tabindex="-1"></a>Soma <span class="ot">=</span> SQC1Beta <span class="sc">+</span> SQC2Beta;</span>
-<span id="cb113-8"><a href="#cb113-8" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Partição da SQTrat usando contrastes l.i. mas não ortogonais'</span>,,</span>
-<span id="cb113-9"><a href="#cb113-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">'SQcontraste1 = '</span> SQC1Beta[format<span class="ot">=</span><span class="fl">8.4</span>],, <span class="st">'SQcontraste2 = '</span>SQC2Beta[format<span class="ot">=</span><span class="fl">8.4</span>],,</span>
-<span id="cb113-10"><a href="#cb113-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Soma SQs     = '</span> Soma[format<span class="ot">=</span><span class="fl">8.4</span>] <span class="st">'    SQTrat = '</span> SQTrat[format<span class="ot">=</span><span class="fl">8.4</span>];</span>
-<span id="cb113-11"><a href="#cb113-11" aria-hidden="true" tabindex="-1"></a>quit;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>C1 <span class="ot">=</span>{<span class="dv">0</span>  <span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">-</span><span class="dv">1</span>};</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>C2 <span class="ot">=</span>{<span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span> <span class="sc">-</span><span class="dv">1</span>};</span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>C1Beta <span class="ot">=</span> C1<span class="sc">*</span>Beta;</span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>C2Beta <span class="ot">=</span> C2<span class="sc">*</span>Beta;</span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>SQC1Beta <span class="ot">=</span> <span class="fu">t</span>(C1<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C1<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C1))<span class="sc">*</span>C1<span class="sc">*</span>Beta;</span>
+<span id="cb100-6"><a href="#cb100-6" aria-hidden="true" tabindex="-1"></a>SQC2Beta <span class="ot">=</span> <span class="fu">t</span>(C2<span class="sc">*</span>Beta)<span class="sc">*</span><span class="fu">inv</span>(C2<span class="sc">*</span><span class="fu">ginv</span>(<span class="fu">t</span>(X)<span class="sc">*</span>X)<span class="sc">*</span><span class="fu">t</span>(C2))<span class="sc">*</span>C2<span class="sc">*</span>Beta;</span>
+<span id="cb100-7"><a href="#cb100-7" aria-hidden="true" tabindex="-1"></a>Soma <span class="ot">=</span> SQC1Beta <span class="sc">+</span> SQC2Beta;</span>
+<span id="cb100-8"><a href="#cb100-8" aria-hidden="true" tabindex="-1"></a>print <span class="st">'Partição da SQTrat usando contrastes l.i. mas não ortogonais'</span>,,</span>
+<span id="cb100-9"><a href="#cb100-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">'SQcontraste1 = '</span> SQC1Beta[format<span class="ot">=</span><span class="fl">8.4</span>],, <span class="st">'SQcontraste2 = '</span>SQC2Beta[format<span class="ot">=</span><span class="fl">8.4</span>],,</span>
+<span id="cb100-10"><a href="#cb100-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">'Soma SQs     = '</span> Soma[format<span class="ot">=</span><span class="fl">8.4</span>] <span class="st">'    SQTrat = '</span> SQTrat[format<span class="ot">=</span><span class="fl">8.4</span>];</span>
+<span id="cb100-11"><a href="#cb100-11" aria-hidden="true" tabindex="-1"></a>quit;</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>

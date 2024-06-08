@@ -1,19 +1,92 @@
-# Dados Desbalanceados - Contrastes
+# ANOVA desbalanceada com um fator
 
-Os pesos líquidos de latas enchidas por cinco máquinas de enchimento são apresentados:
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
 
-|   A   |   B   |   C   |   D   |   E   |
-|:-----:|:-----:|:-----:|:-----:|:-----:|
-| 11,95 | 12,18 | 12,16 | 12,25 | 12,10 |
-| 12,00 | 12,11 | 12,15 | 12,30 | 12,04 |
-| 12,25 |  \-   | 12,08 | 12,10 | 12,02 |
-| 12,10 |  \-   |  \-   |  \-   | 12,02 |
+options(scipen = 999999, knitr.kable.NA = '')
 
-## 1. 
+library(MASS)
+```
+
+Nesta seção, trataremos da ANOVA com **um fator** em conjuntos de dados **desbalanceados**, em que o número de observações por tratamento não é o mesmo.
+
+O modelo desbalanceado com um fator é dado por:
+
+$$
+\begin{align}
+y_{ij} = \mu + \tau_i + \epsilon_{ij} = \mu_{i} + \epsilon_{ij} \\
+i = 1,\dots,k \space \text{ e } \space j = 1,\dots,n_i
+\end{align}
+$$
+
+Para realizar inferências, assumiremos $\epsilon_{ij} \sim N(0, \sigma^2)$ são independentes e identicamente distribuídos.
+
+Como exemplo, temos o seguinte caso: *Os pesos líquidos de latas enchidas por cinco máquinas de enchimento são apresentados:*
+
+```{r}
+#| echo: false
+
+data.frame(
+  A = c(11.95, 12, 12.25, 12.10),
+  B = c(12.18, 12.11, "-", "-"),
+  C = c(12.16, 12.15, 12.08, "-"),
+  D = c(12.25, 12.30, 12.10, "-"),
+  E = c(12.10, 12.04, 12.02, 12.02)
+) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+O modelo matricial de médias de caselas $\mathbf{y} = \mathbf{W}\boldsymbol{\mu} + \boldsymbol{\epsilon}$ é dado por:
+
+$$
+\begin{bmatrix}
+y_{11} \\ y_{12} \\ y_{13} \\ y_{14} \\ y_{21} \\ y_{22} \\ y_{31} \\ y_{32} \\ y_{33} \\ y_{41} \\ y_{42} \\ y_{43} \\ y_{51} \\ y_{52} \\ y_{53} \\ y_{54}
+\end{bmatrix}
+=
+\begin{bmatrix}
+11,95 \\ 12,00 \\ 12,25 \\ 12,10 \\ 12,18 \\ 12,11 \\ 12,16 \\ 12,15 \\ 12,08 \\ 12,25 \\ 12,30 \\ 12,10 \\ 12,10 \\ 12,04 \\ 12,02 \\ 12,02
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+\mu_1 \\ \mu_2 \\ \mu_3 \\ \mu_4 \\ \mu_5
+\end{bmatrix}
++
+\begin{bmatrix}
+\epsilon_{11} \\ \epsilon_{12} \\ \epsilon_{13} \\ \epsilon_{14} \\ \epsilon_{21} \\ \epsilon_{22} \\ \epsilon_{31} \\ \epsilon_{32} \\ \epsilon_{33} \\ \epsilon_{41} \\ \epsilon_{42} \\ \epsilon_{43} \\ \epsilon_{51} \\ \epsilon_{52} \\ \epsilon_{53} \\ \epsilon_{54}
+\end{bmatrix}
+$$
 
 ::: panel-tabset
 
 ### R
+
+```{r}
+#| eval: false
+
+install.packages("MASS")
+library(MASS)
+```
 
 ```{r}
 y <- c(11.95,12.00,12.25,12.10,12.18,12.11,12.16,12.15,12.08,12.25,12.30,12.10,12.10,12.04,12.02,12.02)
@@ -27,193 +100,30 @@ W <- matrix(
   rep(0, 12), rep(1, 4)),
   ncol = 5, byrow = FALSE
 )
-W              # W do modelo de médias de caselas
+W
+```
 
-k <- ncol(W)   # Número de tratamentos
+Note que a matriz $\mathbf{W}$ é de posto completo (posto$(\mathbf{W}) = k = 5$).
+
+```{r}
+k <- ncol(W)                         # Número de tratamentos
 k
 
-N <- nrow(W)   # Número total de repetições
-N
+rank_W <- sum(diag(ginv(W) %*% W))   # posto da matriz W
+rank_W
+
+deficit_rank <- k - rank_W           # déficit de rank
+deficit_rank
 ```
 
-```{r}
-# Contrastes ortogonais não ponderados
-Jnn <- matrix(1, nrow = N, ncol = N)
+Dessa forma, o sistema de equações normais $\mathbf{(W'W)} \boldsymbol{\hat\mu} = \mathbf{(W'y)}$ tem solução única:
 
-In <- diag(1, nrow = N)
-```
-
-```{r}
-SQTotal <- t(y) %*% (In - Jnn / N) %*% y
-SQTotal
-
-gl_total <- N - 1
-gl_total
-```
-
-```{r}
-# SQ do modelo completo: yij = mi(i) + eij
-mi <- solve(t(W) %*% W) %*% t(W) %*% y
-mi
-
-SQcompleto <- t(mi) %*% t(W) %*% y
-SQcompleto
-```
-
-```{r}
-# SQ do modelo reduzido: yij = mi + eij
-jn <- matrix(1, ncol = 1, nrow = N)
-
-mir <- solve(t(jn) %*% jn) %*% t(jn) %*% y
-mir
-
-SQreduzido <- t(mir) %*% t(jn) %*% y
-SQreduzido
-```
-
-```{r}
-SQEntre <- SQcompleto - SQreduzido
-SQEntre
-
-gl_entre <- k - 1
-gl_entre
-
-QMEntre <- SQEntre / gl_entre
-QMEntre
-```
-
-```{r}
-SQRes <- t(y) %*% y - t(mi) %*% t(W) %*% y
-SQRes
-
-gl_res <- N - k
-gl_res
-
-QMRes <- SQRes / gl_res
-QMRes
-```
-
-```{r}
-Fcalc <- QMEntre / QMRes
-Fcalc
-
-Ftab <- qf(0.95, gl_entre, gl_res)
-Ftab
-
-p_valor <- 1 - pf(Fcalc, gl_entre, gl_res)
-p_valor
-```
-
-```{r}
-#| echo: false
-
-options(knitr.kable.NA = '')
-
-data.frame(
-  "FV" = c("Hipótese", "Resíduo", "Total"),
-  "gl" = c(gl_entre, gl_res, gl_total),
-  "SQ" = c(SQEntre, SQRes, SQTotal) |> round(4),
-  "QM" = c(QMEntre, QMRes, NA) |> round(4),
-  "Fcal" = c(Fcalc, NA, NA) |> round(4),
-  "Ftab" = c(Ftab, NA, NA) |> round(4),
-  "p.valor" = c(p_valor, NA, NA) |> round(4)
-) |> 
-  kableExtra::kbl(
-    align = "c",
-    caption = "ANOVA: Ho: m1=m2=m3=m4=m5 (caso desbalanceado)",
-    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
-  ) |> 
-  kableExtra::kable_styling(position = "center")
-```
-
-```{r}
-# Contrastes ortogonais do tipo t(ai)*mi
-a1 <- c(3,-2,-2, 3,-2)
-a2 <- c(0, 1,-2, 0, 1)
-a3 <- c(1, 0, 0,-1, 0)
-a4 <- c(0, 1, 0, 0,-1)
-```
-
-```{r}
-SQa1 <- t(t(a1) %*% mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% t(a1) %*% mi
-F_a1 <- SQa1 / QMRes
-p_valor_a1 <- 1 - pf(F_a1, 1, gl_res)
-
-SQa2 <- t(t(a2) %*% mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% t(a2) %*% mi
-F_a2 <- SQa2 / QMRes
-p_valor_a2 <- 1 - pf(F_a2, 1, gl_res)
-
-SQa3 <- t(t(a3) %*% mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% t(a3) %*% mi
-F_a3 <- SQa3 / QMRes
-p_valor_a3 <- 1 - pf(F_a3, 1, gl_res)
-
-SQa4 <- t(t(a4) %*% mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% t(a4) %*% mi
-F_a4 <- SQa4 / QMRes
-p_valor_a4 <- 1 - pf(F_a4, 1, gl_res)
-```
-
-```{r}
-#| echo: false
-
-options(knitr.kable.NA = '')
-
-Ftab_c <- qf(0.95, 1, gl_res)
-
-data.frame(
-  "Contrastes" = c("A,D vs. B,C,E", "B,E vs. C", "A vs. D", "B vs. E"),
-  "SQ" = c(SQa1, SQa2, SQa3, SQa4) |> round(4), 
-  "Fcal" = c(F_a1, F_a2, F_a3, F_a4) |> round(4),
-  "Ftab" = c(Ftab_c, NA, NA, NA) |> round(4),
-  "p.valor" = c(p_valor_a1, p_valor_a2, p_valor_a3, p_valor_a4) |> round(4)
-) |> 
-  kableExtra::kbl(
-    align = "c",
-    caption = "ANOVA: Contrastes ortogonais não ponderados",
-    col.names = c("Contrastes", "SQ", "Fcal", "Ftab", "p-valor (5%)")
-  ) |> 
-  kableExtra::kable_styling(position = "center")
-```
-
-```{r}
-# SQContrastes = SQA1 + SQA2 + SQA3 + SQA4 não é igual a SQEntre porque os contrastes NÃO SÃO ORTOGONAIS!
-SQContrastes <- SQa1 + SQa2 + SQa3 + SQa4
-SQContrastes
-
-SQEntre
-```
-
-```{r}
-# Contrastes ortogonais ponderados
-a2p <- c(0, 2, -6, 0, 4)
-
-SQa2p <- t(t(a2p) %*% mi) %*% solve(t(a2p) %*% solve(t(W) %*% W) %*% a2p) %*% t(a2p) %*% mi
-
-F_a2p <- SQa2p / QMRes
-
-p_valor_a2p <- 1 - pf(F_a2p, 1, gl_res)
-```
-
-```{r}
-#| echo: false
-
-options(knitr.kable.NA = '')
-
-Ftab_c <- qf(0.95, 1, gl_res)
-
-data.frame(
-  "Contrastes" = c("A,D vs. B,C,E", "2B + 4E vs. 6C"),
-  "SQ" = c(SQa1, SQa2p) |> round(4), 
-  "Fcal" = c(F_a1, F_a2p) |> round(4),
-  "Ftab" = c(Ftab_c, NA) |> round(4),
-  "p.valor" = c(p_valor_a1, p_valor_a2p) |> round(4)
-) |> 
-  kableExtra::kbl(
-    align = "c",
-    caption = "ANOVA: Contrastes ortogonais ponderados",
-    col.names = c("Contrastes", "SQ", "Fcal", "Ftab", "p-valor (5%)")
-  ) |> 
-  kableExtra::kable_styling(position = "center")
-```
+$$
+\boldsymbol{\hat\mu} = \mathbf{(W'W)}^{-1} \mathbf{W'y} = \mathbf{\bar{y}} =
+\begin{bmatrix}
+\bar{y}_{1.} \\ \bar{y}_{2.} \\ \bar{y}_{3.} \\ \bar{y}_{4.} \\ \bar{y}_{5.}
+\end{bmatrix}
+$$
 
 ### SAS
 
@@ -234,6 +144,159 @@ W = design(Trat); 	* W do modelo de médias de caselas;
 k = ncol(W);		* Número de tratamentos;
 N = nrow(W);		* Número total de repetições;
 print W y[format=10.2];
+```
+
+:::
+
+## Teste de hipótese
+
+Para testar a hipótese $H_0: \mu_1 = \mu_2 = \mu_3 = \mu_4 = \mu_5$, podemos utilizar a abordagem do **modelo completo x modelo reduzido** e **contrastes**.
+
+### Modelo completo x Modelo reduzido
+
+::: panel-tabset
+
+### R
+
+```{r}
+N <- nrow(W)   # Número total de repetições
+N
+
+Jnn <- matrix(1, nrow = N, ncol = N)
+In <- diag(1, nrow = N)
+```
+
+A soma de quadrados total (`SQTotal`) é dada por:
+
+$$
+SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
+$$
+
+```{r}
+# Total
+SQTotal <- t(y) %*% (In - Jnn / N) %*% y
+SQTotal
+
+gl_total <- N - 1
+gl_total
+```
+
+A soma de quadrados do **modelo completo** de média de caselas é dado por:
+
+$$
+SQ(\mu_1,\mu_2,\mu_3,\mu_4,\mu_5) = \boldsymbol{\hat\mu' W'y}
+$$
+
+```{r}
+# Modelo completo
+mi <- solve(t(W) %*% W) %*% t(W) %*% y
+mi
+
+SQcompleto <- t(mi) %*% t(W) %*% y
+SQcompleto
+```
+
+O **modelo reduzido** pode ser escrito, matricialmente, da seguinte maneira:
+
+$$
+\mathbf{y} = \mu \mathbf{j} + \boldsymbol{\epsilon}^*, \quad \text{onde } \mathbf{j} \text{ é } N \times 1
+$$
+
+em que $\mathbf{j}$ é um vetor coluna de 1's com dimensão $N \times 1$, sendo $N$ o número total de observações (sem contar os valores ausentes).
+
+Dessa forma, a soma de quadrados do **modelo reduzido** é dado por:
+
+$$
+SQ(\mu) = \hat\mu \mathbf{j}' \mathbf{y}
+$$
+
+```{r}
+# Modelo reduzido
+jn <- matrix(1, ncol = 1, nrow = N)
+jn
+
+mi_reduzido <- solve(t(jn) %*% jn) %*% t(jn) %*% y
+mi_reduzido
+
+SQreduzido <- t(mi_reduzido) %*% t(jn) %*% y
+SQreduzido
+```
+
+Com as somas de quadrados dos modelos completo e reduzido, obtemos a soma de quadrados **entre grupos**, calculada pela diferença entre a soma de quadrados do modelo completo (`SQcompleto`) e a soma de quadrados do modelo reduzido (`SQreduzido`). Além disso, apresenta $(k-1)$ graus de liberdade.
+
+```{r}
+# Entre grupos
+SQEntre <- SQcompleto - SQreduzido
+SQEntre
+
+gl_entre <- k - 1
+gl_entre
+
+QMEntre <- SQEntre / gl_entre
+QMEntre
+```
+
+Já a soma de quadrados dos resíduos (`SQRes`) é dada por:
+
+$$
+SQRes = \mathbf{y'y} - \boldsymbol{\hat\mu' W'y}
+$$
+
+```{r}
+# Resíduo
+SQRes <- t(y) %*% y - t(mi) %*% t(W) %*% y
+SQRes
+
+gl_res <- N - k
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+```
+
+Com os quadrados médios, calcularemos a estatística F e o p-valor.
+
+```{r}
+Fcalc <- QMEntre / QMRes
+Fcalc
+
+Ftab <- qf(0.95, gl_entre, gl_res)
+Ftab
+
+p_valor <- 1 - pf(Fcalc, gl_entre, gl_res)
+p_valor
+```
+
+A seguir, o quadro da ANOVA compila os resultados obtidos.
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Hipótese", "Resíduo", "Total"),
+  "gl" = c(gl_entre, gl_res, gl_total),
+  "SQ" = c(SQEntre, SQRes, SQTotal) |> round(4),
+  "QM" = c(QMEntre, QMRes, NA) |> round(4),
+  "Fcal" = c(Fcalc, NA, NA) |> round(4),
+  "Ftab" = c(Ftab, NA, NA) |> round(4),
+  "p.valor" = c(p_valor, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA desbalanceada: H0: m1=m2=m3=m4=m5",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o $F_{cal} < F_{tab}$, considerando $F_{(0,05;4;11)}$, não se rejeita $H_0: \mu_1 = \mu_2 = \mu_3 = \mu_4 = \mu_5$, ou seja, não existem diferenças significativas entre as médias ponderadas dos pesos líquidos de latas enchidas pelas cinco máquinas. Ainda, podemos dizer que os pesos líquidos médios das latas enchidas pelas cinco máquinas não diferem entre si.
+
+### SAS
+
+```{r}
+#| eval: false
 
 Jnn = J(N,N,1);
 In = I(N);
@@ -264,6 +327,124 @@ print '------------------------------',
 print 'Ho: m1=m2=m3=m4=m5'  gl_entre SQEntre[format=10.5] QMEntre[format=10.5] Fcalc[format=8.4] p_valor[format=8.3],,
       'Resíduo           '  gl_res   SQRes[format=10.5]   QMRes[format=10.5],,
       'Total             '  gl_total SQTotal[format=10.5]; 
+```
+
+:::
+
+### Contrastes 
+
+Definimos um contraste de $k$ médias populacionais como:
+
+$$
+\delta = c_1\mu_1 + c_2\mu_2 + \dots + c_k\mu_k = \boldsymbol{c'\mu}
+$$
+
+em que $\sum^k_{i=1} c_i = 0$.
+
+Quando trabalhamos com ANOVA **balanceada**, dois contrastes
+
+$$
+\hat\delta = \sum^k_{i=1} a_i \bar{y}_{i.} \quad \text{e} \quad \hat\gamma = \sum^k_{i=1} b_i \bar{y}_{i.}
+$$
+
+são ditos ortogonais se $\sum^k_{i=1} a_i b_i = 0$, sendo esta a condição de independência entre os contrastes.
+
+Para o caso **desbalanceado**, devemos utilizar **contrastes ortogonais ponderados**, afim de garantir a independência entre os contrastes. Dessa forma, os contrastes $\hat\delta$ e $\hat\gamma$ são independentes em modelos desbalanceados se e somente se
+
+$$
+\sum^k_{i=1} \frac{a_i b_i}{n_i} = 0
+$$
+
+sendo $n_i$ as respostas ao $i$-ésimo tratamento.
+
+Contudo, na prática, os contrastes ortogonais ponderados são de menor interesse que os contrastes ortogonais não ponderados, não sendo necessário que as somas de quadrados sejam independentes para realizarmos os testes sobre os contrastes.
+
+A seguir, veremos as diferenças entre os contrastes ortogonais não ponderados e os ponderados.
+
+#### Contrastes ortogonais não ponderados {.unnumbered}
+
+::: panel-tabset
+
+### R
+
+Os contrastes a seguir comparam as médias dos tratamentos da seguinte maneira:
+
+$$
+\begin{align}
+H_{a01}&: 3\mu_1 - 2\mu_2 - 2\mu_3 + 3\mu_4 - 2\mu_5 = 0 \\
+H_{a02}&: \mu_2 - 2\mu_3 + \mu_5 = 0 \\
+H_{a03}&: \mu_1 - \mu_4 = 0 \\
+H_{a04}&: \mu_2 - \mu_5 = 0 \\
+\end{align}
+$$
+
+```{r}
+a1 <- c(3,-2,-2, 3,-2)
+a2 <- c(0, 1,-2, 0, 1)
+a3 <- c(1, 0, 0,-1, 0)
+a4 <- c(0, 1, 0, 0,-1)
+```
+
+As somas de quadrados são calculadas a partir da seguinte forma quadrática:
+
+$$
+SQ(\hat\delta) = \boldsymbol{(c'\mu)}' [\mathbf{c'(W'W)c}]^{-1} \boldsymbol{(c'\mu)}
+$$
+
+em que $\mathbf{c}$ é o vetor de coeficientes do contraste.
+
+```{r}
+SQa1 <- t(t(a1) %*% mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% t(a1) %*% mi
+F_a1 <- SQa1 / QMRes
+p_valor_a1 <- 1 - pf(F_a1, 1, gl_res)
+
+SQa2 <- t(t(a2) %*% mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% t(a2) %*% mi
+F_a2 <- SQa2 / QMRes
+p_valor_a2 <- 1 - pf(F_a2, 1, gl_res)
+
+SQa3 <- t(t(a3) %*% mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% t(a3) %*% mi
+F_a3 <- SQa3 / QMRes
+p_valor_a3 <- 1 - pf(F_a3, 1, gl_res)
+
+SQa4 <- t(t(a4) %*% mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% t(a4) %*% mi
+F_a4 <- SQa4 / QMRes
+p_valor_a4 <- 1 - pf(F_a4, 1, gl_res)
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Contrastes" = c("A,D vs. B,C,E", "B,E vs. C", "A vs. D", "B vs. E"),
+  "SQ" = c(SQa1, SQa2, SQa3, SQa4) |> round(4), 
+  "Fcal" = c(F_a1, F_a2, F_a3, F_a4) |> round(4),
+  "p.valor" = c(p_valor_a1, p_valor_a2, p_valor_a3, p_valor_a4) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Contrastes ortogonais não ponderados",
+    col.names = c("Contrastes", "SQ", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que nenhum p-valor é menor que $\alpha = 0,05$, não rejeitamos qualquer uma das hipóteses $H_0: \sum_i c_i\mu_i = 0$ associadas aos contrastes definidos anteriormente.
+
+Ao somar as somas de quadrados dos contrastes ortogonais **não ponderados**, não obtemos o mesmo resultado da soma de quadrados entre grupos (`SQEntre`)
+
+```{r}
+SQContrastes <- SQa1 + SQa2 + SQa3 + SQa4
+SQContrastes
+
+SQEntre
+```
+
+### SAS
+
+```{r}
+#| eval: false
 
 * Contrastes ortogonais do tipo t(ai)*mi;
 a1 = {3,-2,-2, 3,-2};
@@ -301,6 +482,67 @@ print '----------------------------------------------------------------',
        SQContrastes[format=10.5] SQEntre[format=10.5],,
       'porque os contrastes NÃO SÃO ORTOGONAIS!',
       '----------------------------------------------------------------',,,;
+```
+
+:::
+
+#### Contrastes ortogonais ponderados {.unnumbered}
+
+::: panel-tabset
+
+### R
+
+Utilizaremos o primeiro contraste ortogonal do exemplo anterior, $H_{a01}: 3\mu_1 - 2\mu_2 - 2\mu_3 + 3\mu_4 - 2\mu_5 = 0$, e o contraste ortogonal de $H_0: 2\mu_2 - 6\mu_3 + 4\mu_5 = 0$ para ilustrar os contrastes ortogonais **ponderados**. Portanto:
+
+$$
+\begin{align}
+\delta &= \boldsymbol{a'\mu} = [3, -2, -2, 3, -2] \boldsymbol{\mu} \\
+\gamma &= \boldsymbol{b'\mu} = [0, 2, -6, 0, 4] \boldsymbol{\mu}
+\end{align}
+$$
+
+Neste caso, temos **contrastes ortogonais ponderados**:
+
+$$
+\sum^k_{i=1} \frac{a_ib_i}{n_i} = \frac{3(0)}4 - \frac{2(2)}2 - \frac{2(-6)}3 + \frac{3(0)}3 - \frac{2(4)}4 = 0
+$$
+
+```{r}
+a2p <- c(0, 2, -6, 0, 4)
+
+SQa2p <- t(t(a2p) %*% mi) %*% solve(t(a2p) %*% solve(t(W) %*% W) %*% a2p) %*% t(a2p) %*% mi
+
+F_a2p <- SQa2p / QMRes
+
+p_valor_a2p <- 1 - pf(F_a2p, 1, gl_res)
+```
+
+Assim, as somas de quadrados associadas aos dois contrastes são **independentes**, cujos valores estão descritos no seguinte quadro de ANOVA.
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Contrastes" = c("A,D vs. B,C,E", "2B + 4E vs. 6C"),
+  "SQ" = c(SQa1, SQa2p) |> round(4), 
+  "Fcal" = c(F_a1, F_a2p) |> round(4),
+  "p.valor" = c(p_valor_a1, p_valor_a2p) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Contrastes ortogonais ponderados",
+    col.names = c("Contrastes", "SQ", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
 A2p = {0, 2, -6, 0, 4};
 SQA2p = t(t(a2p)*mi)*inv(t(a2p)*inv(t(W)*W)*a2p)*t(a2p)*mi;
 F_a2p = SQa2p/QMRes;

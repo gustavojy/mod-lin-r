@@ -1,0 +1,150 @@
+options nocenter nodate ps=1000 ls=120;
+data Guppy;
+ input Grupo Rep PesoMat PesoInic;
+ cards;
+1	1	49	35
+1	2	61	26
+1	3	55	29
+1	4	69	32
+1	5	51	23
+1	6	38	26
+1	7	64	31
+2	1	68	33
+2	2	70	35
+2	3	60	28
+2	4	53	29
+2	5	59	32
+2	6	48	23
+2	7	46	26
+3	1	59	33
+3	2	53	36
+3	3	54	26
+3	4	48	30
+3	5	54	33
+3	6	53	25
+3	7	37	23
+;
+
+proc iml;
+varnames = {"Grupo" "Rep" "PesoMat" "PesoInic"};
+use work.Guppy;
+read all var varnames;
+close work.Guppy;
+reset fuzz;
+
+k = 3;					* Número de grupos;
+n = 7;					* Número de repetições por grupo;
+kn = nrow(PesoMat);		* Número total de observações;
+Jkn = J(kn,kn,1);
+Ikn = I(kn);
+
+y = PesoMat;
+x = PesoInic;
+ print x;
+Z = j(kn,1,1)||design(Grupo);	* monta matriz Z;
+ print Z;
+ZLZ = t(Z)*Z;
+iZLZ = block(0,1/n,1/n,1/n);	* define uma inversa-g de (Z'Z);
+KK = iZLZ*t(Z);
+* print KK[format=4.2];
+PZ = Z*iZLZ*t(Z);				* calcula P = Z(ginv(Z'Z))Z';
+exx = t(x)*(Ikn - PZ)*x;		* calcula exx usando (16.25);
+eyy = t(y)*(Ikn - PZ)*y;		* calcula eyy usando (16.25);
+exy = t(x)*(Ikn - PZ)*y;		* calcula exy usando (16.25);
+
+beta = inv(Exx)*exy; 			* calcula Beta usando (16.26);
+print Beta;
+alfa0 = iZLZ*t(Z)*y;			
+alfa = alfa0 - iZLZ*t(Z)*X*beta;	* Calcula alfa usando (16.11);
+c = {0,1,1,1};
+Media_obs = alfa0;
+xbarra = (1/kn)*j(1,kn,1)*x;
+L = {1 1 0 0, 1 0 1 0, 1 0 0 1};
+Media_obs = L*alfa0;
+Media_ajust = L*(alfa + c*xbarra*beta);
+
+*Calcula a SQ resíduo ajustado para a covariável;
+SQRes_y = eyy;	*(16.19);
+
+SQResyx = eyy - (exy**2)/exx;		* calcula SQResy.x usando (16.27);
+gl_Resyx = k*(n-1)-1;				* calcula gl associado a SQResy.x;
+QMResyx =SQResyx/gl_Resyx;			* calcula QMResy.x;
+
+*Calcula a SQ resíduo sem o ajuste para a covariável;
+txx = t(X)*(Ikn-(1/kn)*Jkn)*X;		* calcula txx usando (16.34);
+tyy = t(y)*(Ikn-(1/kn)*Jkn)*y;		* calcula tyy usando (16.34);			
+txy = t(X)*(Ikn-(1/kn)*Jkn)*y;		* calcula txy usando (16.34);
+SQTyx = tyy - (txy**2)/txx;			* calcula SQTy.x usando(16.33);
+* print SQTyx;
+
+* Cálculo de SQH01 para testar H01: a1=a2=a3;
+SQH01 = SQTyx - SQResyx;			* calcula SQ(alfa|mi,beta) usando (16.30);	
+gl_H01 = k-1;						* calcula gl associado à SQ(alfa|mi,beta);
+QMH01 = SQH01/gl_H01;
+F_H01 = QMH01/QMResyx;				* calcula F para testar H01 usando (16.31);
+pvalue_H01 = 1-cdf('F',F_H01,gl_H01,gl_Resyx);	* calcula p-valor para F_H01;
+
+* Cálculo de SQH02 para testar H02:Beta=0;
+SQH02 = (exy**2)/exx;				* calcula SQH02 usando (16.35);
+gl_H02 = 1;
+QMH02 = SQH02/gl_H02;
+F_H02 = QMH02/QMResyx;				* calcula F para testar H02 usando (16.36);
+pvalue_H02 = 1-cdf('F',F_H02,gl_H02,gl_Resyx);	* calcula p-valor associado a F_H02;
+
+print '---------------',
+      ' Quadro ANCOVA ',
+      '---------------',,
+'H01: a1 = a2 = a3' gl_H01[format=12.0] SQH01[format=12.4] QMH01[format=12.4] F_H01[format=12.4] pvalue_H01[format=12.4],,
+'H02: Beta = 0    ' gl_H02[format=12.0] SQH02[format=12.4] QMH02[format=12.4] F_H02[format=12.4] pvalue_H02[format=12.4],,
+'Resíduo          ' gl_Resyx[format=12.0] SQResyx[format=12.4] QMResyx[format=12.4],,,;
+
+* Cálculo de SQH03 para testar H03: b1=b2=b3;
+
+X = X#design(Grupo);
+print X;
+Z = j(kn,1,1)||design(Grupo);	*(16.3);
+PZ = Z*ginv(t(Z)*Z)*t(Z);
+*print PZ[format=8.4];
+exy = t(X)*(Ikn - PZ)*y;			* calcula exy usando (16.43);
+eyy = t(y)*(Ikn - PZ)*y;
+Exx = t(X)*(Ikn - PZ)*X;			* calcula Exx usando (16.41);
+Betas = inv(Exx)*exy;			* calcula os betas usando (16.45);
+print Betas[format=12.4];
+
+SQRes_yx_full = eyy - t(exy)*Betas;
+gl_Res_full = k*(n-2);
+QMRes_yx_full = SQRes_yx_full/gl_Res_full;
+
+SQH03 = SQResyx - SQRes_yx_full;
+gl_H03 = k-1;
+QMH03 = SQH03/gl_H03;
+F_H03 = QMH03/QMRes_yx_full;
+pvalue_H03 = 1-cdf('F',F_H03,gl_H03,gl_Res_full);
+
+print '--------------------------------------------',
+      'ANOVA para comparar os betas dos três grupos',
+      '--------------------------------------------',,
+'H03: Beta1=Beta2=Beta3' gl_H03[format=14.0] SQH03[format=14.4] QMH03[format=14.4] F_H03[format=10.4] pvalue_H03[format=14.4],,
+'Resíduo               ' gl_Res_full[format=14.0] SQRes_yx_full[format=14.4] QMRes_yx_full[format=14.4],,,;
+
+print Media_obs[format=12.2] Media_ajust[format=12.2];
+
+quit;
+
+proc glm data=Guppy;
+ class Grupo;
+ model PesoMat = PesoInic Grupo / ss3;
+ means Grupo;
+ lsmeans Grupo / stderr;
+run;
+
+proc glm data=Guppy;
+class grupo;
+model PesoMat = Grupo Grupo*PesoInic / noint ss3 solution;
+contrast 'B1=B2=B3' PesoInic*grupo  2 -1 -1, 
+                    PesoInic*grupo  0  1 -1;
+run;
+
+proc corr data=Guppy;
+var PesoMat PesoInic;
+run;

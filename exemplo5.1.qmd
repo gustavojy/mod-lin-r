@@ -20,13 +20,13 @@ $$
 
 em que:
 
-- $y_{ij}$ é o valor observado na $j$−ésima repetição do $i$−ésimo tratamento;
+- $y_{ij}$ é o valor observado na $j$−ésima repetição do $i$−ésimo nível de tratamento;
 
 - $\mu$ é uma constante comum a todas as observações, geralmente a média geral;
 
-- $\tau_i$ é o efeito do $i$−ésimo tratamento;
+- $\tau_i$ é o efeito do $i$−ésimo nível de tratamento;
 
-- $\epsilon_{ij}$ é o erro experimental observado na $j$−ésima repetição do $i$−ésimo tratamento.
+- $\epsilon_{ij}$ é o erro experimental observado na $j$−ésima repetição do $i$−ésimo nível de tratamento.
 
 Quando o modelo é representado na forma matricial $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$, a matriz de delineamento $\mathbf{X}$ não é de posto completo (**posto incompleto**), sendo assim um modelo dito **superparametrizado**. Dessa forma, é necessário adequar a metodologia aplicada nos modelos de regressão.
 
@@ -133,7 +133,7 @@ XLy
 
 Com a matriz $\mathbf{X'X}$, obtemos o número de observações totais (6) e o número de observações dos tratamentos (3 para cada aditivo). O vetor $\mathbf{X'y}$ nos retorna o total dos valores observados por tratamento (45 km/L para o aditivo 1 e 54 km/L para o aditivo 2), além do total global (99 km/L).
 
-Para calcular o posto das matrizes $\mathbf{X}$ e $\mathbf{X'X}$, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de uma matriz.
+Para calcular o posto das matrizes $\mathbf{X}$ e $\mathbf{X'X}$, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de Moore-Penrose de uma matriz.
 
 ```{r}
 #| eval: false
@@ -266,6 +266,8 @@ data.frame(y = y, ig = y_hat0, t1 = y_hat1, t2 = y_hat2, t3 = y_hat3) |>
   ) |> 
   kableExtra::kable_styling(position = "center")
 ```
+
+Note que, independentemente do $\boldsymbol{\beta}$ estimado, temos a mesma estimativa de $\mathbf{y}$ (`y_hat` ou $\hat{y}$).
 
 ### SAS
 

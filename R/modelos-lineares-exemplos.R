@@ -1,6 +1,19 @@
 # Modelos Lineares - Exemplos R
 # Material complementar: <https://gustavojy.github.io/mod-lin-r/>
 
+# Pacotes utilizados ------------------------------------------------------
+
+install.packages("kableExtra")
+install.packages("plotly")
+install.packages("ggplot2")
+install.packages("MASS")
+install.packages("ExpDes.pt")
+
+library(kableExtra)
+library(plotly)
+library(ggplot2)
+library(MASS)
+library(ExpDes.pt)
 
 # 1. Covariância, Correlação e Distância de Mahalanobis -------------------
 
@@ -84,7 +97,7 @@ data.frame(Y, DM2, rank)
 # 2. Gráfico Normal Bivariada ------------------------------------------------
 
 ## Biblioteca
-# install.packages("plotly")
+
 library(plotly)
 
 ## Vetores
@@ -1251,7 +1264,6 @@ XLX
 XLy <- t(X) %*% y
 XLy
 
-install.packages("MASS")
 library(MASS)     # função ginv()
 
 rank_X <- sum(diag(X %*% ginv(X)))
@@ -1275,10 +1287,10 @@ defRank
 Beta0 <- ginv(XLX) %*% t(X) %*% y
 Beta0
 
-### Solução com restrição $\tau_1 = 0$ (R)
-
 y_hat0 <- X %*% Beta0
 y_hat0
+
+### Solução com restrição $\tau_1 = 0$ (R)
 
 TR <- c(0, 1, 0)
 TR
@@ -1368,7 +1380,6 @@ L2Beta3
 
 ## 8.2 ANOVA balanceada com um fator - Teste de Hipótese ------------------
 
-# install.packages("MASS")
 library(MASS)     # função ginv()
 
 y <- as.vector(
@@ -1396,18 +1407,21 @@ p
 k <- sum(diag(X %*% ginv(X)))
 k
 
+p - k   # Déficit de rank (mostra que é de posto incompleto)
+
 XLX <- t(X) %*% X
 XLX
 
 XLy <- t(X) %*% y
 XLy
 
-### Vetor com as estimativas a partir da inversa generalizada
+### Inversa generalizada de Moore-Penrose
 
 Beta <- ginv(XLX) %*% XLy
 Beta
 
-### Vetor com as estimativas a partir da inversa generalizada utilizando a submatriz diagonal
+### Inversa generalizada simples (Searle)
+XLX
 
 igXLX <- (1/7) * matrix(
   c(0, 0, 0, 0,
@@ -1485,6 +1499,8 @@ gl_res
 QMRes <- SQRes / gl_res
 QMRes
 
+# F e p-valor
+
 Fcalc <- QMTrat / QMRes
 Fcalc
 
@@ -1512,6 +1528,8 @@ SQC1Beta
 
 SQC2Beta <- t(C2Beta) %*% solve(t(C2) %*% ginv(t(X) %*% X) %*% C2) %*% (C2Beta)
 SQC2Beta
+
+# A soma das somas de quadrados dos contrastes ORTOGONAIS resulta na soma de quadrados dos tratamentos:
 
 SomaSQ <- SQC1Beta + SQC2Beta
 SomaSQ
@@ -1558,30 +1576,7 @@ SQC1Beta
 SQC3Beta <- t(C3Beta) %*% solve(t(C3)%*% ginv(t(X) %*% X) %*% C3) %*% (C3Beta)
 SQC3Beta
 
-# QM
-QMC1Beta <- SQC1Beta / 1
-QMC1Beta
-
-QMC3Beta <- SQC3Beta / 1
-QMC3Beta
-
-# F e p-valor
-FC1 <- QMC1Beta / QMRes
-FC1
-
-FC3 <- QMC3Beta / QMRes
-FC3
-
-ftab <- qf(0.95, 1, 18)
-ftab
-
-p_valorC1 <- 1 - pf(FC1, 1, gl_res)
-p_valorC1
-
-p_valorC3 <- 1 - pf(FC3, 1, gl_res)
-p_valorC3
-
-#### A soma das somas de quadrados dos contrastes não ortogonais não resulta na soma de quadrados dos tratamentos:
+# A soma das somas de quadrados dos contrastes NÃO ORTOGONAIS NÃO resulta na soma de quadrados dos tratamentos:
 
 SomaSQ <- SQC1Beta + SQC3Beta
 SomaSQ
@@ -1592,8 +1587,7 @@ SQTrat
 
 ## 8.3 ANOVA balanceada com dois fatores ----------------------------------
 
-# install.packages("MASS")
-library(MASS)
+library(MASS)     # função ginv()
 
 y <- c(39.02, 38.79, 35.74, 35.41, 37.02, 36.00, 38.96, 39.01, 35.58, 35.52, 35.70, 36.04)
 y
@@ -1615,11 +1609,14 @@ X <- matrix(c(
 nrow = 12, byrow = TRUE)
 X
 
-rank_X <- sum(diag(ginv(X) %*% X))
+npar <- ncol(X)                      # número de parâmetros
+npar
+
+rank_X <- sum(diag(ginv(X) %*% X))   # posto de X
 rank_X
 
-npar <- ncol(X)    # número de parâmetros
-npar
+deficit_rank <- npar - rank_X        # déficit de rank
+deficit_rank
 
 a <- 2    # níveis do fator A
 b <- 3    # níveis do fator B
@@ -1662,6 +1659,7 @@ Betag
 
 ### Teste de hipótese
 
+#### Modelo Completo x Modelo Reduzido
 In <- diag(abn)
 Jn <- matrix(1, nrow = abn, ncol = abn)
 
@@ -1686,7 +1684,7 @@ gl_res
 QMRes <- SQRes / gl_res
 QMRes
 
-# Cálculo SQAxB (interação) - forma quadrática
+# Interação AxB
 X1 <- cbind(X0, XA, XB)
 X1
 
@@ -1711,7 +1709,7 @@ ftabAB
 p_valorAB <- 1 - pf(FAB, glAB, gl_res)
 p_valorAB
 
-# fator A - SQ(A)
+# Fator A
 PA <- XA %*% ginv(t(XA) %*% XA) %*% t(XA) - Jn/abn
 PA
 
@@ -1733,7 +1731,7 @@ ftabA
 p_valorA <- 1 - pf(FA, glA, gl_res)
 p_valorA
 
-# fator B - SQ(A)
+# Fator B
 PB <- XB %*% ginv(t(XB) %*% XB) %*% t(XB) - Jn/abn
 PB
 
@@ -1755,39 +1753,42 @@ ftabB
 p_valorB <- 1 - pf(FB, glB, gl_res)
 p_valorB
 
-### Somas de quadrados usando Hipótese Linear Geral
+#### Hipótese Linear Geral
 
-CA <- 
-  (1/3) * matrix(
-    c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1, byrow = TRUE
-  )
-CA
-
-CB <- 
-  (1/2) * matrix(
-    c(0, 0, 0, 2, -2, 0, 1, -1, 0, 1, -1, 0,
-      0, 0, 0, 2, 0, -2, 1, 0, -1, 1, 0, -1), nrow = 2, byrow = TRUE
-  )
-CB
-
+# Interação AxB
 CAxB <- matrix(
   c(0, 0, 0, 0, 0, 0, 1, -1, 0, -1, 1, 0,
     0, 0, 0, 0, 0, 0, 1, 0, -1, -1, 0, 1), nrow = 2, byrow = TRUE
 )
 CAxB
 
+SQ_CAxB <- t(CAxB %*% Beta) %*% solve(CAxB %*% ginv(t(X) %*% X) %*% t(CAxB)) %*% (CAxB %*% Beta)
+SQ_CAxB
+
+# Fator A
+CA <- 
+  (1/3) * matrix(
+    c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1, byrow = TRUE
+  )
+fractions(CA)
+
 SQ_CA <- t(CA %*% Beta) %*% solve(CA %*% ginv(t(X) %*% X) %*% t(CA)) %*% (CA %*% Beta)
 SQ_CA
+
+# Fator B
+CB <- 
+  (1/2) * matrix(
+    c(0, 0, 0, 2, -2, 0, 1, -1, 0, 1, -1, 0,
+      0, 0, 0, 2, 0, -2, 1, 0, -1, 1, 0, -1), nrow = 2, byrow = TRUE
+  )
+fractions(CB)
 
 SQ_CB <- t(CB %*% Beta) %*% solve(CB %*% ginv(t(X) %*% X) %*% t(CB)) %*% (CB %*% Beta)
 SQ_CB
 
-SQ_CAxB <- t(CAxB %*% Beta) %*% solve(CAxB %*% ginv(t(X) %*% X) %*% t(CAxB)) %*% (CAxB %*% Beta)
-SQ_CAxB
+### Estimabilidade no modelo superparametrizado
 
-### Estimabilidade no Modelo Superparametrizado Sem Restrições
-
-#Verifica se LBeta = a1-a2 e LBeta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) são estimáveis - não é estimável
+#### Sem restrições nos parâmetros
 
 L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
 L1
@@ -1800,7 +1801,6 @@ verL1
 L1Beta <- t(L1) %*% Beta
 L1Beta
 
-#Estimabilidade de L2*Beta = a1-a2 + (1/3(g11+g12+g13)-(1/3)(g21+g22+g23) é estimavel no modelo SEM restricao nos parametros - é estimavel!
 
 L2 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
 L2
@@ -1813,7 +1813,7 @@ verL2
 L2Beta <- t(L2) %*% Beta
 L2Beta
 
-# Matriz T de condições marginais: T*Beta = 0
+#### Com restrições nos parâmetros
 
 t <- matrix(
   c(0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1839,9 +1839,6 @@ yr
 Beta_R <- solve(t(W) %*% W) %*% t(W) %*% yr   # Beta sujeito às condições marginais
 Beta_R
 
-### Estimabilidade no Modelo Superparametrizado Com Restrições
-
-# LiBeta é estimável se Li = verLi. Verifica que L1Beta = a1-a2 é ESTIMÁVEL no modelo COM RESTRIÇÃO nos parâmetros
 
 L1 <- t(matrix(c(0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 1))
 L1
@@ -1852,9 +1849,8 @@ verL1 <- ver %*% L1 |> round()
 verL1
 
 L1Beta_r <- t(L1) %*% Beta_R
-L1Beta_r # Mostra que L1Beta = a1-a2 É estimável no modelo', 'COM restrição nos parâmetros
+L1Beta_r
 
-# Verifica que L2Beta = a1-a2 a1-a2 + (1/3(g11+g12+g13) - (1/3)(g21+g22+g23) é ESTIMÁVEL no modelo', 'COM RESTRIÇÃO nos parâmetros
 
 L22 <- (1/3) * t(matrix(c(0, 3, -3, 0, 0, 0, 1, 1, 1, -1, -1, -1), nrow = 1))
 L22 |> round(3)
@@ -1863,27 +1859,472 @@ verL22 <- ver %*% L22 |> round(3)
 verL22
 
 L2Beta_R <- t(L22) %*% Beta_R
-L2Beta_R      # Mostra que L2Beta = a1-a2 +(1/3(g11+g12+g13)-(1/3)(g21=g22+g23) É estimável no modelo', 'COM restrição nos parâmetros
+L2Beta_R
 
-### Hipótese linear geral
+#### Hipótese linear geral
 
-# ESTIMABILIDADE NO MODELO SUPERPARAMETRIZADO SEM RESTRIÇÃO
 CA <- (1 / 3) * c(0,  3, -3,  0,  0,  0,  1,  1,  1, -1, -1, -1)
-CA |> round(2)
+fractions(CA)
 
-CABeta <- CA %*% Beta_R
+##### Sem restrição
+CABeta <- CA %*% Beta
 CABeta
-
-# No modelo COM restrição nos parâmetros:
-
-CA
-
-CABeta_R <- CA %*% Beta_R
-CABeta_R
 
 SQ_A <- t(CABeta) %*% solve(t(CA) %*% ginv(t(X) %*% X) %*% CA) %*% CABeta
 SQ_A
 
+##### Com restrição
+
+CABeta_R <- CA %*% Beta_R
+CABeta_R
+
 SQ_A_R = t(CABeta_R) %*% solve(t(CA) %*% solve(t(W) %*% W) %*% CA) %*% CABeta_R
 SQ_A_R
+
+
+
+## 8.4 ANOVA desbalanceada com um fator -----------------------------------
+
+library(MASS)     # função ginv()
+
+y <- c(11.95,12.00,12.25,12.10,12.18,12.11,12.16,12.15,12.08,12.25,12.30,12.10,12.10,12.04,12.02,12.02)
+y
+
+W <- matrix(
+  c(rep(1, 4), rep(0, 12),
+    rep(0, 4), rep(1, 2), rep(0, 10),
+    rep(0, 6), rep(1, 3), rep(0, 7),
+    rep(0, 9), rep(1, 3), rep(0, 4),
+    rep(0, 12), rep(1, 4)),
+  ncol = 5, byrow = FALSE
+)
+W
+
+k <- ncol(W)                         # Número de tratamentos
+k
+
+rank_W <- sum(diag(ginv(W) %*% W))   # posto da matriz W
+rank_W
+
+deficit_rank <- k - rank_W           # déficit de rank
+deficit_rank
+
+## Teste de hipótese
+### Modelo completo x Modelo reduzido
+N <- nrow(W)   # Número total de repetições
+N
+
+Jnn <- matrix(1, nrow = N, ncol = N)
+In <- diag(1, nrow = N)
+
+
+# Total
+SQTotal <- t(y) %*% (In - Jnn / N) %*% y
+SQTotal
+
+gl_total <- N - 1
+gl_total
+
+# Modelo completo
+mi <- solve(t(W) %*% W) %*% t(W) %*% y
+mi
+
+SQcompleto <- t(mi) %*% t(W) %*% y
+SQcompleto
+
+# Modelo reduzido
+jn <- matrix(1, ncol = 1, nrow = N)
+jn
+
+mi_reduzido <- solve(t(jn) %*% jn) %*% t(jn) %*% y
+mi_reduzido
+
+SQreduzido <- t(mi_reduzido) %*% t(jn) %*% y
+SQreduzido
+
+# Entre grupos
+SQEntre <- SQcompleto - SQreduzido
+SQEntre
+
+gl_entre <- k - 1
+gl_entre
+
+QMEntre <- SQEntre / gl_entre
+QMEntre
+
+# Resíduo
+SQRes <- t(y) %*% y - t(mi) %*% t(W) %*% y
+SQRes
+
+gl_res <- N - k
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+# F e p-valor
+Fcalc <- QMEntre / QMRes
+Fcalc
+
+Ftab <- qf(0.95, gl_entre, gl_res)
+Ftab
+
+p_valor <- 1 - pf(Fcalc, gl_entre, gl_res)
+p_valor
+
+### Contrastes
+#### Contrastes ortogonais não ponderados
+a1 <- c(3,-2,-2, 3,-2)
+a2 <- c(0, 1,-2, 0, 1)
+a3 <- c(1, 0, 0,-1, 0)
+a4 <- c(0, 1, 0, 0,-1)
+
+SQa1 <- t(t(a1) %*% mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% t(a1) %*% mi
+SQa1
+F_a1 <- SQa1 / QMRes
+F_a1
+p_valor_a1 <- 1 - pf(F_a1, 1, gl_res)
+p_valor_a1
+
+SQa2 <- t(t(a2) %*% mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% t(a2) %*% mi
+SQa2
+F_a2 <- SQa2 / QMRes
+F_a2
+p_valor_a2 <- 1 - pf(F_a2, 1, gl_res)
+p_valor_a2
+
+SQa3 <- t(t(a3) %*% mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% t(a3) %*% mi
+SQa3
+F_a3 <- SQa3 / QMRes
+F_a3
+p_valor_a3 <- 1 - pf(F_a3, 1, gl_res)
+p_valor_a3
+
+SQa4 <- t(t(a4) %*% mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% t(a4) %*% mi
+SQa4
+F_a4 <- SQa4 / QMRes
+F_a4
+p_valor_a4 <- 1 - pf(F_a4, 1, gl_res)
+p_valor_a4
+
+# SQContrastes = SQA1 + SQA2 + SQA3 + SQA4 não é igual a SQEntre porque os contrastes NÃO SÃO ORTOGONAIS!
+SQContrastes <- SQa1 + SQa2 + SQa3 + SQa4
+SQContrastes
+
+SQEntre
+
+#### Contrastes ortogonais ponderados
+a2p <- c(0, 2, -6, 0, 4)
+
+SQa2p <- t(t(a2p) %*% mi) %*% solve(t(a2p) %*% solve(t(W) %*% W) %*% a2p) %*% t(a2p) %*% mi
+SQa2p
+
+F_a2p <- SQa2p / QMRes
+F_a2p
+
+p_valor_a2p <- 1 - pf(F_a2p, 1, gl_res)
+p_valor_a2p
+
+
+
+## 8.5 ANOVA desbalanceada com dois fatores (Girassol) ---------------------
+
+library(MASS)
+
+y <- c(77.9,83.2,83.5,71.5,73.5,70.5,67.5,65,71.5,70.8,72.5,89.5,91.8,92.9,86,84,94.5,96,95.8,99.5,98,93,96,90.5,83,80,78.5)
+
+n <- length(y)
+n
+
+W <- matrix(c(
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  1,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  1,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  1,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  1,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  1,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  1,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1
+), ncol = 10, byrow = TRUE
+)
+
+# Número de parâmetros
+k <- ncol(W)
+k
+
+# Posto de W
+rank_W <- sum(diag(ginv(W) %*% W))
+rank_W
+
+# Déficit de rank
+deficit_rank <- k - rank_W
+deficit_rank
+
+# Estimação parâmetro mi de médias de caselas
+Mi <- solve(t(W) %*% W) %*% t(W) %*% y
+Mi
+
+## Teste de hipótese
+
+### Modelo de médias
+
+Jnxn <- matrix(1, n, n)
+Inxn <- diag(n)
+
+# Total
+AT <- Inxn - (1 / n) * Jnxn
+
+SQTotal <- t(y) %*% AT %*% y
+SQTotal
+
+gl_total <- sum(diag(AT %*% ginv(AT)))
+gl_total
+
+# Residuo
+AR <- Inxn - W %*% ginv(t(W) %*% W) %*% t(W)
+
+SQRes <- t(y) %*% AR %*% y
+SQRes
+
+gl_res <- sum(diag(AR %*% ginv(AR)))
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
+
+# Tratamento
+
+AG <- W %*% ginv(t(W) %*% W) %*% t(W) - (1/n) * Jnxn
+
+SQTrat <- t(y) %*% AG %*% y
+SQTrat
+
+gl_trat <- sum(diag(AG %*% ginv(AG)))
+gl_trat
+
+QMTrat <- SQTrat / gl_trat
+QMTrat
+
+# F e p-valor
+
+Fcalc <- QMTrat / QMRes
+Fcalc
+
+Ftab <- qf(0.95, gl_trat, gl_res)
+Ftab
+
+p_valor <- 1 - pf(Fcalc, gl_trat, gl_res)
+p_valor
+
+### Efeito de interação
+
+# Contrastes
+
+CS <- matrix(c(1,  1,  1,  1,  1, -1, -1, -1, -1, -1), ncol = 10, byrow = TRUE)
+CS
+
+CG <- matrix(c(
+  -2, -1,  0,  1,  2, -2, -1,  0,  1,  2,
+  2, -1, -2, -1,  2,  2, -1, -2, -1,  2,
+  -1,  2,  0, -2,  1, -1,  2,  0, -2,  1,
+  1, -4,  6, -4,  1,  1, -4,  6, -4,  1
+), ncol = 10, byrow = TRUE
+)
+CG
+
+CSxG <- rbind(
+  sweep(CS, 2, CG[1,], `*`),
+  sweep(CS, 2, CG[2,], `*`),
+  sweep(CS, 2, CG[3,], `*`),
+  sweep(CS, 2, CG[4,], `*`)
+)
+CSxG
+
+# Fator Sexo
+SQSexo <- t(CS %*% Mi) %*% solve(CS %*% ginv(t(W) %*% W) %*% t(CS)) %*% (CS %*% Mi)
+SQSexo
+
+gl_sexo <- nrow(CS)
+gl_sexo
+
+QMSexo <- SQSexo / gl_sexo
+QMSexo
+
+F_sexo <- QMSexo / QMRes
+F_sexo
+
+p_sexo <- 1 - pf(F_sexo, gl_sexo, gl_res)
+p_sexo
+
+# Fator Girassol
+SQGirassol <- t(CG %*% Mi) %*% solve(CG %*% ginv(t(W) %*% W) %*% t(CG)) %*% (CG %*% Mi)
+SQGirassol
+
+gl_girassol <- nrow(CG)
+gl_girassol
+
+QMGirassol <- SQGirassol / gl_girassol
+QMGirassol
+
+F_girassol <- QMGirassol / QMRes
+F_girassol
+
+p_girassol <- 1 - pf(F_girassol, gl_girassol, gl_res)
+p_girassol
+
+# Interação Sexo x Girassol
+SQSxG <- t(CSxG %*% Mi) %*% solve(CSxG %*% ginv(t(W) %*% W) %*% t(CSxG)) %*% (CSxG %*% Mi)
+SQSxG
+
+gl_SxG <- nrow(CSxG)
+gl_SxG
+
+QMSxG <- SQSxG / gl_SxG
+QMSxG
+
+F_SxG <- QMSxG / QMRes
+F_SxG
+
+p_SxG <- 1 - pf(F_SxG, gl_SxG, gl_res)
+p_SxG
+
+### Efeitos Simples
+
+#### Sexo dentro de Girassol
+
+a1 <- matrix(c(1, 0, 0, 0, 0, -1,  0,  0,  0,  0), ncol = 1)
+a2 <- matrix(c(0, 1, 0, 0, 0,  0, -1,  0,  0,  0), ncol = 1)
+a3 <- matrix(c(0, 0, 1, 0, 0,  0,  0, -1,  0,  0), ncol = 1)
+a4 <- matrix(c(0, 0, 0, 1, 0,  0,  0,  0, -1,  0), ncol = 1)
+a5 <- matrix(c(0, 0, 0, 0, 1,  0,  0,  0,  0, -1), ncol = 1)
+
+SQa1 <- t(t(a1) %*% Mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% (t(a1) %*% Mi)
+SQa1
+
+SQa2 <- t(t(a2) %*% Mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% (t(a2) %*% Mi)
+SQa2
+
+SQa3 <- t(t(a3) %*% Mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% (t(a3) %*% Mi)
+SQa3
+
+SQa4 <- t(t(a4) %*% Mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% (t(a4) %*% Mi)
+SQa4
+
+SQa5 <- t(t(a5) %*% Mi) %*% solve(t(a5) %*% solve(t(W) %*% W) %*% a5) %*% (t(a5) %*% Mi)
+SQa5
+
+gl_a <- 1
+
+Fcalc1 <- SQa1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+p_valor1
+
+Fcalc2 <- SQa2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+p_valor2
+
+Fcalc3 <- SQa3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+p_valor3
+
+Fcalc4 <- SQa4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+p_valor4
+
+Fcalc5 <- SQa5 / QMRes
+p_valor5 <- 1 - pf(Fcalc5, 1, gl_res)
+p_valor5
+
+#### Girassol dentro de Sexo
+
+# Fêmeas
+
+F1 <- c(-2, -1,  0,  1, 2, 0, 0, 0, 0, 0)  # Grau 1
+F2 <- c( 2, -1, -2, -1, 2, 0, 0, 0, 0, 0)  # Grau 2
+F3 <- c(-1,  2,  0, -2, 1, 0, 0, 0, 0, 0)  # Grau 3
+F4 <- c( 1, -4,  6, -4, 1, 0, 0, 0, 0, 0)  # Grau 4
+
+SQf1 <- t(t(F1) %*% Mi) %*% solve(t(F1) %*% solve(t(W) %*% W) %*% F1) %*% (t(F1) %*% Mi)
+
+SQf2 <- t(t(F2) %*% Mi) %*% solve(t(F2) %*% solve(t(W) %*% W) %*% F2) %*% (t(F2) %*% Mi)
+
+SQf3 <- t(t(F3) %*% Mi) %*% solve(t(F3) %*% solve(t(W) %*% W) %*% F3) %*% (t(F3) %*% Mi)
+
+SQf4 <- t(t(F4) %*% Mi) %*% solve(t(F4) %*% solve(t(W) %*% W) %*% F4) %*% (t(F4) %*% Mi)
+
+
+gl_f <- 1
+
+
+Fcalc1 <- SQf1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+
+Fcalc2 <- SQf2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+
+Fcalc3 <- SQf3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+
+Fcalc4 <- SQf4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+
+# Machos
+
+M1 <- c(0, 0, 0, 0, 0, -2, -1,  0,  1, 2)  # Grau 1
+M2 <- c(0, 0, 0, 0, 0,  2, -1, -2, -1, 2)  # Grau 2
+M3 <- c(0, 0, 0, 0, 0, -1,  2,  0, -2, 1)  # Grau 3
+M4 <- c(0, 0, 0, 0, 0,  1, -4,  6, -4, 1)  # Grau 4
+
+SQm1 <- t(t(M1) %*% Mi) %*% solve(t(M1) %*% solve(t(W) %*% W) %*% M1) %*% (t(M1) %*% Mi)
+
+SQm2 <- t(t(M2) %*% Mi) %*% solve(t(M2) %*% solve(t(W) %*% W) %*% M2) %*% (t(M2) %*% Mi)
+
+SQm3 <- t(t(M3) %*% Mi) %*% solve(t(M3) %*% solve(t(W) %*% W) %*% M3) %*% (t(M3) %*% Mi)
+
+SQm4 <- t(t(M4) %*% Mi) %*% solve(t(M4) %*% solve(t(W) %*% W) %*% M4) %*% (t(M4) %*% Mi)
+
+
+gl_m <- 1
+
+
+Fcalc1 <- SQm1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+
+Fcalc2 <- SQm2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+
+Fcalc3 <- SQm3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+
+Fcalc4 <- SQm4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+
+
+# Regressões:
+
+
+
+
+
+
+
 

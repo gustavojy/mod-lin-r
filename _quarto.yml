@@ -46,9 +46,9 @@ book:
         - exemplo5.1.qmd
         - exemplo5.2.qmd
         - exemplo5.3.qmd
-        # - exemplo5.4.qmd
+        - exemplo5.4.qmd
         # - exemplo5.5.qmd
-        # - exemplo5.6.qmd
+        - exemplo5.6.qmd
 
 format:
   html:

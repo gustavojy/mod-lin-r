@@ -1,159 +1,943 @@
-# Fatorial desbalanceado
+# ANOVA desbalanceada com dois fatores
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+options(scipen = 999999, knitr.kable.NA = '')
+
+library(MASS)
+```
+
+Agora, trataremos da ANOVA com **dois fatores** em conjuntos de dados **desbalanceados**. O modelo desbalanceado com dois fatores é dado por:
+
+$$
+\begin{align}
+y_{ijk} = \mu + \alpha_i + \beta_j + \gamma{ij} + \epsilon_{ij} = \mu_{ij} + \epsilon_{ijk} \\
+i = 1,\dots,a \space \text{ , } \space j = 1,\dots,b \space \text{ e } \space k = 1, \dots, n_{ij}
+\end{align}
+$$
+
+Para realizar inferências, assumiremos $\epsilon_{ijk} \sim N(\mu_{ij}, \sigma^2)$ são independentes e identicamente distribuídos.
+
+Para o caso fatorial desbalanceado, utilizaremos o modelo de médias de caselas, que fornece uma abordagem mais simples e sem ambiguidades para testar hipóteses, quando comparado ao modelo superparametrizado.
+
+Como exemplo, considere: *Em um experimento de substituição do farelo de soja pelo farelo de girassol na ração de suínos, montou-se um experimento fatorial 2x5, com os fatores Sexo (1:Macho e 2:Fêmea) e Girassol (0, 25, 50, 75 e 100% de substituição). Foram utilizados 30 suínos (15 machos e 15 fêmeas) castrados da raça Duroc-Jersey, num delineamento inteiramente casualizado com 3 repetições. Na fase final do período experimental ocorreu a morte de três suínos. Os ganhos de peso dos animais aos 112 dias de experimento estão apresentados a seguir:*
+
+|       |       | Macho |       |       |       |       | Fêmea  |       |       |
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:------:|:-----:|:-----:|
+|   0   |  25   |  50   |  75   |  100  |   0   |  25   |   50   |  75   |  100  |
+|  \-   | 94,5  | 99,5  | 93,0  | 83,0  | 77,9  | 71,5  |  67,5  | 71,5  | 89,5  |
+| 86,0  | 96,0  | 98,0  | 96,0  | 80,0  | 83,2  | 73,5  |   \-   | 70,8  | 91,8  |
+| 84,0  | 95,8  |  \-   | 90,5  | 78,5  | 83,5  | 70,5  |  65,0  | 72,5  | 92,9  |
+
+O modelo matemático é dado por:
+
+$$
+\begin{align}
+y_{ijk}& = \mu_{ij} + \epsilon_{ijk} \\
+i = 1,2 \space \text{ , } \space &j = 1,\dots,5 \space \text{ e } \space k = n_{ij}
+\end{align}
+$$
+
+Já o modelo matricial de médias de caselas $\mathbf{y} = \mathbf{W}\boldsymbol{\mu} + \boldsymbol{\epsilon}$ é dado por:
+  
+$$
+\begin{bmatrix}
+y_{111} \\ y_{112} \\ y_{113} \\ y_{121} \\ y_{122} \\ y_{123} \\ y_{131} \\ y_{132} \\ y_{141} \\ y_{142} \\ y_{143} \\ y_{151} \\ y_{152} \\ y_{153} \\ y_{211} \\ y_{212} \\ y_{221} \\ y_{222} \\ y_{223} \\ y_{231} \\ y_{232} \\ y_{241} \\ y_{242} \\ y_{243} \\ y_{251} \\ y_{252} \\ y_{253}
+\end{bmatrix}
+=
+\begin{bmatrix}
+77.9 \\ 83.2 \\ 83.5 \\ 71.5 \\ 73.5 \\ 70.5 \\ 67.5 \\ 65 \\ 71.5 \\ 70.8 \\ 72.5 \\ 89.5 \\ 91.8 \\ 92.9 \\ 86 \\ 84 \\ 94.5 \\ 96 \\ 95.8 \\ 99.5 \\ 98 \\ 93 \\ 96 \\ 90.5 \\ 83 \\ 80 \\ 78.5
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+\mu_{11} \\ \mu_{12} \\ \mu_{13} \\ \mu_{14} \\ \mu_{15} \\ \mu_{21} \\ \mu_{22} \\ \mu_{23} \\ \mu_{24} \\ \mu_{25} 
+\end{bmatrix}
+\begin{bmatrix}
+\epsilon_{111} \\ \epsilon_{112} \\ \epsilon_{113} \\ \epsilon_{121} \\ \epsilon_{122} \\ \epsilon_{123} \\ \epsilon_{131} \\ \epsilon_{132} \\ \epsilon_{141} \\ \epsilon_{142} \\ \epsilon_{143} \\ \epsilon_{151} \\ \epsilon_{152} \\ \epsilon_{153} \\ \epsilon_{211} \\ \epsilon_{212} \\ \epsilon_{221} \\ \epsilon_{222} \\ \epsilon_{223} \\ \epsilon_{231} \\ \epsilon_{232} \\ \epsilon_{241} \\ \epsilon_{242} \\ \epsilon_{243} \\ \epsilon_{251} \\ \epsilon_{252} \\ \epsilon_{253}
+\end{bmatrix}
+$$
+
+::: panel-tabset
+
+### R
 
 ```{r}
 library(MASS)
 ```
 
-
-*Em um experimento de substituição do farelo de soja pelo farelo de girassol na ração de suínos, montou-se um experimento fatorial 2x5, com os fatores Sexo (1:Macho e 2:Fêmea) e Girassol (0, 25, 50, 75 e 100% de substituição). Foram utilizados 30 suínos (15 machos e 15 fêmeas) castrados da raça Duroc-Jersey, num delineamento inteiramente casualizado com 3 repetições. Na fase final do período experimental ocorreu a morte de três suínos. Os ganhos de peso dos animais aos 112 dias de experimento estão apresentados a seguir:*
-
 ```{r}
-y <- c(85.0, 86.0, 84.0, 94.5, 96.0, 95.8, 99.5, 98.0, 104.0, 93.0, 96.0, 90.5, 83.0, 80.0, 78.5)
+y <- c(77.9,83.2,83.5,71.5,73.5,70.5,67.5,65,71.5,70.8,72.5,89.5,91.8,92.9,86,84,94.5,96,95.8,99.5,98,93,96,90.5,83,80,78.5)
 
 n <- length(y)
+n
 
-jnx1 <- matrix(1, n, 1)
+W <- matrix(c(
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  1, 0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 1,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  1,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  1,  0,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  1,  0,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  1,  0,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  1,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  1,  0,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  1,  0,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  1,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  1,  0,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  1,  0,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1,
+  0, 0,  0,  0,  0,  0,  0,  0,  0,  1
+), ncol = 10, byrow = TRUE
+)
+```
 
+Nota-se que posto$(W) = k = 10$, sendo $k$ o número de parâmetros do modelo.
+
+```{r}
+# Número de parâmetros
+k <- ncol(W)
+k
+
+# Posto de W
+rank_W <- sum(diag(ginv(W) %*% W))
+rank_W
+
+# Déficit de rank
+deficit_rank <- k - rank_W
+deficit_rank
+```
+
+Dessa forma, o sistema de equações normais $\mathbf{(W'W)} \boldsymbol{\hat\mu} = \mathbf{(W'y)}$ tem solução única:
+
+$$
+\boldsymbol{\hat\mu} = \mathbf{(W'W)}^{-1} \mathbf{W'y} = \mathbf{\bar{y}} =
+\begin{bmatrix}
+\bar{y}_{11.} \\ \bar{y}_{12.} \\ \bar{y}_{13.} \\ \bar{y}_{14.} \\ \bar{y}_{15.} \\ \bar{y}_{21.} \\ \bar{y}_{22.} \\ \bar{y}_{23.} \\ \bar{y}_{24.} \\ \bar{y}_{25.} 
+\end{bmatrix}
+$$
+
+Onde o vetor $\mathbf{\bar{y}}$ contém as médias amostrais das caselas.
+
+```{r}
+Mi <- solve(t(W) %*% W) %*% t(W) %*% y
+Mi
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+data Girassol;
+input Sexo Girassol Trat Rep GP;
+* n11=2 n12=3 n13=2 n14=3 n15=3;
+* n21=2 n22=3 n23=2 n24=3 n25=3;
+cards;
+  1   0   1   1  77.9
+  1   0   1   2  83.2
+  1   0   1   3  83.5
+  1  25   2   1  71.5
+  1  25   2   2  73.5
+  1  25   2   3  70.5
+  1  50   3   1  67.5
+  1  50   3   3  65.0
+  1  75   4   1  71.5
+  1  75   4   2  70.8
+  1  75   4   3  72.5
+  1 100   5   1  89.5
+  1 100   5   2  91.8
+  1 100   5   3  92.9
+  2   0   6   2  86.0
+  2   0   6   3  84.0
+  2  25   7   1  94.5
+  2  25   7   2  96.0
+  2  25   7   3  95.8
+  2  50   8   1  99.5
+  2  50   8   2  98.0
+  2  75   9   1  93.0
+  2  75   9   2  96.0
+  2  75   9   3  90.5
+  2 100  10   1  83.0
+  2 100  10   2  80.0
+  2 100  10   3  78.5
+;
+
+proc iml;
+varNames = {"Sexo" "Girassol" "Trat" "Rep" "GP"};
+use work.Girassol;
+read all var varNames;
+close work.Girassol;
+print Sexo Girassol Trat Rep GP;
+
+y = GP; 
+n = nrow(y);
+
+W = design(Trat);
+
+Mi = inv(t(W)*W)*t(W)*GP;
+print GP W Mi[format=8.2];
+```
+
+:::
+
+## Teste de hipótese
+
+### Modelo de médias
+
+A seguir, testaremos a hipótese de igualdade entre as médias dos tratamentos utilizando a abordagem do **modelo completo x modelo reduzido**.
+
+::: panel-tabset
+
+### R
+
+```{r}
 Jnxn <- matrix(1, n, n)
-
 Inxn <- diag(n)
-
-Z1 <- c(0, 0, 0, 25, 25, 25, 50, 50, 50, 75, 75, 75, 100, 100, 100)
-
-dados <- data.frame(Girassol = Z1, GP = y)
-
-delin_matriz <- as.matrix(model.matrix(aov(GP ~ as.factor(Girassol), data = dados)))
-
-delin_matriz <- delin_matriz[,-1]
-XT <- cbind(rep(1,15),c(rep(1,3),rep(0,12)), delin_matriz)
-
 ```
 
-```{r}
-Beta0 <- ginv(t(XT) %*% XT) %*% t(XT) %*% y
-```
+A soma de quadrados total (`SQTotal`) é dada por:
 
-
-```{r}
-y0 <- c(y, 0)
-T1 <- c(0, 1, 0, 0, 0, 0)  # Condição: G0 = 0 (Restrição do R)
-# T1 <- c(0, 1, 1, 1, 1, 1); Condição: Soma dos efeitos = zero;
-# T1 <- c(0, 0, 0, 0, 0, 1); Condição: G100 = 0 (Restrição do SAS);
-XT1 <- rbind(XT, T1)
-(Beta <- round(solve(t(XT1) %*% XT1) %*% t(XT1) %*% y0,3)) #usando a restrição do R
-row.names(Beta) <- NULL
-print(Beta0, digits = 4)# Solução baseada na inversa
-print(Beta, digits = 4)#Solução usando a restrição do R
-```
+$$
+SQTotal = \mathbf{y'} \left(\mathbf{I} - \frac{1}n \mathbf{J}\right) \mathbf{y}
+$$
 
 ```{r}
-#Total
-AT <- Inxn - (1/n) * Jnxn
+# Total
+AT <- Inxn - (1 / n) * Jnxn
+
 SQTotal <- t(y) %*% AT %*% y
+SQTotal
+
 gl_total <- sum(diag(AT %*% ginv(AT)))
+gl_total
 ```
 
-```{r}
-#Tratamento
-AG <- XT %*% ginv(t(XT) %*% XT) %*% t(XT) - (1/n) * Jnxn
-SQGirassol <- t(y) %*% AG %*% y
-gl_girassol <- sum(diag(AG %*% ginv(AG)))
-QMGirassol <- SQGirassol / gl_girassol
-```
+A soma de quadrados dos resíduos (`SQRes`) é dada por:
 
+$$
+SQRes = \mathbf{y'} [\mathbf{I} - \mathbf{W(W'W)^{-}W'}] \mathbf{y}
+$$
 
 ```{r}
-#Residuo
-AR <- Inxn - XT %*% ginv(t(XT) %*% XT) %*% t(XT)
-SQResiduo <- t(y) %*% AR %*% y
+# Residuo
+AR <- Inxn - W %*% ginv(t(W) %*% W) %*% t(W)
+
+SQRes <- t(y) %*% AR %*% y
+SQRes
+
 gl_res <- sum(diag(AR %*% ginv(AR)))
-QMResiduo <- SQResiduo / gl_res
+gl_res
+
+QMRes <- SQRes / gl_res
+QMRes
 ```
 
+A soma de quadrados de tratamento é:
+
+$$
+SQTrat = \mathbf{y'} \left[\mathbf{W(W'W)^{-}W'} - \frac{1}n \mathbf{J}\right] \mathbf{y}
+$$
 
 ```{r}
-#Teste F
-(Fcalc <- QMGirassol / QMResiduo)
-(p_valor <- 1 - pf(Fcalc, gl_girassol, gl_res))
-```
+# Tratamento
 
-```{r}
-#Tabela de analise de variancia (ANOVA)
-data.frame(F.variação=c("Tratamento","Resíduo","Total"),
-           GL=round(c(gl_girassol,gl_res,gl_total),4), 
-           SQs=round(c(SQGirassol,SQResiduo,SQTotal),4),
-           QMs=round(c(QMGirassol,QMResiduo,NA),4), 
-           F.cal=round(c(Fcalc,NA,NA),4),
-           p.valor=c(p_valor,NA,NA))
-```
+AG <- W %*% ginv(t(W) %*% W) %*% t(W) - (1/n) * Jnxn
 
+SQTrat <- t(y) %*% AG %*% y
+SQTrat
 
+gl_trat <- sum(diag(AG %*% ginv(AG)))
+gl_trat
 
-
-## Contrastes
-
-```{r}
-#Montando os contrastes
-L1 <- c(0, -2, -1, 0, 1, 2)  #Grau 1
-L2 <- c(0, 2, -1, -2, -1, 2) #Grau 2
-L3 <- c(0, -1, 2, 0, -2, 1)  #Grau 3
-L4 <- c(0, 1, -4, 6, -4, 1)  #Grau 4
-
+QMTrat <- SQTrat / gl_trat
+QMTrat
 ```
 
 ```{r}
-#Soma de quadrado dos contrastes
-SQGrau1 <- t(t(L1) %*% Beta) %*% solve(t(L1) %*% ginv(t(XT) %*% XT) %*% L1) %*% t(L1) %*% Beta
-SQGrau2 <- t(t(L2) %*% Beta) %*% solve(t(L2) %*% ginv(t(XT) %*% XT) %*% L2) %*% t(L2) %*% Beta
-SQGrau3 <- t(t(L3) %*% Beta) %*% solve(t(L3) %*% ginv(t(XT) %*% XT) %*% L3) %*% t(L3) %*% Beta
-SQGrau4 <- t(t(L4) %*% Beta) %*% solve(t(L4) %*% ginv(t(XT) %*% XT) %*% L4) %*% t(L4) %*% Beta
-gl <- 1
+# F e p-valor
 
-#Teste F
-Fcalc1 <- SQGrau1 / QMResiduo
-p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)#grau 1
+Fcalc <- QMTrat / QMRes
+Fcalc
 
-Fcalc2 <- SQGrau2 / QMResiduo
-p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)#grau 2
+Ftab <- qf(0.95, gl_trat, gl_res)
+Ftab
 
-Fcalc3 <- SQGrau3 / QMResiduo
-p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)#grau 2
-
-Fcalc4 <- SQGrau4 / QMResiduo
-p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)#grau 4
-
-cat("QUADRO DE ANOVA - Testes de tendência\n")
-cat("Grau 1", gl, format(SQGrau1, digits = 4), format(Fcalc1, digits = 4), format(p_valor1, digits = 4), "\n")
-cat("Grau 2", gl, format(SQGrau2, digits = 4), format(Fcalc2, digits = 4), format(p_valor2, digits = 4), "\n")
-cat("Grau 3", gl, format(SQGrau3, digits = 4), format(Fcalc3, digits = 4), format(p_valor3, digits = 4), "\n")
-cat("Grau 4", gl, format(SQGrau4, digits = 4), format(Fcalc4, digits = 4), format(p_valor4, digits = 4), "\n")
-
+p_valor <- 1 - pf(Fcalc, gl_trat, gl_res)
+p_valor
 ```
 
-
+A seguir, o quadro da ANOVA traz os resultados obtidos.
 
 ```{r}
-SomaSQ <- SQGrau1 + SQGrau2 + SQGrau3 + SQGrau4
-cat("SomaSQ =", format(SomaSQ, digits = 4), "   =", format(SQGirassol, digits = 4), "\n") #comparando SQtrat e SQcontrastes
+#| echo: false
 
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Tratamentos", "Resíduo", "Total"),
+  "gl" = c(gl_trat, gl_res, gl_total),
+  "SQ" = c(SQTrat, SQRes, SQTotal) |> round(4),
+  "QM" = c(QMTrat, QMRes, NA) |> round(4),
+  "Fcal" = c(Fcalc, NA, NA) |> round(4),
+  "Ftab" = c(Ftab, NA, NA) |> round(4),
+  "p.valor" = c(p_valor, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA fatorial desbalanceada - modelo de médias: H0: ",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
 ```
 
-## Modelo quadrático
+Dado que o $F_{cal} > F_{tab}$, considerando $F_{(0,05;9;17)}$, rejeita-se a hipótese nula de igualdade de médias, ou seja, pelo menos duas médias diferem entre si.
+
+Com isso, precisamos analisar o efeito de interação entre os tratamentos.
+
+### SAS
 
 ```{r}
-#Modelo de regressão quadratica
-Z2 <- Z1 * Z1
-Z <- cbind(jnx1, Z1, Z2)
+#| eval: false
 
-(Beta_Reg <- solve(t(Z) %*% Z) %*% t(Z) %*% y)#estimativas do modelo quadrático
+AT = I(n)-(1/n)*J(n,n,1);
+SQTotal = t(Y)*AT*y;
+gl_total = n-1;
 
-y_hat <- Z %*% Beta_Reg #Valores preditos
-res <- y - y_hat #Residuos
-data.frame(y, y_hat, res)#
+ARes = I(n)- W*inv(t(W)*W)*t(W);
+SQRes = t(y)*ARes*y;
+gl_res = round(trace(ARes*ginv(ARes)));
+QMRes = SQRes/gl_Res;
 
-SQReg <- t(Beta_Reg) %*% t(Z) %*% y - t(y) %*% ((1/n) * Jnxn %*% y)
-R2 <- SQReg / SQTotal
-data.frame(SQReg, SQTotal, R2)
+ATrat = W*inv(t(W)*W)*t(W) - (1/n)*J(n,n,1);
+SQTrat = t(y)*ATrat*y;
+gl_trat = round(trace(ATrat*ginv(ATrat)));
+QMTrat = SQTrat/gl_trat;
+F_trat = QMTrat/QMRes;
+p_trat = 1-cdf('F',F_trat,gl_trat,gl_res);
+
+print 'ANOVA - modelo de médias',,
+'Tratamentos ' gl_trat SQTrat[format=12.4] QMTrat[format=12.4] F_trat[format=12.4] p_trat[format=12.4],,
+'Resíduo     ' gl_res SQRes[format=12.4] QMRes[format=12.4],,
+'Total       ' gl_total SQTotal[format=12.4];
+```
+
+:::
+
+### Efeito de interação
+
+Para avaliar se há **interação** entre os fatores, realizaremos outra ANOVA, avaliando os **efeitos principais** de ambos os fatores (vide @sec-fatorial-th).
+
+$$
+\begin{align}
+H_0 &: \text{Não há efeito da interação entre os fatores A e B} \\
+H_1 &: \text{Há efeito da interação entre os fatores A e B}
+\end{align}
+$$
+
+Para isso, utilizaremos a **hipótese linear geral**. A soma de quadrados obtida a partir desta abordagem é dada por:
+
+$$
+SQ_{Hip} = (\boldsymbol{C\hat{\beta}})' \left[\mathbf{C(X'X)^-C'}\right]^{-1} (\boldsymbol{C\hat{\beta}})
+$$
+
+::: panel-tabset
+
+### R
+
+A matriz de coeficientes $\mathbf{C}$ do fator Sexo (`CS`), do fator Girassol (`CG`) e da interação entre os fatores (`CSxG`) são dadas a seguir:
+
+```{r}
+CS <- matrix(c(1,  1,  1,  1,  1, -1, -1, -1, -1, -1), ncol = 10, byrow = TRUE)
+CS
+
+CG <- matrix(c(
+  -2, -1,  0,  1,  2, -2, -1,  0,  1,  2,
+   2, -1, -2, -1,  2,  2, -1, -2, -1,  2,
+  -1,  2,  0, -2,  1, -1,  2,  0, -2,  1,
+   1, -4,  6, -4,  1,  1, -4,  6, -4,  1
+), ncol = 10, byrow = TRUE
+)
+CG
+
+CSxG <- rbind(
+  sweep(CS, 2, CG[1,], `*`),
+  sweep(CS, 2, CG[2,], `*`),
+  sweep(CS, 2, CG[3,], `*`),
+  sweep(CS, 2, CG[4,], `*`)
+)
+CSxG
+```
+
+A matriz `CSxG` é construída a partir da mutiplicação, elemento a elemento, da matriz `CS` com a primeira, segunda, terceira e quarta linhas da matriz `CG`. Para isso, utilizamos a função `sweep()` para realizar esta operação e, posteriormente, com a `rbind()`, juntamos os resultados por linha.
+
+```{r}
+# Fator Sexo
+SQSexo <- t(CS %*% Mi) %*% solve(CS %*% ginv(t(W) %*% W) %*% t(CS)) %*% (CS %*% Mi)
+SQSexo
+
+gl_sexo <- nrow(CS)
+gl_sexo
+
+QMSexo <- SQSexo / gl_sexo
+QMSexo
+
+F_sexo <- QMSexo / QMRes
+F_sexo
+
+p_sexo <- 1 - pf(F_sexo, gl_sexo, gl_res)
+p_sexo
+```
+
+```{r}
+# Fator Girassol
+SQGirassol <- t(CG %*% Mi) %*% solve(CG %*% ginv(t(W) %*% W) %*% t(CG)) %*% (CG %*% Mi)
+SQGirassol
+
+gl_girassol <- nrow(CG)
+gl_girassol
+
+QMGirassol <- SQGirassol / gl_girassol
+QMGirassol
+
+F_girassol <- QMGirassol / QMRes
+F_girassol
+
+p_girassol <- 1 - pf(F_girassol, gl_girassol, gl_res)
+p_girassol
+```
+
+```{r}
+# Interação Sexo x Girassol
+SQSxG <- t(CSxG %*% Mi) %*% solve(CSxG %*% ginv(t(W) %*% W) %*% t(CSxG)) %*% (CSxG %*% Mi)
+SQSxG
+
+gl_SxG <- nrow(CSxG)
+gl_SxG
+
+QMSxG <- SQSxG / gl_SxG
+QMSxG
+
+F_SxG <- QMSxG / QMRes
+F_SxG
+
+p_SxG <- 1 - pf(F_SxG, gl_SxG, gl_res)
+p_SxG
+```
+
+No caso fatorial desbalanceado, a soma das somas de quadrados não será igual a soma de quadrados dos tratamentos, pois não utilizamos contrastes ortogonais ponderados.
+
+```{r}
+SSQ <- SQSexo + SQGirassol + SQSxG
+SSQ
+
+SQTrat
+```
+
+O quadro de ANOVA resume os resultados obtidos.
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "FV" = c("Sexo (A)", "Girassol (B)", "Interação (AxB)", "Resíduo", "Total"),
+  "gl" = c(gl_sexo, gl_girassol, gl_SxG, gl_res, gl_total),
+  "SQ" = c(SQSexo, SQGirassol, SQSxG, SQRes, SQTotal) |> round(3),
+  "QM" = c(QMSexo, QMGirassol, QMSxG, QMRes, NA) |> round(3),
+  "Fcal" = c(F_sexo, F_girassol, F_SxG, NA, NA) |> round(3),
+  "p.valor" = c(p_sexo, p_girassol, p_SxG, NA, NA) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Fatorial Sexo x Girassol (caso desbalanceado) - Interação e efeitos principais",
+    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Dado que o p-valor da **interação** é menor que p-valor = 0,05, **rejeita-se** $H_0: \text{Não há efeito da interação entre os fatores A e B}$, ou seja, **há efeito de interação** entre os fatores Sexo e Girassol (há dependência).
+
+Visto que há interação entre os fatores, precisamos avaliar os **efeitos simples** dos tratamentos.
+
+### SAS
+
+```{r}
+#| eval: false
+
+CS = { 1  1  1  1  1 -1 -1 -1 -1 -1};
+*CG = {-4  1  1  1  1 -4  1  1  1  1,
+       0 -3  1  1  1  0 -3  1  1  1,
+       0  0 -2  1  1  0  0 -2  1  1,
+       0  0  0 -1  1  0  0  0 -1  1}; 
+
+CG = {-2 -1  0  1  2 -2 -1  0  1  2,
+       2 -1 -2 -1  2  2 -1 -2 -1  2,
+	  -1  2  0 -2  1 -1  2  0 -2  1,
+	   1 -4  6 -4  1  1 -4  6 -4  1};
+CSxG = CS#CG[1,]//CS#CG[2,]//CS#CG[3,]//CS#CG[4,];
+print CS,, CG,, CSxG;
+
+SQSexo = t(CS*Mi)*inv(CS*inv(t(W)*W)*t(CS))*(CS*Mi);
+gl_Sexo = nrow(CS);
+QMSexo = SQSexo/gl_Sexo;
+F_sexo =QMSexo/QMRes;
+p_sexo = 1-cdf('F',F_sexo,gl_sexo,gl_res);
+
+SQGirassol = t(CG*Mi)*inv(CG*inv(t(W)*W)*t(CG))*(CG*Mi);
+gl_Girassol = nrow(CG);
+QMGirassol = SQGirassol/gl_Girassol;
+F_Girassol = QMGirassol/QMRes;
+p_girassol = 1-cdf('F',F_Girassol,gl_Girassol,gl_res);
+
+SQSxG = t(CSxG*Mi)*inv(CSxG*inv(t(W)*W)*t(CSxG))*(CSxG*Mi);
+gl_SxG = nrow(CSxG);
+QMSxG = SQSxG/gl_SxG;
+F_SxG = QMSxG/QMRes;
+p_SxG = 1-cdf('F',F_SxG,gl_SxG,gl_res);
+
+SQTrats = SQSexo + SQGirassol + SQSxG;
+
+print 'ANOVA - FATORIAL SEXO x GIRASSOL',,
+'Sexo            ' gl_sexo SQSexo[format=12.4] QMSexo[format=12.4] F_sexo[format=12.4] p_sexo[format=12.4],,
+'Girassol      ' gl_girassol SQGirassol[format=12.4] QMGirassol[format=12.4] F_Girassol[format=12.4] p_Girassol[format=12.4],,
+'Interação SxG   ' gl_SxG SQSxG[format=12.4] QMSxG[format=12.4] F_SxG[format=12.4] p_SxG[format=12.4],,
+'Resíduo         ' gl_res SQRes[format=12.4] QMRes[format=12.4],,
+'Total           ' gl_total SQTotal[format=12.4],,;
+
+print 'SQTrats = SQS + SQG + SQSxG = ' SQTrats[format=12.4] SQTrat[format=12.4];
 
 ```
 
+:::
+
+### Efeitos Simples
+
+Dado que há interação entre os fatores, devemos avaliar os **efeitos simples** de cada fator, ou seja, avaliar o efeito do fator A (Sexo) dentro de cada nível do fator B (Girassol) e/ou o efeito do fator B (Girassol) dentro de cada nível do fator A (Sexo).
+
+Para isso, utilizaremos **contrastes ortogonais** não ponderados.
+
+#### Sexo dentro de Girassol {.unnumbered}
+
+Primeiramente, compararemos as médias dos dois sexos dentro de cada nível do fator Girassol.
+
+$$
+H_0: \mu_{1j} = \mu_{2j}, \quad \text{para } j = 1,2,3,4,5
+$$
+
+::: panel-tabset
+
+### R
+
+```{r}
+a1 <- matrix(c(1, 0, 0, 0, 0, -1,  0,  0,  0,  0), ncol = 1)
+a2 <- matrix(c(0, 1, 0, 0, 0,  0, -1,  0,  0,  0), ncol = 1)
+a3 <- matrix(c(0, 0, 1, 0, 0,  0,  0, -1,  0,  0), ncol = 1)
+a4 <- matrix(c(0, 0, 0, 1, 0,  0,  0,  0, -1,  0), ncol = 1)
+a5 <- matrix(c(0, 0, 0, 0, 1,  0,  0,  0,  0, -1), ncol = 1)
+```
+
+A soma de quadrados dos contrastes é calculada da seguinte forma:
+
+$$
+SQ_c = (\boldsymbol{\lambda' \mu})' \left[\boldsymbol{\lambda'} (\mathbf{W'W})^{-1} \boldsymbol{\lambda}\right]^{-1} (\boldsymbol{\lambda' \mu})
+$$
+
+Cada contraste tem um graus de liberdade.
+
+```{r}
+SQa1 <- t(t(a1) %*% Mi) %*% solve(t(a1) %*% solve(t(W) %*% W) %*% a1) %*% (t(a1) %*% Mi)
+SQa1
+
+SQa2 <- t(t(a2) %*% Mi) %*% solve(t(a2) %*% solve(t(W) %*% W) %*% a2) %*% (t(a2) %*% Mi)
+SQa2
+
+SQa3 <- t(t(a3) %*% Mi) %*% solve(t(a3) %*% solve(t(W) %*% W) %*% a3) %*% (t(a3) %*% Mi)
+SQa3
+
+SQa4 <- t(t(a4) %*% Mi) %*% solve(t(a4) %*% solve(t(W) %*% W) %*% a4) %*% (t(a4) %*% Mi)
+SQa4
+
+SQa5 <- t(t(a5) %*% Mi) %*% solve(t(a5) %*% solve(t(W) %*% W) %*% a5) %*% (t(a5) %*% Mi)
+SQa5
+
+gl_a <- 1
+```
+
+A estatística F e o p-valor de cada contraste é dado por:
+
+```{r}
+Fcalc1 <- SQa1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+p_valor1
+
+Fcalc2 <- SQa2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+p_valor2
+
+Fcalc3 <- SQa3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+p_valor3
+
+Fcalc4 <- SQa4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+p_valor4
+
+Fcalc5 <- SQa5 / QMRes
+p_valor5 <- 1 - pf(Fcalc5, 1, gl_res)
+p_valor5
+```
+
+O quadro de ANOVA resume os resultados obtidos.
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Hipóteses" = c("Girassol = 0: M = F", "Girassol = 25: M = F", "Girassol = 50: M = F", "Girassol = 75: M = F", "Girassol = 100: M = F"),
+  "gl" = c(gl_a),
+  "SQ" = c(SQa1, SQa2, SQa3, SQa4, SQa5) |> round(3),
+  "Fcal" = c(Fcalc1, Fcalc2, Fcalc3, Fcalc4, Fcalc5) |> round(3),
+  "p.valor" = c(p_valor1, p_valor2, p_valor3, p_valor4, p_valor5) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Fatorial Sexo x Girassol (caso desbalanceado) - Sexo dentro de Girassol",
+    col.names = c("Hipóteses", "gl", "SQ", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Apenas para Girassol = 0% $H_0: \mu_{1j} = \mu_{2j}$ não foi rejeitada. No demais níveis (25%, 50%, 75% e 100%), rejeita-se a hipótese nula, ou seja, há diferença entre o ganho de peso entre machos e fêmeas.
+
+Para verificar a diferença do percentual de farelo de girassol entre os sexo, devemos analisar as médias dos efeitos simples.
+
+```{r}
+#| echo: false
+
+data.frame(
+  Girassol = rep(c(0,25,50,75,100),2),
+  Sexo = c(rep("F", 5), rep("M", 5)),
+  medias = round(Mi, 2)
+) |> 
+  tidyr::pivot_wider(names_from = Girassol, values_from = medias) |> 
+  kableExtra::kbl(align = "c") |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+Uma vez que para girassol = 0% não houve significância, as médias entre os sexos não diferem, estatisticamente. Para os níveis 25%, 50%, 75% e 100%, o ganho médio de peso dos machos foi superior ao das fêmeas, mas com 100% de Girassol, as fêmeas tiveram maior ganho médio de peso.
+
+```{r}
+#| echo: false
+
+data.frame(
+  Sexo = c("F", "M"),
+  "0"  = c("81.53 a", "85.00 a"),
+  "25" = c("71.83 b", "95.43 a"),	
+  "50" = c("66.25 b", "98.75 a"),	
+  "75" = c("71.60 b", "93.17 a"),	
+  "100" = c("91.4 a", "80.5 b")
+) |> 
+  kableExtra::kbl(align = "c", col.names = c("Sexo","0","25","50","75","100")) |> 
+  kableExtra::kable_styling(position = "center")
+```
+
+### SAS
+
+```{r}
+#| eval: false
+
+a1 = {1 0 0 0 0 -1  0  0  0  0};
+a2 = {0 1 0 0 0  0 -1  0  0  0};
+a3 = {0 0 1 0 0  0  0 -1  0  0};
+a4 = {0 0 0 1 0  0  0  0 -1  0};
+a5 = {0 0 0 0 1  0  0  0  0 -1};
+SQa1 = t(a1*Mi)*inv(a1*inv(t(W)*W)*t(a1))*(a1*Mi);
+SQa2 = t(a2*Mi)*inv(a2*inv(t(W)*W)*t(a2))*(a2*Mi);
+SQa3 = t(a3*Mi)*inv(a3*inv(t(W)*W)*t(a3))*(a3*Mi);
+SQa4 = t(a4*Mi)*inv(a4*inv(t(W)*W)*t(a4))*(a4*Mi);
+SQa5 = t(a5*Mi)*inv(a5*inv(t(W)*W)*t(a5))*(a5*Mi);
+gl_a = 1;
+Fa1 = SQa1/QMRes; Fa2 = SQa2/QMRes; Fa3 = SQa3/QMRes; Fa4 = SQa4/QMRes; Fa5 = SQa5/QMRes;
+p_a1 = 1-cdf('F',Fa1,1,gl_res); p_a2 = 1-cdf('F',Fa2,1,gl_res);
+p_a3 = 1-cdf('F',Fa3,1,gl_res); p_a4 = 1-cdf('F',Fa4,1,gl_res);
+p_a5 = 1-cdf('F',Fa5,1,gl_res);
+
+print '------------------------------------------------------------------------',
+      ' Desdobramento (1): Compara as médias de Sexo em cada nível de Girassol ',
+      '------------------------------------------------------------------------',,
+'Girassol=  0: M=F' gl_a SQa1[format=12.4] Fa1[format=12.4] p_a1[format=12.4],,
+'Girassol= 25: M=F' gl_a SQa2[format=12.4] Fa2[format=12.4] p_a2[format=12.4],,
+'Girassol= 50: M=F' gl_a SQa3[format=12.4] Fa3[format=12.4] p_a3[format=12.4],,
+'Girassol= 75: M=F' gl_a SQa4[format=12.4] Fa4[format=12.4] p_a4[format=12.4],,
+'Girassol=100: M=F' gl_a SQa5[format=12.4] Fa5[format=12.4] p_a5[format=12.4];
+
+quit;
+```
+
+:::
+
+#### Girassol dentro de Sexo  {.unnumbered}
+
+Agora, compararemos as médias do fator Girassol dentro de cada nível de sexo. Como Girassol é um fator **quantitativo** e seus níveis são igualmente espaçados, vamos usar coeficientes de polinômios ortogonais para realizar os testes de tendência, separadamente, para cada Sexo.
+
+$$
+H_0: \mu_{i1} = \mu_{i2} = \mu_{i3} = \mu_{i4} = \mu_{i5}, \quad \text{para } i = 1,2
+$$
+
+::: panel-tabset
+
+### R
+
+Como são 5 níveis, utilizaremos os coeficientes até o 4º grau.
+
+Para as fêmeas vamos usar:
+
+```{r}
+F1 <- c(-2, -1,  0,  1, 2, 0, 0, 0, 0, 0)  # Grau 1
+F2 <- c( 2, -1, -2, -1, 2, 0, 0, 0, 0, 0)  # Grau 2
+F3 <- c(-1,  2,  0, -2, 1, 0, 0, 0, 0, 0)  # Grau 3
+F4 <- c( 1, -4,  6, -4, 1, 0, 0, 0, 0, 0)  # Grau 4
+```
+
+e para os machos:
+
+```{r}
+M1 <- c(0, 0, 0, 0, 0, -2, -1,  0,  1, 2)  # Grau 1
+M2 <- c(0, 0, 0, 0, 0,  2, -1, -2, -1, 2)  # Grau 2
+M3 <- c(0, 0, 0, 0, 0, -1,  2,  0, -2, 1)  # Grau 3
+M4 <- c(0, 0, 0, 0, 0,  1, -4,  6, -4, 1)  # Grau 4
+```
+
+Com os contrastes ortogonais para cada sexo, realizaremos a ANOVA para cada um deles, a fim de verificar qual o grau de polinômio que melhor explica o ganho de peso de cada um dos sexos.
+
+- **Fêmeas**:
+
+```{r}
+SQf1 <- t(t(F1) %*% Mi) %*% solve(t(F1) %*% solve(t(W) %*% W) %*% F1) %*% (t(F1) %*% Mi)
+
+SQf2 <- t(t(F2) %*% Mi) %*% solve(t(F2) %*% solve(t(W) %*% W) %*% F2) %*% (t(F2) %*% Mi)
+
+SQf3 <- t(t(F3) %*% Mi) %*% solve(t(F3) %*% solve(t(W) %*% W) %*% F3) %*% (t(F3) %*% Mi)
+
+SQf4 <- t(t(F4) %*% Mi) %*% solve(t(F4) %*% solve(t(W) %*% W) %*% F4) %*% (t(F4) %*% Mi)
+
+
+gl_f <- 1
+
+
+Fcalc1 <- SQf1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+
+Fcalc2 <- SQf2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+
+Fcalc3 <- SQf3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+
+Fcalc4 <- SQf4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Grau" = c("1º", "2º", "3º", "4º"),
+  "gl" = c(gl_f),
+  "SQ" = c(SQf1, SQf2, SQf3, SQf4) |> round(3),
+  "Fcal" = c(Fcalc1, Fcalc2, Fcalc3, Fcalc4) |> round(3),
+  "p.valor" = c(p_valor1, p_valor2, p_valor3, p_valor4) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Fatorial Sexo x Girassol (caso desbalanceado) - Girassol dentro de Sexo F",
+    col.names = c("Grau", "gl", "SQ", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center") |> 
+  kableExtra::row_spec(3, bold = TRUE, background = "#B9C6EB")
+```
+
+Analisando, decrescentemente, a ordem dos graus, o 3º grau é o primeiro a apresentar significância estatística, considerando p-valor = 5%. Assim, o comportamento do ganho de peso em função do aumento da porcentagem de substituição do farelo de soja por farelo de girassol pode ser bem explicado por um polinômio de 3º grau para as fêmeas.
+
+- **Machos:**
+
+```{r}
+SQm1 <- t(t(M1) %*% Mi) %*% solve(t(M1) %*% solve(t(W) %*% W) %*% M1) %*% (t(M1) %*% Mi)
+
+SQm2 <- t(t(M2) %*% Mi) %*% solve(t(M2) %*% solve(t(W) %*% W) %*% M2) %*% (t(M2) %*% Mi)
+
+SQm3 <- t(t(M3) %*% Mi) %*% solve(t(M3) %*% solve(t(W) %*% W) %*% M3) %*% (t(M3) %*% Mi)
+
+SQm4 <- t(t(M4) %*% Mi) %*% solve(t(M4) %*% solve(t(W) %*% W) %*% M4) %*% (t(M4) %*% Mi)
+
+
+gl_m <- 1
+
+
+Fcalc1 <- SQm1 / QMRes
+p_valor1 <- 1 - pf(Fcalc1, 1, gl_res)
+
+Fcalc2 <- SQm2 / QMRes
+p_valor2 <- 1 - pf(Fcalc2, 1, gl_res)
+
+Fcalc3 <- SQm3 / QMRes
+p_valor3 <- 1 - pf(Fcalc3, 1, gl_res)
+
+Fcalc4 <- SQm4 / QMRes
+p_valor4 <- 1 - pf(Fcalc4, 1, gl_res)
+```
+
+```{r}
+#| echo: false
+
+options(knitr.kable.NA = '')
+
+data.frame(
+  "Grau" = c("1º", "2º", "3º", "4º"),
+  "gl" = c(gl_m),
+  "SQ" = c(SQm1, SQm2, SQm3, SQm4) |> round(3),
+  "Fcal" = c(Fcalc1, Fcalc2, Fcalc3, Fcalc4) |> round(3),
+  "p.valor" = c(p_valor1, p_valor2, p_valor3, p_valor4) |> round(4)
+) |> 
+  kableExtra::kbl(
+    align = "c",
+    caption = "ANOVA: Fatorial Sexo x Girassol (caso desbalanceado) - Girassol dentro de Sexo M",
+    col.names = c("Grau", "gl", "SQ", "Fcal", "p-valor (5%)")
+  ) |> 
+  kableExtra::kable_styling(position = "center") |> 
+  kableExtra::row_spec(2, bold = TRUE, background = "#B9C6EB")
+```
+
+Enquanto isso, para os machos, o comportamento do ganho de peso em função do aumento da porcentagem de substituição do farelo de soja por farelo de girassol pode ser bem explicado por um polinômio de 2º grau.
+
+A seguir, ajustaremos as curvas de regressão de ambos os modelos.
+
+```{r}
+#| eval: false
+
+install.packages("ExpDes.pt")
+library(ExpDes.pt)
+```
+
+```{r}
+dados_girassol <- readr::read_delim("C:/Users/Gustavo Jun/Desktop/dados_girassol.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+with(
+  dados_girassol,
+  fat2.dic(Sexo, Girassol, resp = GP, quali = c(TRUE, FALSE))
+  )
+```
+
+```{r}
+library(ggplot2)
+
+f <- dados_girassol |> 
+  dplyr::filter(Sexo == 1) |> 
+  ggplot(aes(x = Girassol, y = GP)) + 
+  geom_point() +
+  stat_function(fun = function(Girassol) {81.577 - 0.425*Girassol - 0.0003*Girassol^2 + 0.00006 * Girassol^3})
+
+m <- dados_girassol |> 
+  dplyr::filter(Sexo == 2) |> 
+  ggplot(aes(x = Girassol, y = GP)) + 
+  geom_point() +
+  stat_function(fun = function(Girassol) {84.951 + 0.5847*Girassol - 0.0063*Girassol^2})
+
+library(patchwork)
+
+f + m
+```
+
+
+
+### SAS
+
+```{r}
+#| eval: false
+
+proc glm;
+class trat;
+model GP = trat / ss3;
+
+contrast 'Sexo' trat 1  1  1  1  1 -1 -1 -1 -1 -1;
+contrast 'Girassol'  trat -2 -1  0  1  2 -2 -1  0  1  2,
+      				 trat  2 -1 -2 -1  2  2 -1 -2 -1  2,
+	  				 trat -1  2  0 -2  1 -1  2  0 -2  1,
+	  				 trat  1 -4  6 -4  1  1 -4  6 -4  1;
+contrast 'Interação' trat -4  1  1  1  1  4 -1 -1 -1 -1,
+      				 trat  0 -3  1  1  1  0  3 -1 -1 -1,
+ 	  				 trat  0  0 -2  1  1  0  0  2 -1 -1,
+ 	  				 trat  0  0  0 -1  1  0  0  0  1 -1;
+
+contrast 'Girassol=  0: F = M' trat 1 0 0 0 0 -1  0  0  0  0;
+contrast 'Girassol= 25: F = M' trat 0 1 0 0 0  0 -1  0  0  0;
+contrast 'Girassol= 50: F = M' trat 0 0 1 0 0  0  0 -1  0  0;
+contrast 'Girassol= 75: F = M' trat 0 0 0 1 0  0  0  0 -1  0;
+contrast 'Girassol=100: F = M' trat 0 0 0 0 1  0  0  0  0 -1;
+contrast 'Machos: Girassol grau 1' trat -2 -1  0  1  2  0  0  0  0  0;
+contrast 'Machos: Girassol grau 2' trat  2 -1 -2 -1  2  0  0  0  0  0;
+contrast 'Machos: Girassol grau 3' trat -1  2  0 -2  1  0  0  0  0  0;
+contrast 'Machos: Girassol grau 4' trat  1 -4  6 -4  1  0  0  0  0  0;
+contrast 'Fêmeas: Girassol grau 1' trat  0  0  0  0  0 -2 -1  0  1  2;
+contrast 'Fêmeas: Girassol grau 2' trat  0  0  0  0  0  2 -1 -2 -1  2;
+contrast 'Fêmeas: Girassol grau 3' trat  0  0  0  0  0 -1  2  0 -2  1;
+contrast 'Fêmeas: Girassol grau 4' trat  0  0  0  0  0  1 -4  6 -4  1;
+run;
+
+proc glm;
+class Sexo Girassol;
+model GP = Sexo Girassol  / ss1 ss2 ss3;
+run;
+```
+
+:::

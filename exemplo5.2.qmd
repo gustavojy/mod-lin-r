@@ -34,7 +34,7 @@ Como suposições do modelo $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \bolds
 
 - $\boldsymbol{\epsilon} \sim N(\mathbf{0}, \sigma^2 \mathbf{I})$.
 
-Novamente, utilizaremos a função `ginv()` do pacote `MASS`, que calcula a inversa generalizada de uma matriz.
+Novamente, utilizaremos a função `ginv()` do pacote `MASS`.
 
 ```{r}
 #| eval: false
@@ -71,7 +71,7 @@ ncol = 4, byrow = FALSE)
 X
 ```
 
-No objeto `kn`, guardaremos o número de vlaores observados; no `p`, o número de variáveis; e no `k`, o posto de $\mathbf{X}$.
+No objeto `kn`, guardaremos o número de valores observados; no `p`, o número de variáveis; e no `k`, o posto de $\mathbf{X}$.
 
 ```{r}
 kn <- length(y)
@@ -82,7 +82,11 @@ p
 
 k <- sum(diag(X %*% ginv(X)))
 k
+
+p - k
 ```
+
+Note que a diferença entre `p - k` resulta no déficit de rank. Como o resultado é 1, $\mathbf{X}$ é uma matriz de posto incompleto.
 
 Calculando $\mathbf{X'X}$ e $\mathbf{X'y}$, temos:
 
@@ -94,18 +98,22 @@ XLy <- t(X) %*% y
 XLy
 ```
 
-Com os resultados anteriores, calcularemos duas estimativas de $\boldsymbol{\beta}$:
+Com os resultados anteriores, calcularemos duas estimativas de $\boldsymbol{\beta}$ utilizando duas inversas generalizadas distintas:
 
-- Vetor com as estimativas a partir da inversa generalizada:
+$$\boldsymbol{\hat\beta} = \mathbf{(X'X)^- X' y}$$
+
+- Inversa generalizada de Moore-Penrose:
 
 ```{r}
 Beta <- ginv(XLX) %*% XLy
 Beta
 ```
 
-- Vetor com as estimativas a partir da inversa generalizada utilizando a submatriz diagonal:
+- Inversa generalizada simples (Searle):
 
 ```{r}
+XLX
+
 igXLX <- (1/7) * matrix(
   c(0, 0, 0, 0,
     0, 1, 0, 0,
@@ -198,7 +206,7 @@ print 'Função NÃO estimável: alfa1+alfa2+alfa3:',,LBeta[format=12.4] LBeta2[
 
 ## Teste de hipótese
 
-A seguir, testaremos a seguinte hipótese:
+A seguir, testaremos a seguinte hipótese, seguindo o **modelo reparametrizado de médias de caselas**, $y_{ij} = \mu_{i} + \epsilon_{ij}$, em que $\mu_i = \mu + \alpha_i$:
 
 $$
 \begin{align}
@@ -319,7 +327,7 @@ data.frame(
 ) |> 
   kableExtra::kbl(
     align = "c",
-    caption = "ANOVA para os dados de ácido ascórbico",
+    caption = "ANOVA para os dados de ácido ascórbico. H0: mi1 = mi2 = mi3",
     col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
   ) |> 
   kableExtra::kable_styling(position = "center")
@@ -365,8 +373,8 @@ Considerando os **constrastes ortogonais** $2\mu_1 - \mu_2 - \mu_3$ e $\mu_2 - \
 
 $$
 \begin{align}
-2\mu_1 - \mu_2 - \mu_3 &= 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
-\mu_2 - \mu_3 &= \alpha_2 - \alpha_3 = [0,0,1,-1]\boldsymbol{\beta} = \mathbf{c'_2}\boldsymbol{\beta}
+H_{01} &:2\mu_1 - \mu_2 - \mu_3 = 2\alpha_1 - \alpha_2 - \alpha_3 = [0,2,-1,-1]\boldsymbol{\beta} = \mathbf{c'_1}\boldsymbol{\beta}\\
+H_{02} &:\mu_2 - \mu_3 = \alpha_2 - \alpha_3 = [0,0,1,-1]\boldsymbol{\beta} = \mathbf{c'_2}\boldsymbol{\beta}
 \end{align}
 $$
 
@@ -391,26 +399,44 @@ C1Beta
 C2 <- c(0, 0, 1, -1)
 C2Beta <- C2 %*% Beta
 C2Beta
+```
 
+```{r}
 # Partição da SQTrat
 SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
 SQC1Beta
 
 SQC2Beta <- t(C2Beta) %*% solve(t(C2) %*% ginv(t(X) %*% X) %*% C2) %*% (C2Beta)
 SQC2Beta
+```
 
+```{r}
 SomaSQ <- SQC1Beta + SQC2Beta
-SomaSQ
 
 SQTrat
+```
 
+```{r}
+#| echo: false
+
+cat(
+  "Soma das SQ de contrastes ortogonais =", SomaSQ, "\n",
+  "SQTrat =", SQTrat
+  )
+```
+
+Aqui, note que a soma das somas de quadrados dos contrastes (`SomaSQ`) são iguais a soma de quadrados de tratamentos (`SQTrat`).
+
+```{r}
 # QM
 QMC1Beta <- SQC1Beta / 1
 QMC1Beta
 
 QMC2Beta <- SQC2Beta / 1
 QMC2Beta
+```
 
+```{r}
 # F e p-valor
 FC1 <- QMC1Beta / QMRes
 FC1
@@ -450,7 +476,7 @@ data.frame(
   kableExtra::kable_styling(position = "center")
 ```
 
-Ambos os $F_{cal}$ são superiores ao valor tabelado $F_{(0,05;1,18)}$. Assim, Ambas as hipóteses $H_{01}$ e $H_{02}$ são rejeitadas e se conclui que:
+Ambos os $F_{cal}$ são superiores ao valor tabelado $F_{(0,05;1,18)}$. Assim, ambas as hipóteses $H_{01}$ e $H_{02}$ são rejeitadas e se conclui que:
 
 $$
 \mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_2 \ne \mu_3
@@ -507,71 +533,19 @@ C1Beta
 C3 <- c(0, 1, 0, -1)
 C3Beta <- C3 %*% Beta
 C3Beta
+```
 
+```{r}
 # Partição da SQTrat
 SQC1Beta <- t(C1Beta) %*% solve(t(C1) %*% ginv(t(X) %*% X) %*% C1) %*% (C1Beta)
 SQC1Beta
 
 SQC3Beta <- t(C3Beta) %*% solve(t(C3)%*% ginv(t(X) %*% X) %*% C3) %*% (C3Beta)
 SQC3Beta
-
-# QM
-QMC1Beta <- SQC1Beta / 1
-QMC1Beta
-
-QMC3Beta <- SQC3Beta / 1
-QMC3Beta
-
-# F e p-valor
-FC1 <- QMC1Beta / QMRes
-FC1
-
-FC3 <- QMC3Beta / QMRes
-FC3
-
-ftab <- qf(0.95, 1, 18)
-ftab
-
-p_valorC1 <- 1 - pf(FC1, 1, gl_res)
-p_valorC1
-
-p_valorC3 <- 1 - pf(FC3, 1, gl_res)
-p_valorC3
 ```
-
-```{r}
-#| echo: false
-
-options(knitr.kable.NA = '')
-
-data.frame(
-  "FV" = c("Contraste c'1", "Contraste c'2", "Resíduo", "Total"),
-  "gl" = c(1, 1, gl_res, gl_total),
-  "SQ" = c(SQC1Beta, SQC3Beta, SQRes, SQTotal) |> round(3),
-  "QM" = c(QMC1Beta, QMC3Beta, QMRes, NA) |> round(3),
-  "Fcal" = c(FC1, FC3, NA, NA) |> round(3),
-  "Ftab" = c(ftab, ftab, NA, NA) |> round(3),
-  "p.valor" = c(p_valorC1, p_valorC3, NA, NA) |> round(5)
-) |> 
-  kableExtra::kbl(
-    align = "c",
-    caption = "ANOVA para contrastes não ortogonais dos dados de ácido ascórbico",
-    col.names = c("FV", "gl", "SQ", "QM", "Fcal", "Ftab", "p-valor (5%)")
-  ) |> 
-  kableExtra::kable_styling(position = "center")
-```
-
-Ambos os $F_{cal}$ são superiores ao valor tabelado $F_{(0,05;1,18)}$. Assim, Ambas as hipóteses $H_{01}$ e $H_{03}$ são rejeitadas e se conclui que:
-  
-$$
-\mu_1 \ne \frac{\mu_2 + \mu_3}2 \quad e \quad \mu_1 \ne \mu_3
-$$
-
-Contudo, nota-se que a soma das somas de quadrados dos contrastes não ortogonais não resulta na soma de quadrados dos tratamentos:
 
 ```{r}
 SomaSQ <- SQC1Beta + SQC3Beta
-SomaSQ
 
 SQTrat
 ```
@@ -584,6 +558,8 @@ cat(
   "SQTrat =", SQTrat
   )
 ```
+
+Ao contrário do caso dos constrastes ortogonais, a soma das somas de quadrados dos **contrastes não ortogonais** (`SomaSQ`) não resulta na soma de quadrados dos tratamentos (`SQTrat`), o que prejudica a interpretação da análise de variância, dada a não independência entre os contrastes.
 
 ### SAS
 
