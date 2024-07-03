@@ -2,7 +2,6 @@ project:
   type: book
   output-dir: docs
 
-published-title: "Data"
 book:
   title: "Modelos Lineares I - Seminário"
   author: "Gustavo Jun Yakushiji"
