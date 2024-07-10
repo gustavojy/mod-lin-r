@@ -3,7 +3,8 @@ project:
   output-dir: docs
 
 book:
-  title: "Modelos Lineares I - Seminário"
+  title: "Modelos Lineares I"
+  subtitle: "Exemplos em SAS e R"
   author: "Gustavo Jun Yakushiji"
   
   site-url: https://github.com/gustavojy/mod-lin-r
@@ -41,7 +42,6 @@ book:
         - exemplo5.2.qmd
         - exemplo5.3.qmd
         - exemplo5.4.qmd
-        # - exemplo5.5.qmd
         - exemplo5.6.qmd
 
 format:

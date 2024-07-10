@@ -2,16 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Modelos Lineares I - Seminário",
+    "title": "Modelos Lineares I",
     "section": "",
-    "text": "Introdução\nEste material faz parte da disciplina LCE5861 - Modelos Lineares I, ministrada pelo prof. Dr. César Gonçalves de Lima na ESALQ/USP, como parte do Programa de Pós-Graduação em Estatística e Experimentação Agronômica.\nSerão apresentados exercícios e exemplos de aulas resolvidos com o software SAS, os quais foram convertidos para a linguagem de programação R. Parte desses exercícios e exemplos são oriundos de Rencher e Schaalje (2008)1.\nPara acessar o script em R, clique aqui. Para acessar os scripts em SAS, clique aqui."
-  },
-  {
-    "objectID": "index.html#footnotes",
-    "href": "index.html#footnotes",
-    "title": "Modelos Lineares I - Seminário",
-    "section": "",
-    "text": "Rencher, A. C.; Schaalje, G. B. (2008). Linear models in Statistics, 2ª ed. New York: Wiley.↩︎"
+    "text": "Introdução\nEste material faz parte da disciplina LCE5861 - Modelos Lineares I (2024), ministrada pelo prof. Dr. César Gonçalves de Lima na ESALQ/USP, como parte do Programa de Pós-Graduação em Estatística e Experimentação Agronômica.\nSerão apresentados exercícios e exemplos de aulas resolvidos com o software SAS, os quais foram convertidos para a linguagem de programação R.\nPara acessar o script em R, clique aqui. Para acessar os scripts em SAS, clique aqui."
   },
   {
     "objectID": "exemplo1.html#vetores-e-matriz",
